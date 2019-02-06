@@ -1,0 +1,55 @@
+#!/bin/bash
+#
+# This script requires lcov, dirname
+#
+
+TESTS="\
+TestFoilAuth \
+TestFoilAuthToken"
+
+function err() {
+    echo "*** ERROR!" $1
+    exit 1
+}
+
+# Check the required tools
+which lcov >> /dev/null || err "Please install lcov"
+which dirname >> /dev/null || err "Please install dirname"
+
+# LCOV 1.10 has branch coverage disabled per default
+# Previous versions didn't have the --rc option
+if  [ ! -z "$(lcov --help | grep ' --rc ')" ] ; then
+    LCOV_OPT="--rc lcov_branch_coverage=1"
+    GENHTML_OPT="--branch-coverage"
+fi
+
+pushd `dirname $0` > /dev/null
+COV_DIR="$PWD"
+pushd .. > /dev/null
+TEST_DIR="$PWD"
+pushd .. > /dev/null
+TOP_DIR="$PWD"
+popd > /dev/null
+popd > /dev/null
+popd > /dev/null
+
+FULL_COV="$COV_DIR/full.gcov"
+APP_COV="$COV_DIR/app.gcov"
+
+make -C "$TEST_DIR" clean
+rm -f "$FULL_COV" "$APP_COV"
+TESTS_COV=
+
+for t in $TESTS ; do
+    pushd "$TEST_DIR/$t"
+    make -C "$TEST_DIR/$t" clean coverage || exit 1
+    build/coverage/$t || exit 1
+    TEST_COV="$TEST_DIR/$t/build/coverage/$t.cov"
+    lcov $LCOV_OPT -c -d build/coverage -o "$TEST_COV" || exit 1
+    TESTS_COV+="-a $TEST_COV "
+    popd
+done
+
+lcov $LCOV_OPT $TESTS_COV -o "$FULL_COV" || exit 1
+lcov $LCOV_OPT -e "$FULL_COV" "$TOP_DIR/src/*" -o "$APP_COV" || exit 1
+genhtml $GENHTML_OPT "$APP_COV" -t "FoilAuth" --output-directory "$COV_DIR/report" || exit 1

@@ -1,0 +1,6 @@
+[Desktop Entry]
+Type=Application
+Name=Foil Auth
+X-Nemo-Application-Type=silica-qt5
+Icon=harbour-foilauth
+Exec=harbour-foilauth

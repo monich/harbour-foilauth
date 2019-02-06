@@ -1,0 +1,12 @@
+[submodule "harbour-lib"]
+	path = harbour-lib
+	url = https://github.com/monich/harbour-lib.git
+[submodule "foil"]
+	path = foil
+	url = https://github.com/monich/foil.git
+[submodule "libglibutil"]
+	path = libglibutil
+	url = https://github.com/monich/libglibutil.git
+[submodule "libqrencode"]
+	path = libqrencode
+	url = https://github.com/fukuchi/libqrencode.git
