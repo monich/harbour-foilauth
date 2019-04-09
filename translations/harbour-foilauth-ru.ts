@@ -177,9 +177,9 @@
         <source>FoilAuth has found %0 unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
         <extracomment>Text for import page</extracomment>
         <translation>
-            <numerusform>У вас тут нашлась база данных SailOTP и там %0 незашифрованный код авторизации. Хотите его зашифровать и использовать в этой программе?</numerusform>
-            <numerusform>У вас тут нашлась база данных SailOTP и там %0 незашифрованных кода авторизации. Хотите их зашифровать и использовать в этой программе?</numerusform>
-            <numerusform>У вас тут нашлась база данных SailOTP и там %0 незашифрованных кодов авторизации. Хотите их зашифровать и использовать в этой программе?</numerusform>
+            <numerusform>У вас тут нашлась база данных SailOTP, а там %0 незашифрованный код авторизации. Хотите его зашифровать и использовать в этой программе?</numerusform>
+            <numerusform>У вас тут нашлась база данных SailOTP, а там %0 незашифрованных кода авторизации. Хотите их зашифровать и использовать в этой программе?</numerusform>
+            <numerusform>У вас тут нашлась база данных SailOTP, а там %0 незашифрованных кодов авторизации. Хотите их зашифровать и использовать в этой программе?</numerusform>
         </translation>
     </message>
     <message id="foilauth-notification-copied_to_clipboard">
