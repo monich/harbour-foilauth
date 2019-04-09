@@ -366,7 +366,7 @@ void QrCodeScanner::Private::onScanDone(uint aScanId, QImage aImage,
         Q_EMIT scanner()->scanningChanged();
         Q_EMIT scanner()->scanFinished(result, aImage);
     } else {
-        HDEBUG("exnexpected scan");
+        HDEBUG("unexpected scan");
     }
 }
 
