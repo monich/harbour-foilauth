@@ -51,13 +51,6 @@
 #define FOILPICS_PATH   FOILAPPS_DIR "/harbour-foilpics"
 #define FOILNOTES_PATH  FOILAPPS_DIR "/harbour-foilnotes"
 
-#define BASE32_BITS_PER_NIBBLE (5)
-#define BASE32_BYTES_PER_CHUNK (5)
-#define BASE32_NIBBLES_PER_CHUNK (8)
-#define BASE32_BITS_PER_CHUNK (BASE32_BITS_PER_NIBBLE*BASE32_NIBBLES_PER_CHUNK)
-#define BASE32_NIBBLE_MASK  ((1 << BASE32_BITS_PER_NIBBLE) - 1)
-Q_STATIC_ASSERT(BASE32_BITS_PER_CHUNK == BASE32_BYTES_PER_CHUNK * 8);
-
 // ==========================================================================
 // FoilAuth::Private
 // ==========================================================================

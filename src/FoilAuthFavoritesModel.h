@@ -40,7 +40,6 @@
 class FoilAuthFavoritesModel : public QSortFilterProxyModel {
     Q_OBJECT
     Q_PROPERTY(QObject* sourceModel READ sourceModel WRITE setSourceModelObject NOTIFY sourceModelChanged)
-    Q_PROPERTY(int startIndex READ startIndex WRITE setStartIndex NOTIFY startIndexChanged)
     Q_PROPERTY(int count READ count NOTIFY countChanged)
 
 public:
@@ -53,16 +52,11 @@ public:
 
     int count() const;
 
-    // QAbstractProxyModel
-    QModelIndex mapToSource(const QModelIndex& aIndex) const Q_DECL_OVERRIDE;
-    QModelIndex mapFromSource(const QModelIndex& aIndex) const Q_DECL_OVERRIDE;
-
 protected:
     bool filterAcceptsRow(int aSourceRow, const QModelIndex& aParent) const Q_DECL_OVERRIDE;
 
 Q_SIGNALS:
     void sourceModelChanged();
-    void startIndexChanged();
     void countChanged();
 
 private:

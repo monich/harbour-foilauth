@@ -51,13 +51,11 @@ public Q_SLOTS:
     void checkCount();
 
 public:
-    int iStartIndex;
     int iLastKnownCount;
 };
 
 FoilAuthFavoritesModel::Private::Private(FoilAuthFavoritesModel* aParent) :
     QObject(aParent),
-    iStartIndex(0),
     iLastKnownCount(0)
 {
     connect(aParent, SIGNAL(rowsInserted(QModelIndex,int,int)), SLOT(checkCount()));
@@ -103,40 +101,6 @@ bool FoilAuthFavoritesModel::filterAcceptsRow(int aSourceRow,
     const QAbstractItemModel* model = sourceModel();
     const QModelIndex index = model->index(aSourceRow, 0, aParent);
     return model->data(index, FoilAuthModel::favoriteRole()).toBool();
-}
-
-QModelIndex FoilAuthFavoritesModel::mapToSource(const QModelIndex& aIndex) const
-{
-    return SUPER::mapToSource(aIndex);
-}
-
-QModelIndex FoilAuthFavoritesModel::mapFromSource(const QModelIndex& aIndex) const
-{
-    return SUPER::mapFromSource(aIndex);
-}
-
-int FoilAuthFavoritesModel::startIndex() const
-{
-    return iPrivate->iStartIndex;
-}
-
-void FoilAuthFavoritesModel::setStartIndex(int aIndex)
-{
-    HDEBUG(aIndex);
-    if (iPrivate->iStartIndex != aIndex) {
-        const QAbstractItemModel* model = sourceModel();
-        if (model) {
-            const int count = model->rowCount();
-            const int oldRealIndex = qBound(0, iPrivate->iStartIndex, count);
-            const int newRealIndex = qBound(0, aIndex, count);
-            iPrivate->iStartIndex = aIndex;
-            if (oldRealIndex != newRealIndex) {
-            }
-        } else {
-            iPrivate->iStartIndex = aIndex;
-        }
-        Q_EMIT startIndexChanged();
-    }
 }
 
 int FoilAuthFavoritesModel::count() const
