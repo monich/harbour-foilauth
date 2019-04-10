@@ -122,7 +122,6 @@ Dialog {
                     var scanPage = pageStack.push(Qt.resolvedUrl("ScanPage.qml"))
                     if (scanPage) {
                         scanPage.scanCompleted.connect(function(token) {
-                            console.log(token)
                             if (token.valid) {
                                 labelField.text = token.label
                                 secretField.text = token.secret
