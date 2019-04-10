@@ -168,8 +168,10 @@ Page {
             rightMargin: Theme.horizontalPageMargin
         }
 
-        onXChanged: updateViewFinderPosition()
-        onYChanged: updateViewFinderPosition()
+        onXChanged: viewFinderContainer.updateViewFinderPosition()
+        onYChanged: viewFinderContainer.updateViewFinderPosition()
+        onWidthChanged: viewFinderContainer.updateViewFinderPosition()
+        onHeightChanged: viewFinderContainer.updateViewFinderPosition()
 
         Rectangle {
             id: viewFinderContainer
@@ -206,7 +208,7 @@ Page {
             }
 
             function updateViewFinderPosition() {
-                scanner.viewFinderRect = Qt.rect(x + parent.x, y + parent.y, width, height)
+                scanner.viewFinderRect = Qt.rect(x + parent.x, y + parent.y, viewFinder ? viewFinder.width : width, viewFinder ? viewFinder.height : height)
             }
         }
     }
