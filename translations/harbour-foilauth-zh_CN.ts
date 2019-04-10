@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="zh_cn">
+<TS version="2.1" language="zh_CN">
 <context>
     <name></name>
     <message id="foilauth-app_name">
@@ -73,7 +73,6 @@
         <extracomment>Password field label</extracomment>
         <translation>
             <numerusform>输入至少 %0 字符</numerusform>
-            <numerusform>输入至少 %0 字符</numerusform>
         </translation>
     </message>
     <message id="foilauth-generate-button-generating_key">
@@ -119,7 +118,7 @@
     <message id="foilauth-token-digits-placeholder">
         <source>Number of password digits</source>
         <extracomment>Text field placeholder (number of password digits)</extracomment>
-        <translation密码数字位数</translation>
+        <translation>密码数字位数</translation>
     </message>
     <message id="foilauth-token-timeshift-text">
         <source>Time shift (seconds)</source>
@@ -175,7 +174,6 @@
         <source>FoilAuth has found %0 unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
         <extracomment>Text for import page</extracomment>
         <translation>
-            <numerusform>FoilAuth 已在你的设备上找到 %0 未加密的 SailOTP 令牌。 是否导入及加密？</numerusform>
             <numerusform>FoilAuth 已在你的设备上找到 %0 未加密的 SailOTP 令牌。 是否导入及加密？</numerusform>
         </translation>
     </message>
@@ -282,7 +280,7 @@
     <message id="foilnotes-confirm_password_page-info_label">
         <source>Please type in your new password one more time</source>
         <extracomment>Password confirmation label</extracomment>
-        <translation请再次输入你的新密码</translation>
+        <translation>请再次输入你的新密码</translation>
     </message>
     <message id="foilnotes-confirm_password_page-description">
         <source>Make sure you don&apos;t forget your password. It&apos;s impossible to either recover it or to access the encrypted notes without knowing it. Better take it seriously.</source>
