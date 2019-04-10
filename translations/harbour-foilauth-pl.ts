@@ -74,6 +74,7 @@ Wprowadź swoje hasło</translation>
         <extracomment>Password field label</extracomment>
         <translation>
             <numerusform>Wprowadź przynajmniej %0 znak</numerusform>
+            <numerusform>Wprowadź przynajmniej %0 znaki</numerusform>
             <numerusform>Wprowadź przynajmniej %0 znaków</numerusform>
         </translation>
     </message>
@@ -177,6 +178,7 @@ Wprowadź swoje hasło</translation>
         <extracomment>Text for import page</extracomment>
         <translation>
             <numerusform>FoilAuth znalazł na twoim urządzeniu %0 niezaszyfrowanego tokena SailOTP. Czy chcesz go zaimportować i zaszyfrować?</numerusform>
+            <numerusform>FoilAuth znalazł na twoim urządzeniu %0 niezaszyfrowany tokeni SailOTP. Czy chcesz je zaimportować i zaszyfrować?</numerusform>
             <numerusform>FoilAuth znalazł na twoim urządzeniu %0 niezaszyfrowanych tokenów SailOTP. Czy chcesz je zaimportować i zaszyfrować?</numerusform>
         </translation>
     </message>
