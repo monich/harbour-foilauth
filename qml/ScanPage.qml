@@ -156,30 +156,42 @@ Page {
         }
     }
 
-    Column {
-        spacing: Theme.paddingLarge
-        anchors.centerIn: parent
-        width: parent.width
+    Item {
+        anchors {
+            top: parent.top
+            topMargin: Theme.paddingLarge
+            bottom: toooBar.top
+            bottomMargin: Theme.paddingLarge
+            left: parent.left
+            leftMargin: Theme.horizontalPageMargin
+            right: parent.right
+            rightMargin: Theme.horizontalPageMargin
+        }
 
-        onXChanged: viewFinderContainer.updateViewFinderPosition()
-        onYChanged: viewFinderContainer.updateViewFinderPosition()
+        onXChanged: updateViewFinderPosition()
+        onYChanged: updateViewFinderPosition()
 
         Rectangle {
             id: viewFinderContainer
 
+            readonly property real ratio_4_3: 4./3.
+            readonly property real ratio_16_9: 16./9.
             readonly property bool canSwitchResolutions: typeof ViewfinderResolution_4_3 !== "undefined" &&
                 typeof ViewfinderResolution_16_9 !== "undefined"
-            readonly property int defaultShortSide: Math.floor((Math.min(Screen.width, Screen.height) - Theme.itemSizeLarge - 2 * Theme.paddingLarge)) & (-16)
-            readonly property int defaultLongSide: Math.floor((Math.max(Screen.width, Screen.height) * 0.6)) & (-16)
-            readonly property int defaultWidth: page.isPortrait ? defaultShortSide : defaultLongSide
-            readonly property int narrowWidth: Math.floor(page.isPortrait ? height/16*9 : height*16/9) & (-2)
-            readonly property int wideWidth: Math.floor(page.isPortrait ? height/4*3 : height*4/3) & (-2)
             readonly property size viewfinderResolution: canSwitchResolutions ?
                 (FoilAuthSettings.scanWideMode ? ViewfinderResolution_4_3 : ViewfinderResolution_16_9) :
                 Qt.size(0,0)
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: canSwitchResolutions ? (FoilAuthSettings.scanWideMode ? wideWidth : narrowWidth) : defaultWidth
-            height: page.isPortrait ? defaultLongSide : defaultShortSide
+            readonly property real ratio: canSwitchResolutions ? (FoilAuthSettings.scanWideMode ? ratio_4_3 : ratio_16_9) :
+                typeof ViewfinderResolution_4_3 !== "undefined" ? ratio_4_3 : ratio_16_9
+
+            readonly property int portraitWidth: Math.floor((parent.height/parent.width > ratio) ? parent.width : parent.height/ratio)
+            readonly property int portraitHeight: Math.floor((parent.height/parent.width > ratio) ? (parent.width * ratio) : parent.height)
+            readonly property int landscapeWidth: Math.floor((parent.width/parent.height > ratio) ? (parent.height * ratio) : parent.width)
+            readonly property int landscapeHeight: Math.floor((parent.width/parent.height > ratio) ? parent.height : (parent.width / ratio))
+
+            anchors.centerIn: parent
+            width: page.isPortrait ? portraitWidth : landscapeWidth
+            height: page.isPortrait ? portraitHeight : landscapeHeight
             color: "#20000000"
 
             onWidthChanged: updateViewFinderPosition()
@@ -197,88 +209,94 @@ Page {
                 scanner.viewFinderRect = Qt.rect(x + parent.x, y + parent.y, width, height)
             }
         }
+    }
 
-        Item {
-            height: Math.max(flashButton.height, zoomSlider.height, aspectButton.height)
-            anchors.horizontalCenter: parent.horizontalCenter
-            width: parent.width
+    Item {
+        id: toooBar
 
-            Item {
-                height: parent.height
-                anchors {
-                    left: parent.left
-                    right: zoomSlider.left
-                }
-                visible: TorchSupported
-                HintIconButton {
-                    id: flashButton
+        height: Math.max(flashButton.height, zoomSlider.height, aspectButton.height)
+        width: parent.width
 
-                    anchors.centerIn: parent
-                    icon.source: viewFinder && viewFinder.flashOn ?
-                            "image://theme/icon-camera-flash-on" :
-                            "image://theme/icon-camera-flash-off"
-                    //: Hint label
-                    //% "Toggle flashlight"
-                    hint: qsTrId("foilauth-scan-hint_toggle_flash")
-                    onShowHint: page.showHint(hint)
-                    onHideHint: page.hideHint()
-                    onClicked: if (viewFinder) viewFinder.toggleFlash()
-                }
+        anchors {
+            bottom: parent.bottom
+            bottomMargin: Theme.paddingLarge
+        }
+
+        HintIconButton {
+            id: flashButton
+
+            anchors {
+                left: parent.left
+                leftMargin: Theme.horizontalPageMargin
+                verticalCenter: parent.verticalCenter
             }
 
-            Slider {
-                id: zoomSlider
+            visible: TorchSupported
+            icon.source: viewFinder && viewFinder.flashOn ?
+                    "image://theme/icon-camera-flash-on" :
+                    "image://theme/icon-camera-flash-off"
+            //: Hint label
+            //% "Toggle flashlight"
+            hint: qsTrId("foilauth-scan-hint_toggle_flash")
+            onShowHint: page.showHint(hint)
+            onHideHint: page.hideHint()
+            onClicked: if (viewFinder) viewFinder.toggleFlash()
+        }
 
-                //: Slider label
-                //% "Zoom"
-                label: qsTrId("foilauth-scan-zoom_label")
-                anchors.horizontalCenter: parent.horizontalCenter
-                width: viewFinderContainer.narrowWidth
-                leftMargin: 0
-                rightMargin: 0
-                minimumValue: 1.0
-                maximumValue: 70.0
-                value: 1
-                stepSize: 5
-                onValueChanged: {
-                    FoilAuthSettings.scanZoom = value
-                    if (viewFinder) {
-                        viewFinder.digitalZoom = value
-                    }
-                }
-                Component.onCompleted: {
-                    value = FoilAuthSettings.scanZoom
-                    if (viewFinder) {
-                        viewFinder.digitalZoom = value
-                    }
-                }
+        Slider {
+            id: zoomSlider
+
+            anchors {
+                left: parent.left
+                leftMargin: 2 * Theme.horizontalPageMargin + Theme.itemSizeSmall
+                right: parent.right
+                rightMargin: 2 * Theme.horizontalPageMargin + Theme.itemSizeSmall
             }
 
-            Item {
-                height: parent.height
-                visible: viewFinderContainer.canSwitchResolutions
-                anchors {
-                    left: zoomSlider.right
-                    right: parent.right
-                }
-                HintIconButton {
-                    id: aspectButton
-
-                    readonly property string icon_16_9: iconSourcePrefix + Qt.resolvedUrl("images/resolution_16_9.svg")
-                    readonly property string icon_4_3: iconSourcePrefix +  Qt.resolvedUrl("images/resolution_4_3.svg")
-                    anchors.centerIn: parent
-                    icon {
-                        source: FoilAuthSettings.scanWideMode ? icon_4_3 : icon_16_9
-                        sourceSize: Qt.size(Theme.iconSizeMedium, Theme.iconSizeMedium)
-                    }
-                    //: Hint label
-                    //% "Switch the aspect ratio between 9:16 and 3:4"
-                    hint: qsTrId("foilauth-scan-hint_aspect_ratio")
-                    onShowHint: page.showHint(hint)
-                    onHideHint: page.hideHint()
-                    onClicked: FoilAuthSettings.scanWideMode = !FoilAuthSettings.scanWideMode
+            //: Slider label
+            //% "Zoom"
+            label: qsTrId("foilauth-scan-zoom_label")
+            leftMargin: 0
+            rightMargin: 0
+            minimumValue: 1.0
+            maximumValue: 70.0
+            value: 1
+            stepSize: 5
+            onValueChanged: {
+                FoilAuthSettings.scanZoom = value
+                if (viewFinder) {
+                    viewFinder.digitalZoom = value
                 }
             }
+            Component.onCompleted: {
+                value = FoilAuthSettings.scanZoom
+                if (viewFinder) {
+                    viewFinder.digitalZoom = value
+                }
+            }
+        }
+
+        HintIconButton {
+            id: aspectButton
+
+            readonly property string icon_16_9: iconSourcePrefix + Qt.resolvedUrl("images/resolution_16_9.svg")
+            readonly property string icon_4_3: iconSourcePrefix +  Qt.resolvedUrl("images/resolution_4_3.svg")
+            anchors {
+                right: parent.right
+                rightMargin: Theme.horizontalPageMargin
+                verticalCenter: parent.verticalCenter
+            }
+            visible: viewFinderContainer.canSwitchResolutions
+            icon {
+                source: FoilAuthSettings.scanWideMode ? icon_4_3 : icon_16_9
+                sourceSize: Qt.size(Theme.iconSizeMedium, Theme.iconSizeMedium)
+            }
+            //: Hint label
+            //% "Switch the aspect ratio between 9:16 and 3:4"
+            hint: qsTrId("foilauth-scan-hint_aspect_ratio")
+            onShowHint: page.showHint(hint)
+            onHideHint: page.hideHint()
+            onClicked: FoilAuthSettings.scanWideMode = !FoilAuthSettings.scanWideMode
         }
     }
 
