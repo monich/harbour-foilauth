@@ -113,7 +113,7 @@
     <message id="foilauth-token-digits-text">
         <source>Digits</source>
         <extracomment>Text field label (number of password digits)</extracomment>
-        <translation>数字</translation>
+        <translation>位数</translation>
     </message>
     <message id="foilauth-token-digits-placeholder">
         <source>Number of password digits</source>
@@ -158,7 +158,7 @@
     <message id="foilauth-foil_pics_warning">
         <source>Note that all Foil apps share the encryption key and the password.</source>
         <extracomment>Warning text, small size label below the password prompt</extracomment>
-        <translation>请记住所有的 Foil 系列软件使用相同的加密秘钥及密码。</translation>
+        <translation>请记住所有的 Foil 系列软件均使用相同的加密秘钥及密码。</translation>
     </message>
     <message id="foilauth-import-accept">
         <source>Yes</source>
@@ -190,7 +190,7 @@
     <message id="foilauth-menu-lock">
         <source>Lock</source>
         <extracomment>Pulley menu item, locks the tokens</extracomment>
-        <translation>锁</translation>
+        <translation>锁定</translation>
     </message>
     <message id="foilauth-menu-delete_all_tokens">
         <source>Delete all</source>
@@ -240,7 +240,7 @@
     <message id="foilauth-password_list-placeholder">
         <source>You do not have any encrypted tokens</source>
         <extracomment>Placeholder text</extracomment>
-        <translation>你还没有任何加密令牌s</translation>
+        <translation>你还没有任何加密令牌</translation>
     </message>
     <message id="foilauth-generate_key_warning-accept">
         <source>Continue</source>
