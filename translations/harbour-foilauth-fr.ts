@@ -57,7 +57,7 @@ Veuillez saisir votre mot de passe</translation>
     <message id="foilauth-generate-label-key_needed">
         <source>You need to generate the key and select the password before you can encrypt your authentication tokens</source>
         <extracomment>Label text</extracomment>
-        <translation>Vous devez générer une clef et choisir un mot de passe avant de pouvoir chiffrer des jetons d'authentification</translation>
+        <translation>Vous devez générer une clef et choisir un mot de passe avant de pouvoir chiffrer des jetons d&apos;authentification</translation>
     </message>
     <message id="foilnotes-generate_key_page-title">
         <source>You are about to generate a new key</source>
@@ -243,7 +243,7 @@ Veuillez saisir votre mot de passe</translation>
     <message id="foilauth-password_list-placeholder">
         <source>You do not have any encrypted tokens</source>
         <extracomment>Placeholder text</extracomment>
-        <translation>Vous n'avez aucun jeton chiffré</translation>
+        <translation>Vous n&apos;avez aucun jeton chiffré</translation>
     </message>
     <message id="foilauth-generate_key_warning-accept">
         <source>Continue</source>
