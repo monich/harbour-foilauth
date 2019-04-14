@@ -205,12 +205,6 @@ VideoOutput {
     }
 
     Timer {
-        id: resultViewTimer
-
-        onTriggered: viewFinder.showMarker = false
-    }
-
-    Timer {
         id: focusTimer
 
         interval: 5000
