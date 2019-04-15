@@ -190,7 +190,7 @@ Wprowadź swoje hasło</translation>
     <message id="foilauth-menu-change_foil_password">
         <source>Change password</source>
         <extracomment>Pulley menu item, changes Foil password</extracomment>
-        <translation>Element Pulley menu, zmień hasło Foil</translation>
+        <translation>Zmień hasło</translation>
     </message>
     <message id="foilauth-menu-lock">
         <source>Lock</source>
