@@ -115,17 +115,17 @@ Veuillez saisir votre mot de passe</translation>
     <message id="foilauth-token-digits-text">
         <source>Digits</source>
         <extracomment>Text field label (number of password digits)</extracomment>
-        <translation>Numérique</translation>
+        <translation>Nombres</translation>
     </message>
     <message id="foilauth-token-digits-placeholder">
         <source>Number of password digits</source>
         <extracomment>Text field placeholder (number of password digits)</extracomment>
-        <translation>Nombre de mot de passe numériques</translation>
+        <translation>Taille du mot de passe numérique</translation>
     </message>
     <message id="foilauth-token-timeshift-text">
         <source>Time shift (seconds)</source>
         <extracomment>Text field label (number of password digits)</extracomment>
-        <translation>Time shift (seconds)</translation>
+        <translation>Décalage (secondes)</translation>
     </message>
     <message id="foilauth-token-timeshift-placeholder">
         <source>OTP time shift, in seconds</source>
@@ -258,7 +258,7 @@ Veuillez saisir votre mot de passe</translation>
     <message id="foilauth-generate_key_warning-text">
         <source>Once you have generated a new key, you are going to lose access to all the files encrypted by the old key. Note that the same key is used by all Foil apps, such as Foil Notes and Foil Pics. If you have forgotten your password, then keep in mind that most likely it&apos;s computationally easier to brute-force your password and recover the old key than to decrypt files for which the key is lost.</source>
         <extracomment>Warning shown prior to generating the new key</extracomment>
-        <translation>Once you have generated a new key, you are going to lose access to all the files encrypted by the old key. Sachez que la même clef est utilisée par toutes les applications Foil, telles que Foil Notes et Foil Pics. Si vous avez oublié votre mot de passe, gardez à l&apos;esprit qu&apos;il est plus simple de brute-forcer votre mot de passe pour récupérer votre ancienne clef que de déchiffrer les fichiers liés à la clef perdue.</translation>
+        <translation>Une fois la nouvelle clef générée, vous perdrez l’accès à tous vos anciens fichiers chiffrés avec l’ancienne clef. Notez que les applications Foil utilisent la même clef, telles que Foil Notes et Foil Pics. Si vous avez oublié votre mot de passe, gardez à l&apos;esprit qu&apos;il est plus simple de brute-forcer votre mot de passe pour récupérer votre ancienne clef que de déchiffrer les fichiers liés à la clef perdue.</translation>
     </message>
     <message id="foilauth-change_password_page-label-enter_passwords">
         <source>Please enter the current and the new password</source>
