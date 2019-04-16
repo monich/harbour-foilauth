@@ -120,7 +120,7 @@ Veuillez saisir votre mot de passe</translation>
     <message id="foilauth-token-digits-placeholder">
         <source>Number of password digits</source>
         <extracomment>Text field placeholder (number of password digits)</extracomment>
-        <translation>Taille du mot de passe numériques</translation>
+        <translation>Taille du mot de passe numérique</translation>
     </message>
     <message id="foilauth-token-timeshift-text">
         <source>Time shift (seconds)</source>
