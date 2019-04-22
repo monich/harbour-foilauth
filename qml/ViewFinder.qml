@@ -4,8 +4,8 @@ import Sailfish.Silica 1.0
 
 VideoOutput {
     id: viewFinder
-    layer.enabled: true
 
+    layer.enabled: true
     anchors.fill: parent
     fillMode: VideoOutput.Stretch
 
@@ -21,6 +21,10 @@ VideoOutput {
     // Not sure why not just camera.orientation but this makes the camera
     // behave similar to what it does for Jolla Camera
     readonly property int cameraOrientation: 360 - camera.orientation
+
+    // Camera doesn't know its maximumDigitalZoom until cameraStatus becomes
+    // Camera.ActiveStatus and doesn't emit maximumDigitalZoomChanged signal
+    signal maximumDigitalZoom(var value)
 
     onOrientationChanged: {
         if (camera.cameraState !== Camera.UnloadedState) {
@@ -147,14 +151,14 @@ VideoOutput {
         }
         onCameraStatusChanged: {
             if (cameraStatus === Camera.ActiveStatus) {
+                // Camera doesn't emit maximumDigitalZoomChanged signal
+                viewFinder.maximumDigitalZoom(maximumDigitalZoom)
                 digitalZoom = viewFinder.digitalZoom
             }
         }
         onCameraStateChanged: {
             if (cameraState === Camera.ActiveState) {
-                if (viewFinder.playingBeep) {
-                    viewFinder.playingBeep = false
-                }
+                viewFinder.playingBeep = false
             } else if (cameraState === Camera.UnloadedState) {
                 if (viewFinder.viewfinderResolution &&
                     viewFinder.viewfinderResolution !== viewfinder.resolution) {

@@ -38,7 +38,8 @@
 
 class FoilAuthSettings : public QObject {
     Q_OBJECT
-    Q_PROPERTY(int scanZoom READ scanZoom WRITE setScanZoom NOTIFY scanZoomChanged)
+    Q_PROPERTY(qreal scanZoom READ scanZoom WRITE setScanZoom NOTIFY scanZoomChanged)
+    Q_PROPERTY(qreal maxZoom READ maxZoom WRITE setMaxZoom NOTIFY maxZoomChanged)
     Q_PROPERTY(bool scanWideMode READ scanWideMode WRITE setScanWideMode NOTIFY scanWideModeChanged)
     Q_PROPERTY(bool sailotpImportDone READ sailotpImportDone WRITE setSailotpImportDone NOTIFY sailotpImportDoneChanged)
     Q_PROPERTY(bool sharedKeyWarning READ sharedKeyWarning WRITE setSharedKeyWarning NOTIFY sharedKeyWarningChanged)
@@ -51,8 +52,11 @@ public:
 
     static QObject* createSingleton(QQmlEngine* aEngine, QJSEngine* aScript);
 
-    int scanZoom() const;
-    void setScanZoom(int aValue);
+    qreal scanZoom() const;
+    void setScanZoom(qreal aValue);
+
+    qreal maxZoom() const;
+    void setMaxZoom(qreal aValue);
 
     bool scanWideMode() const;
     void setScanWideMode(bool aValue);
@@ -66,6 +70,7 @@ public:
     void setSharedKeyWarning2(bool aValue);
 
 Q_SIGNALS:
+    void maxZoomChanged();
     void scanZoomChanged();
     void scanWideModeChanged();
     void sailotpImportDoneChanged();

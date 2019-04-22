@@ -39,13 +39,15 @@
 #include <MGConfItem>
 
 #define DCONF_KEY(x)                FOILAUTH_DCONF_ROOT x
+#define KEY_MAX_ZOOM                DCONF_KEY("maxZoom")
 #define KEY_SCAN_ZOOM               DCONF_KEY("scanZoom")
 #define KEY_SCAN_WIDE_MODE          DCONF_KEY("scanWideMode")
 #define KEY_SAILOTP_IMPORT_DONE     DCONF_KEY("sailotpImportDone")
 #define KEY_SHARED_KEY_WARNING      DCONF_KEY("sharedKeyWarning")
 #define KEY_SHARED_KEY_WARNING2     DCONF_KEY("sharedKeyWarning2")
 
-#define DEFAULT_SCAN_ZOOM           3
+#define DEFAULT_MAX_ZOOM            10.f
+#define DEFAULT_SCAN_ZOOM           3.f
 #define DEFAULT_SCAN_WIDE_MODE      false
 #define DEFAULT_SAILOTP_IMPORT_DONE false
 #define DEFAULT_SHARED_KEY_WARNING  true
@@ -59,6 +61,7 @@ public:
     Private(FoilAuthSettings* aParent);
 
 public:
+    MGConfItem* iMaxZoom;
     MGConfItem* iScanZoom;
     MGConfItem* iScanWideMode;
     MGConfItem* iSailotpImportDone;
@@ -67,12 +70,15 @@ public:
 };
 
 FoilAuthSettings::Private::Private(FoilAuthSettings* aParent) :
+    iMaxZoom(new MGConfItem(KEY_MAX_ZOOM, aParent)),
     iScanZoom(new MGConfItem(KEY_SCAN_ZOOM, aParent)),
     iScanWideMode(new MGConfItem(KEY_SCAN_WIDE_MODE, aParent)),
     iSailotpImportDone(new MGConfItem(KEY_SAILOTP_IMPORT_DONE, aParent)),
     iSharedKeyWarning(new MGConfItem(KEY_SHARED_KEY_WARNING, aParent)),
     iSharedKeyWarning2(new MGConfItem(KEY_SHARED_KEY_WARNING2, aParent))
 {
+    QObject::connect(iMaxZoom, SIGNAL(valueChanged()),
+        aParent, SIGNAL(maxZoomChanged()));
     QObject::connect(iScanZoom, SIGNAL(valueChanged()),
         aParent, SIGNAL(scanZoomChanged()));
     QObject::connect(iScanWideMode, SIGNAL(valueChanged()),
@@ -111,18 +117,34 @@ FoilAuthSettings::createSingleton(
 
 // scanZoom
 
-int
+qreal
 FoilAuthSettings::scanZoom() const
 {
-    return iPrivate->iScanZoom->value(DEFAULT_SCAN_ZOOM).toInt();
+    return iPrivate->iScanZoom->value(DEFAULT_SCAN_ZOOM).toFloat();
 }
 
 void
 FoilAuthSettings::setScanZoom(
-    int aValue)
+    qreal aValue)
 {
     HDEBUG(aValue);
     iPrivate->iScanZoom->set(aValue);
+}
+
+// maxZoom
+
+qreal
+FoilAuthSettings::maxZoom() const
+{
+    return iPrivate->iMaxZoom->value(DEFAULT_MAX_ZOOM).toFloat();
+}
+
+void
+FoilAuthSettings::setMaxZoom(
+    qreal aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iMaxZoom->set(aValue);
 }
 
 // scanWideMode

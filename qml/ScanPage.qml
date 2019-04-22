@@ -153,6 +153,7 @@ Page {
         id: viewFinderComponent
 
         ViewFinder {
+            onMaximumDigitalZoom: FoilAuthSettings.maxZoom = value
         }
     }
 
@@ -261,9 +262,9 @@ Page {
             leftMargin: 0
             rightMargin: 0
             minimumValue: 1.0
-            maximumValue: 70.0
-            value: 1
-            stepSize: 5
+            maximumValue: FoilAuthSettings.maxZoom
+            value: 1.0
+            stepSize: (maximumValue - minimumValue)/100
             onValueChanged: {
                 FoilAuthSettings.scanZoom = value
                 if (viewFinder) {
