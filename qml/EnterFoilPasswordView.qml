@@ -72,8 +72,6 @@ SilicaFlickable {
         }
 
         InfoLabel {
-            id: shortPrompt
-
             height: implicitHeight
             anchors.bottom: longPrompt.bottom
             visible: !panel.showLongPrompt
