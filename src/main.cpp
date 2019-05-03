@@ -39,8 +39,9 @@
 #include "FoilAuth.h"
 #include "SailOTP.h"
 
-#include "QrCodeImageProvider.h"
 #include "QrCodeScanner.h"
+#include "HarbourQrCodeGenerator.h"
+#include "HarbourQrCodeImageProvider.h"
 #include "HarbourOrganizeListModel.h"
 #include "HarbourSingleImageProvider.h"
 
@@ -71,6 +72,7 @@ static void register_types(const char* uri, int v1 = 1, int v2 = 0)
     qmlRegisterSingletonType<SailOTP>(uri, v1, v2, "SailOTP", SailOTP::createSingleton);
     qmlRegisterType<FoilAuthFavoritesModel>(uri, v1, v2, "FoilAuthFavoritesModel");
     qmlRegisterType<HarbourOrganizeListModel>(uri, v1, v2, "HarbourOrganizeListModel");
+    qmlRegisterType<HarbourQrCodeGenerator>(uri, v1, v2, "HarbourQrCodeGenerator");
     qmlRegisterType<HarbourSingleImageProvider>(uri, v1, v2, "HarbourSingleImageProvider");
     qmlRegisterType<QrCodeScanner>(uri, v1, v2, "QrCodeScanner");
 }
@@ -148,7 +150,7 @@ int main(int argc, char *argv[])
     QString providerDefault("harbour");
     QString providerDarkOnLight("harbour-dark");
     QString qrCodeImageProvider("qrcode");
-    engine->addImageProvider(qrCodeImageProvider, new QrCodeImageProvider);
+    engine->addImageProvider(qrCodeImageProvider, new HarbourQrCodeImageProvider);
     engine->addImageProvider(providerDefault, new HarbourImageProvider);
     engine->addImageProvider(providerDarkOnLight, new HarbourImageProvider);
 

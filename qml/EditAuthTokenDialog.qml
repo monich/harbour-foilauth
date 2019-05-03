@@ -6,7 +6,7 @@ Dialog {
     id: dialog
 
     allowedOrientations: appAllowedOrientations
-    canAccept: qrcode.length > 0
+    canAccept: generator.text !== ""
 
     property bool canScan
     property alias acceptText: header.acceptText
@@ -15,13 +15,18 @@ Dialog {
     property alias secret: secretField.text
     property alias digits: digitsField.text
     property alias timeShift: timeShiftField.text
-    readonly property string qrcode: FoilAuth.tokenQrCode(secretField.text,
-        labelField.text, issuer, digitsField.text, timeShiftField.text)
 
     DialogHeader {
         id: header
 
         spacing: 0
+    }
+
+    HarbourQrCodeGenerator {
+        id: generator
+
+        text: FoilAuth.toUri(secretField.text, labelField.text, dialog.issuer,
+            digitsField.text, timeShiftField.text)
     }
 
     SilicaFlickable {
@@ -137,17 +142,18 @@ Dialog {
 
             Rectangle {
                 color: "white"
+                radius: Theme.paddingMedium
+                x: Math.floor((parent.width - width)/2)
                 width: qrcodeImage.width + 2 * Theme.horizontalPageMargin
                 height: qrcodeImage.height + 2 * Theme.horizontalPageMargin
-                anchors.horizontalCenter: parent.horizontalCenter
-                visible: dialog.qrcode !== ""
+                visible: generator.qrcode !== ""
 
                 Image {
                     id: qrcodeImage
 
                     asynchronous: true
                     anchors.centerIn: parent
-                    source: dialog.qrcode ? "image://qrcode/" + dialog.qrcode : ""
+                    source: generator.qrcode ? "image://qrcode/" + generator.qrcode : ""
                     readonly property int maxDisplaySize: Math.min(Screen.width, Screen.height) - Theme.itemSizeLarge - 4 * Theme.horizontalPageMargin
                     readonly property int maxSourceSize: Math.max(sourceSize.width, sourceSize.height)
                     readonly property int n: Math.floor(maxDisplaySize/maxSourceSize)

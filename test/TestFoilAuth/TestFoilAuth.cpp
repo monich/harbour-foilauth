@@ -269,22 +269,17 @@ test_totp(
 }
 
 /*==========================================================================*
- * qrCode
+ * toUri
  *==========================================================================*/
 
 static
 void
-test_qrCode(
+test_toUri(
     void)
 {
-    g_assert(FoilAuth::tokenQrCode("", "Label", "Issuer", 5, 0).isEmpty());
-    QString code = FoilAuth::tokenQrCode("aebagbafay", "Label", "Issuer", 5, 0);
-    g_assert(code == "72axpk7yqjj5jiqixkkgo2xixjq7nyxixjdwe4xiqlia52qi72vk"
-        "vk7yaaw32gaaumt7kajifbgkchsyo2lpk4kivgu2flsazyqbrh2i"
-        "7tuvxeqinoerowly6w3mfbgqqoff6gsajunawgjyp6lq2mfiewob"
-        "sd2yjlkqxeqabugr7xqy636xs7nylsqlklgqc6vpkeyapqrklhyi"
-        "2zppluuicap2fmky66hbsh4yad7xtggy734rocvyqifmxogqxjpf"
-        "4h4axioexxeaxkkw6reiqiedugca73isqkei");
+    g_assert(FoilAuth::toUri("", "Label", "Issuer", 5, 0).isEmpty());
+    g_assert(FoilAuth::toUri("aebagbafa", "Label", "Issuer", 5, 0) ==
+        "otpauth://totp/Label?secret=aebagbaf&issuer=Issuer&digits=5");
 }
 
 /*==========================================================================*
@@ -334,7 +329,7 @@ int main(int argc, char* argv[])
     g_test_add_func(TEST_("fileArray"), test_byteArray);
     g_test_add_func(TEST_("file"), test_file);
     g_test_add_func(TEST_("totp"), test_totp);
-    g_test_add_func(TEST_("qrCode"), test_qrCode);
+    g_test_add_func(TEST_("toUri"), test_toUri);
     g_test_add_func(TEST_("parseUri"), test_parseUri);
     return g_test_run();
 }

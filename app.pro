@@ -77,7 +77,6 @@ HEADERS += \
     src/FoilAuthSettings.h \
     src/FoilAuthToken.h \
     src/QrCodeDecoder.h \
-    src/QrCodeImageProvider.h \
     src/QrCodeImageSource.h \
     src/QrCodeScanner.h \
     src/SailOTP.h
@@ -90,7 +89,6 @@ SOURCES += \
     src/FoilAuthToken.cpp \
     src/main.cpp \
     src/QrCodeDecoder.cpp \
-    src/QrCodeImageProvider.cpp \
     src/QrCodeImageSource.cpp \
     src/QrCodeScanner.cpp \
     src/SailOTP.cpp
@@ -116,6 +114,8 @@ HEADERS += \
     $${HARBOUR_LIB_INCLUDE}/HarbourDebug.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourImageProvider.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourOrganizeListModel.h \
+    $${HARBOUR_LIB_INCLUDE}/HarbourQrCodeGenerator.h \
+    $${HARBOUR_LIB_INCLUDE}/HarbourQrCodeImageProvider.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourSingleImageProvider.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourSystemState.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourTask.h \
@@ -127,6 +127,8 @@ SOURCES += \
     $${HARBOUR_LIB_SRC}/HarbourImageProvider.cpp \
     $${HARBOUR_LIB_SRC}/HarbourMce.cpp \
     $${HARBOUR_LIB_SRC}/HarbourOrganizeListModel.cpp \
+    $${HARBOUR_LIB_SRC}/HarbourQrCodeGenerator.cpp \
+    $${HARBOUR_LIB_SRC}/HarbourQrCodeImageProvider.cpp \
     $${HARBOUR_LIB_SRC}/HarbourSingleImageProvider.cpp \
     $${HARBOUR_LIB_SRC}/HarbourSystemState.cpp \
     $${HARBOUR_LIB_SRC}/HarbourTask.cpp \

@@ -238,19 +238,13 @@ uint FoilAuth::TOTP(QByteArray aSecret, quint64 aTime, uint aMaxPass)
     return mini_hash % aMaxPass;
 }
 
-QString FoilAuth::tokenQrCode(QString aSecretBase32, QString aLabel,
-    QString aIssuer, int aDigits, int aTimeShift)
+QString FoilAuth::toUri(QString aSecretBase32, QString aLabel, QString aIssuer,
+    int aDigits, int aTimeShift)
 {
     QByteArray secret(fromBase32(aSecretBase32));
     if (!secret.isEmpty()) {
         HDEBUG(aSecretBase32 << aLabel << aIssuer << aDigits << aTimeShift);
-        FoilAuthToken token(secret, aLabel, aIssuer, aDigits, aTimeShift);
-        QByteArray qrcode(token.toQrCode());
-        if (!qrcode.isEmpty()) {
-            QString base32(toBase32(qrcode));
-            HDEBUG(base32);
-            return base32;
-        }
+        return FoilAuthToken(secret, aLabel, aIssuer, aDigits, aTimeShift).toUri();
     }
     return QString();
 }

@@ -74,7 +74,6 @@ public:
     bool equals(const FoilAuthToken* aToken) const;
 
     QString toUri() const;
-    QByteArray toQrCode() const;
     QVariantMap toVariantMap() const;
 
 public:

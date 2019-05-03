@@ -220,42 +220,6 @@ QString FoilAuthToken::toUri() const
     return QString();
 }
 
-QByteArray FoilAuthToken::toQrCode() const
-{
-    QByteArray out;
-    if (isValid()) {
-        QString uri = toUri();
-        QRcode* code = QRcode_encodeString(qPrintable(uri), 0, QR_ECLEVEL_M, QR_MODE_8, TRUE);
-        if (code) {
-            const int bytesPerRow = (code->width + 7) / 8;
-            if (bytesPerRow > 0) {
-                out.reserve(bytesPerRow * code->width);
-                for (int y = 0; y < code->width; y++) {
-                    const unsigned char* row = code->data + (code->width * y);
-                    char c = (row[0] & 1);
-                    int x = 1;
-                    for (; x < code->width; x++) {
-                        if (!(x % 8)) {
-                            out.append(&c, 1);
-                            c = row[x] & 1;
-                        } else {
-                            c = (c << 1) | (row[x] & 1);
-                        }
-                    }
-                    const int rem = x % 8;
-                    if (rem) {
-                        // Most significant bit first
-                        c <<= (8 - rem);
-                    }
-                    out.append(&c, 1);
-                }
-            }
-            QRcode_free(code);
-        }
-    }
-    return out;
-}
-
 QVariantMap FoilAuthToken::toVariantMap() const
 {
     QVariantMap out;

@@ -163,33 +163,6 @@ test_toUri(
 }
 
 /*==========================================================================*
- * toQrCode
- *==========================================================================*/
-
-static
-void
-test_toQrCode(
-    void)
-{
-    FoilAuthToken token;
-    g_assert(token.toQrCode().isEmpty());
-    g_assert(token.parseUri("otpauth://totp/Test?secret=vhiiktvjc6meoftj&issuer=Issuer"));
-
-    QByteArray code(token.toQrCode());
-    g_assert(!code.isEmpty());
-    HDEBUG(FoilAuth::toBase32(code));
-
-    int h = 0;
-    for (int x, i = 2; (x = i * ((i + 7)/8)) <= code.size(); i++) {
-        if (x == code.size()) {
-            h = i;
-            break;
-        }
-    }
-    g_assert(h > 0);
-}
-
-/*==========================================================================*
  * toVariantMap
  *==========================================================================*/
 
@@ -233,7 +206,6 @@ int main(int argc, char* argv[])
     g_test_add_func(TEST_("password"), test_password);
     g_test_add_func(TEST_("parseUri"), test_parseUri);
     g_test_add_func(TEST_("toUri"), test_toUri);
-    g_test_add_func(TEST_("toQrCode"), test_toQrCode);
     g_test_add_func(TEST_("toVariantMap"), test_toVariantMap);
     return g_test_run();
 }

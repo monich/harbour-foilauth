@@ -72,7 +72,7 @@ public:
     static uint TOTP(QByteArray aSecret, quint64 aTime, uint aMaxPass);
 
     // Invokable from QML
-    Q_INVOKABLE static QString tokenQrCode(QString aSecretBase32, QString aLabel,
+    Q_INVOKABLE static QString toUri(QString aSecretBase32, QString aLabel,
         QString aIssuer, int aDigits, int aTimeShift);
     Q_INVOKABLE static QVariantMap parseUri(QString aUri);
     Q_INVOKABLE static bool isValidBase32(QString aBase32);
