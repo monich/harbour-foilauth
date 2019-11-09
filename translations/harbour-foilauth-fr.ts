@@ -157,7 +157,7 @@ Veuillez saisir votre mot de passe</translation>
         <extracomment>Hint label</extracomment>
         <translation>Basculer entre les ratios 9:16 et 3:4</translation>
     </message>
-    <message id="foilauth-foil_pics_warning">
+    <message id="foilauth-foil_apps_warning">
         <source>Note that all Foil apps share the encryption key and the password.</source>
         <extracomment>Warning text, small size label below the password prompt</extracomment>
         <translation>Sachez que toutes les applications Foil partagent leur clef de chiffrement et leur mot de passe.</translation>

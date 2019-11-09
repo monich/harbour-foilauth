@@ -75,7 +75,7 @@ Item {
             opacity: parent.showPress ? 0.6 : 1
             //: Warning text, small size label below the password prompt
             //% "Note that all Foil apps share the encryption key and the password."
-            text: qsTrId("foilauth-foil_pics_warning")
+            text: qsTrId("foilauth-foil_apps_warning")
         }
     }
 }

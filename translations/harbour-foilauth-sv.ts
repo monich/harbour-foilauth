@@ -156,7 +156,7 @@
         <extracomment>Hint label</extracomment>
         <translation>Växla bild förhållande mellan 9:16 och 3:4</translation>
     </message>
-    <message id="foilauth-foil_pics_warning">
+    <message id="foilauth-foil_apps_warning">
         <source>Note that all Foil apps share the encryption key and the password.</source>
         <extracomment>Warning text, small size label below the password prompt</extracomment>
         <translation>Notera att alla Foil-appar delar krypteringsnyckel och lösenord.</translation>

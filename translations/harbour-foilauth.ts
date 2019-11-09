@@ -157,7 +157,7 @@ Please enter your password</translation>
         <extracomment>Hint label</extracomment>
         <translation>Switch the aspect ratio between 9:16 and 3:4</translation>
     </message>
-    <message id="foilauth-foil_pics_warning">
+    <message id="foilauth-foil_apps_warning">
         <source>Note that all Foil apps share the encryption key and the password.</source>
         <extracomment>Warning text, small size label below the password prompt</extracomment>
         <translation>Note that all Foil apps share the encryption key and the password.</translation>
