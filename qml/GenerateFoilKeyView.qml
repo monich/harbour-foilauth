@@ -25,6 +25,17 @@ Item {
         })
     }
 
+    Image {
+        source: "image://" + HarbourImageProvider + "/" + Qt.resolvedUrl("images/key.svg") + "?" + Theme.highlightColor
+        width: Theme.itemSizeHuge
+        sourceSize.width: width
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: (panel.y > height) ? Math.floor((panel.y - height)/2) : (panel.y - height)
+        opacity: (y < 0) ? 0 : 1
+        visible: opacity > 0
+        Behavior on opacity { FadeAnimation { duration: 100 } }
+    }
+
     Item {
         id: panel
 
