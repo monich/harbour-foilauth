@@ -159,7 +159,7 @@
         <translation>Переключение камеры между режимами 9:16 и 3:4</translation>
     </message>
     <message id="foilauth-foil_apps_warning">
-        <source>Note that all Foil apps share the encryption key and the password.</source>
+        <source>Note that all Foil apps use the same encryption key and password.</source>
         <extracomment>Warning text, small size label below the password prompt</extracomment>
         <translation>Имейте в виду, что все Foil приложения использует тот же ключ с тем же паролем.</translation>
     </message>

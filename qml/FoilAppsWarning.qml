@@ -1,11 +1,12 @@
 import QtQuick 2.0
 import Sailfish.Silica 1.0
+import harbour.foilauth 1.0
 
 Item {
     id: warning
 
     height: Theme.itemSizeSmall
-    opacity: 0.6
+    opacity: HarbourTheme.opacityHigh
 
     signal clicked()
 
@@ -72,9 +73,9 @@ Item {
             wrapMode: Text.Wrap
             horizontalAlignment: Text.AlignLeft
             color: Theme.highlightColor
-            opacity: parent.showPress ? 0.6 : 1
+            opacity: parent.showPress ? HarbourTheme.opacityHigh : 1
             //: Warning text, small size label below the password prompt
-            //% "Note that all Foil apps share the encryption key and the password."
+            //% "Note that all Foil apps use the same encryption key and password."
             text: qsTrId("foilauth-foil_apps_warning")
         }
     }

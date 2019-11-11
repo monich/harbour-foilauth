@@ -156,10 +156,10 @@ Wprowadź swoje hasło</translation>
     <message id="foilauth-scan-hint_aspect_ratio">
         <source>Switch the aspect ratio between 9:16 and 3:4</source>
         <extracomment>Hint label</extracomment>
-        <translation>Przełącz współczynnik proporcji między 9:16 a 3: 4</translation>
+        <translation>Przełącz współczynnik proporcji między 9:16 a 3:4</translation>
     </message>
     <message id="foilauth-foil_apps_warning">
-        <source>Note that all Foil apps share the encryption key and the password.</source>
+        <source>Note that all Foil apps use the same encryption key and password.</source>
         <extracomment>Warning text, small size label below the password prompt</extracomment>
         <translation>Pamiętaj, że wszystkie aplikacje Foil współdzielą klucz szyfrowania i hasło.</translation>
     </message>
