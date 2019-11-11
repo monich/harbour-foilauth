@@ -52,6 +52,17 @@ SilicaFlickable {
         }
     }
 
+    Image {
+        width: Theme.itemSizeHuge
+        sourceSize.width: width
+        source: "images/foilauth.svg"
+        anchors.horizontalCenter: parent.horizontalCenter
+        y: (panel.y > height) ? Math.floor((panel.y - height)/2) : (panel.y - height)
+        visible: opacity > 0
+        opacity: (y < 0) ? 0 : 1
+        Behavior on opacity { FadeAnimation { duration: landscapeLayout ? 0 : 100 } }
+    }
+
     Item {
         id: panel
 
