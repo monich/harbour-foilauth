@@ -69,7 +69,7 @@ Item {
                 MenuItem { text: "1500" }
                 MenuItem { text: "2048" }
             }
-            Component.onCompleted: currentIndex = 1 // default
+            Component.onCompleted: currentIndex = 2 // default
         }
 
         HarbourPasswordInputField {
