@@ -34,7 +34,7 @@ Item {
         sourceSize.width: width
         anchors.horizontalCenter: parent.horizontalCenter
         y: (panel.y > height) ? Math.floor((panel.y - height)/2) : (panel.y - height)
-        opacity: (y < 0) ? 0 : 1
+        opacity: (y < Theme.paddingLarge) ? 0 : 1
         visible: opacity > 0
         Behavior on opacity { FadeAnimation { duration: 100 } }
     }
@@ -53,6 +53,8 @@ Item {
             //: Label text
             //% "You need to generate the key and select the password before you can encrypt your authentication tokens"
             text: qsTrId("foilauth-generate-label-key_needed")
+            opacity: (parent.y >= Theme.paddingLarge) ? 1 : 0
+            Behavior on opacity { FadeAnimation { } }
         }
 
         ComboBox {
