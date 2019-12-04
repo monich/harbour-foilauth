@@ -11,18 +11,21 @@ Item {
     property alias title: title.text
     readonly property int minPassphraseLen: 8
     readonly property var foilModel: FoilAuthModel
+    readonly property bool canGenerate: inputField.text.length >= minPassphraseLen && !generating
     readonly property bool generating: foilModel.foilState === FoilAuthModel.FoilGeneratingKey
     readonly property bool landscapeLayout: appLandscapeMode && Screen.sizeCategory < Screen.Large
 
     function generateKey() {
-        var confirm = pageStack.push(Qt.resolvedUrl("ConfirmPasswordPage.qml"), {
-            password: inputField.text
-        })
-        confirm.passwordConfirmed.connect(function() {
-            confirm.backNavigation = false
-            foilModel.generateKey(keySize.value, inputField.text)
-            pageStack.pop(mainPage)
-        })
+        if (canGenerate) {
+            var confirm = pageStack.push(Qt.resolvedUrl("ConfirmPasswordPage.qml"), {
+                password: inputField.text
+            })
+            confirm.passwordConfirmed.connect(function() {
+                confirm.backNavigation = false
+                foilModel.generateKey(keySize.value, inputField.text)
+                    pageStack.pop(mainPage)
+            })
+        }
     }
 
     Image {
@@ -86,6 +89,7 @@ Item {
                 qsTrId("foilauth-generate-label-minimum_length",minPassphraseLen).arg(minPassphraseLen) :
                 placeholderText
             enabled: !generating
+            EnterKey.enabled: canGenerate
             EnterKey.onClicked: generateKey()
         }
 
@@ -99,7 +103,7 @@ Item {
                 //: Button label
                 //% "Generate key"
                 qsTrId("foilauth-generate-button-generate_key")
-            enabled: inputField.text.length >= minPassphraseLen && !generating
+            enabled: canGenerate
             onClicked: generateKey()
         }
     }
