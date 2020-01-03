@@ -21,8 +21,7 @@
     <message id="foilauth-foil_password-label-enter_password_long">
         <source>Secret tokens are locked. Please enter your password</source>
         <extracomment>Password prompt label (long)</extracomment>
-        <translation>Коды авторизации заблокированы.
-Введите пароль</translation>
+        <translation>Коды авторизации заблокированы. Введите пароль</translation>
     </message>
     <message id="foilauth-foil_password-button-unlocking">
         <source>Unlocking...</source>

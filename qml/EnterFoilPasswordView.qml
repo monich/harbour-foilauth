@@ -59,7 +59,7 @@ SilicaFlickable {
         anchors.horizontalCenter: parent.horizontalCenter
         y: (panel.y > height) ? Math.floor((panel.y - height)/2) : (panel.y - height)
         visible: opacity > 0
-        opacity: (y < 0) ? 0 : 1
+        opacity: (y < Theme.paddingMedium) ? 0 : 1
         Behavior on opacity { FadeAnimation { duration: landscapeLayout ? 0 : 100 } }
     }
 
@@ -70,7 +70,7 @@ SilicaFlickable {
         height: childrenRect.height
         anchors.verticalCenter: parent.verticalCenter
 
-        readonly property bool showLongPrompt: y >= 0
+        readonly property bool showLongPrompt: y >= Theme.paddingLarge
 
         InfoLabel {
             id: longPrompt
