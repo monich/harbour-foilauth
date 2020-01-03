@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2020 Jolla Ltd.
+ * Copyright (C) 2019-2020 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -45,12 +45,14 @@
 #define KEY_SAILOTP_IMPORT_DONE     DCONF_KEY("sailotpImportDone")
 #define KEY_SHARED_KEY_WARNING      DCONF_KEY("sharedKeyWarning")
 #define KEY_SHARED_KEY_WARNING2     DCONF_KEY("sharedKeyWarning2")
+#define KEY_AUTO_LOCK_TIME          DCONF_KEY("autoLockTime")
 
 #define DEFAULT_MAX_ZOOM            10.f
 #define DEFAULT_SCAN_ZOOM           3.f
 #define DEFAULT_SCAN_WIDE_MODE      false
 #define DEFAULT_SAILOTP_IMPORT_DONE false
 #define DEFAULT_SHARED_KEY_WARNING  true
+#define DEFAULT_AUTO_LOCK_TIME      15000
 
 // ==========================================================================
 // FoilAuthSettings::Private
@@ -67,6 +69,9 @@ public:
     MGConfItem* iSailotpImportDone;
     MGConfItem* iSharedKeyWarning;
     MGConfItem* iSharedKeyWarning2;
+    MGConfItem* iAutoLockTime;
+    QVariant iDefaultSharedKeyWarning;
+    QVariant iDefaultAutoLockTime;
 };
 
 FoilAuthSettings::Private::Private(FoilAuthSettings* aParent) :
@@ -75,7 +80,10 @@ FoilAuthSettings::Private::Private(FoilAuthSettings* aParent) :
     iScanWideMode(new MGConfItem(KEY_SCAN_WIDE_MODE, aParent)),
     iSailotpImportDone(new MGConfItem(KEY_SAILOTP_IMPORT_DONE, aParent)),
     iSharedKeyWarning(new MGConfItem(KEY_SHARED_KEY_WARNING, aParent)),
-    iSharedKeyWarning2(new MGConfItem(KEY_SHARED_KEY_WARNING2, aParent))
+    iSharedKeyWarning2(new MGConfItem(KEY_SHARED_KEY_WARNING2, aParent)),
+    iAutoLockTime(new MGConfItem(KEY_AUTO_LOCK_TIME, aParent)),
+    iDefaultSharedKeyWarning(DEFAULT_SHARED_KEY_WARNING),
+    iDefaultAutoLockTime(DEFAULT_AUTO_LOCK_TIME)
 {
     QObject::connect(iMaxZoom, SIGNAL(valueChanged()),
         aParent, SIGNAL(maxZoomChanged()));
@@ -89,6 +97,8 @@ FoilAuthSettings::Private::Private(FoilAuthSettings* aParent) :
         aParent, SIGNAL(sharedKeyWarningChanged()));
     QObject::connect(iSharedKeyWarning2, SIGNAL(valueChanged()),
         aParent, SIGNAL(sharedKeyWarning2Changed()));
+    QObject::connect(iAutoLockTime, SIGNAL(valueChanged()),
+        aParent, SIGNAL(autoLockTimeChanged()));
 }
 
 // ==========================================================================
@@ -185,13 +195,13 @@ FoilAuthSettings::setSailotpImportDone(
 bool
 FoilAuthSettings::sharedKeyWarning() const
 {
-    return iPrivate->iSharedKeyWarning->value(DEFAULT_SHARED_KEY_WARNING).toBool();
+    return iPrivate->iSharedKeyWarning->value(iPrivate->iDefaultSharedKeyWarning).toBool();
 }
 
 bool
 FoilAuthSettings::sharedKeyWarning2() const
 {
-    return iPrivate->iSharedKeyWarning2->value(DEFAULT_SHARED_KEY_WARNING).toBool();
+    return iPrivate->iSharedKeyWarning2->value(iPrivate->iDefaultSharedKeyWarning).toBool();
 }
 
 void
@@ -208,4 +218,23 @@ FoilAuthSettings::setSharedKeyWarning2(
 {
     HDEBUG(aValue);
     iPrivate->iSharedKeyWarning2->set(aValue);
+}
+
+// autoLockTime
+
+int
+FoilAuthSettings::autoLockTime() const
+{
+    QVariant val(iPrivate->iAutoLockTime->value(iPrivate->iDefaultAutoLockTime));
+    bool ok;
+    const int ival(val.toInt(&ok));
+    return (ok && ival >= 0) ? ival : DEFAULT_AUTO_LOCK_TIME;
+}
+
+void
+FoilAuthSettings::setAutoLockTime(
+    int aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iAutoLockTime->set(aValue);
 }

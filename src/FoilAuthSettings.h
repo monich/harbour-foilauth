@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2020 Jolla Ltd.
+ * Copyright (C) 2019-2020 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -44,6 +44,7 @@ class FoilAuthSettings : public QObject {
     Q_PROPERTY(bool sailotpImportDone READ sailotpImportDone WRITE setSailotpImportDone NOTIFY sailotpImportDoneChanged)
     Q_PROPERTY(bool sharedKeyWarning READ sharedKeyWarning WRITE setSharedKeyWarning NOTIFY sharedKeyWarningChanged)
     Q_PROPERTY(bool sharedKeyWarning2 READ sharedKeyWarning2 WRITE setSharedKeyWarning2 NOTIFY sharedKeyWarning2Changed)
+    Q_PROPERTY(int autoLockTime READ autoLockTime WRITE setAutoLockTime NOTIFY autoLockTimeChanged)
     Q_DISABLE_COPY(FoilAuthSettings)
 
 public:
@@ -69,6 +70,9 @@ public:
     void setSharedKeyWarning(bool aValue);
     void setSharedKeyWarning2(bool aValue);
 
+    int autoLockTime() const;
+    void setAutoLockTime(int aValue);
+
 Q_SIGNALS:
     void maxZoomChanged();
     void scanZoomChanged();
@@ -76,6 +80,7 @@ Q_SIGNALS:
     void sailotpImportDoneChanged();
     void sharedKeyWarningChanged();
     void sharedKeyWarning2Changed();
+    void autoLockTimeChanged();
 
 private:
     class Private;
