@@ -1,6 +1,6 @@
 Name:           harbour-foilauth
 Summary:        HMAC-Based One-Time Password generator
-Version:        1.0.6
+Version:        1.0.7
 Release:        1
 License:        BSD
 Group:          Applications/Internet
