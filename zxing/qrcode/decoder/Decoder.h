@@ -29,10 +29,13 @@
 namespace zxing {
 namespace qrcode {
 
+class BitMatrixParser;
+
 class Decoder {
 private:
   ReedSolomonDecoder rsDecoder_;
 
+  Ref<DecoderResult> decode(BitMatrixParser& parser);
   void correctErrors(ArrayRef<byte> bytes, int numDataCodewords);
 
 public:

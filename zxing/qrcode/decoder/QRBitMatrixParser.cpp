@@ -26,11 +26,12 @@ namespace zxing {
 namespace qrcode {
 
 int BitMatrixParser::copyBit(size_t x, size_t y, int versionBits) {
-  return bitMatrix_->get(x, y) ? (versionBits << 1) | 0x1 : versionBits << 1;
+  const bool bit = mirror_ ? bitMatrix_->get(y, x) : bitMatrix_->get(x, y);
+  return bit ? (versionBits << 1) | 0x1 : versionBits << 1;
 }
 
 BitMatrixParser::BitMatrixParser(Ref<BitMatrix> bitMatrix) :
-    bitMatrix_(bitMatrix), parsedVersion_(0), parsedFormatInfo_() {
+    bitMatrix_(bitMatrix), parsedVersion_(0), mirror_(false) {
   size_t dimension = bitMatrix->getHeight();
   if ((dimension < 21) || (dimension & 0x03) != 1) {
     throw ReaderException("Dimension must be 1 mod 4 and >= 21");

@@ -67,8 +67,33 @@ Ref<DecoderResult> Decoder::decode(Ref<BitMatrix> bits) {
   // Construct a parser and read version, error-correction level
   BitMatrixParser parser(bits);
 
-  // std::cerr << *bits << std::endl;
+  try { return decode(parser); }
+  catch (Exception const&) { /* ignore this one */ }
 
+  // Revert the bit matrix
+  parser.remask();
+
+  // Will be attempting a mirrored reading of the version and format info.
+  parser.setMirror(true);
+
+  // Preemptively read the version.
+  parser.readVersion();
+
+  // Preemptively read the format information.
+  parser.readFormatInformation();
+
+  /*
+   * Since we're here, this means we have successfully detected some kind
+   * of version and format information when mirrored. This is a good sign,
+   * that the QR code may be mirrored, and we should try once more with a
+   * mirrored content.
+   */
+  // Prepare for a mirrored reading.
+  parser.mirror();
+  return decode(parser);
+}
+
+Ref<DecoderResult> Decoder::decode(BitMatrixParser& parser) {
   Version *version = parser.readVersion();
   ErrorCorrectionLevel &ecLevel = parser.readFormatInformation()->getErrorCorrectionLevel();
 
