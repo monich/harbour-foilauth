@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2020 Jolla Ltd.
+ * Copyright (C) 2019-2020 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -107,7 +107,6 @@ public:
 #undef ROLE
 
     typedef QList<ModelData*> List;
-    typedef List::ConstIterator ConstIterator;
 
     ModelData(QString aPath, QByteArray aSecret, QString aLabel, QString aIssuer,
         int aDigits = FoilAuthToken::DEFAULT_DIGITS,
