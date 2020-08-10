@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2020 Jolla Ltd.
+ * Copyright (C) 2019-2020 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -88,6 +88,7 @@ FoilAuthFavoritesModel::FoilAuthFavoritesModel(QObject* aParent) :
     SUPER(aParent),
     iPrivate(new Private(this))
 {
+    connect(this, SIGNAL(sourceModelChanged()), SIGNAL(sourceModelObjectChanged()));
 }
 
 void FoilAuthFavoritesModel::setSourceModelObject(QObject* aModel)
@@ -101,11 +102,6 @@ bool FoilAuthFavoritesModel::filterAcceptsRow(int aSourceRow,
     const QAbstractItemModel* model = sourceModel();
     const QModelIndex index = model->index(aSourceRow, 0, aParent);
     return model->data(index, FoilAuthModel::favoriteRole()).toBool();
-}
-
-int FoilAuthFavoritesModel::count() const
-{
-    return rowCount();
 }
 
 #include "FoilAuthFavoritesModel.moc"
