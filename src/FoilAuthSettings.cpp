@@ -122,7 +122,7 @@ FoilAuthSettings::createSingleton(
     QQmlEngine* aEngine,
     QJSEngine* aScript)
 {
-    return new FoilAuthSettings(aEngine);
+    return new FoilAuthSettings;
 }
 
 // scanZoom

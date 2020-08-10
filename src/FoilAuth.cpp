@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2020 Jolla Ltd.
+ * Copyright (C) 2019-2020 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -132,7 +132,7 @@ FoilAuth::FoilAuth(QObject* aParent) :
 // Callback for qmlRegisterSingletonType<FoilAuth>
 QObject* FoilAuth::createSingleton(QQmlEngine* aEngine, QJSEngine* aScript)
 {
-    return new FoilAuth(aEngine);
+    return new FoilAuth;
 }
 
 bool FoilAuth::otherFoilAppsInstalled() const

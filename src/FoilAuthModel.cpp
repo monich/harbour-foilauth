@@ -1675,7 +1675,7 @@ FoilAuthModel::FoilAuthModel(QObject* aParent) :
 // Callback for qmlRegisterSingletonType<FoilAuthModel>
 QObject* FoilAuthModel::createSingleton(QQmlEngine* aEngine, QJSEngine* aScript)
 {
-    return new FoilAuthModel(aEngine);
+    return new FoilAuthModel;
 }
 
 int FoilAuthModel::favoriteRole()
