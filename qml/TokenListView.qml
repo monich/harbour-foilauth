@@ -1,4 +1,4 @@
-import QtQuick 2.2
+import QtQuick 2.0
 import Sailfish.Silica 1.0
 import org.nemomobile.notifications 1.0
 import harbour.foilauth 1.0
@@ -132,7 +132,7 @@ SilicaListView {
 
             readonly property bool active: foilModel.timerActive
 
-            Behavior on opacity { FadeAnimator {} }
+            Behavior on opacity { FadeAnimation { } }
 
             onActiveChanged: {
                 countdownRepeatAnimation.stop()
