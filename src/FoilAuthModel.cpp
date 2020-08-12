@@ -102,10 +102,6 @@ public:
 #undef LAST
     };
 
-#define ROLE(X,x) static const QString RoleName##X;
-    FOILAUTH_ROLES(ROLE)
-#undef ROLE
-
     typedef QList<ModelData*> List;
 
     ModelData(QString aPath, QByteArray aSecret, QString aLabel, QString aIssuer,
@@ -132,10 +128,6 @@ public:
     QString iCurrentPassword;
     QString iNextPassword;
 };
-
-#define ROLE(X,x) const QString FoilAuthModel::ModelData::RoleName##X(#x);
-FOILAUTH_ROLES(ROLE)
-#undef ROLE
 
 FoilAuthModel::ModelData::ModelData(QString aPath, QByteArray aSecret,
     QString aLabel, QString aIssuer, int aDigits, int aTimeShift,
