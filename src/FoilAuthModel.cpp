@@ -50,8 +50,8 @@
 #include <unistd.h>
 #include <sys/stat.h>
 
-#define ENCRYPT_KEY_TYPE FOILMSG_KEY_AES_256
-#define DIGEST_TYPE FOIL_DIGEST_MD5
+#define ENCRYPT_KEY_TYPE        FOILMSG_KEY_AES_256
+#define SIGNATURE_TYPE          FOILMSG_SIGNATURE_SHA256_RSA
 
 #define HEADER_LABEL            "OTP-Label"
 #define HEADER_ISSUER           "OTP-Issuer"
@@ -85,6 +85,26 @@
 
 #define FOILAUTH_ROLES(role) \
     FOILAUTH_ROLES_(role,role,role)
+
+// ==========================================================================
+// FoilAuthModel::Util
+// ==========================================================================
+
+class FoilAuthModel::Util {
+private:
+    Util();
+public:
+    static const FoilMsgEncryptOptions* encryptionOptions(FoilMsgEncryptOptions* opt);
+};
+
+
+const FoilMsgEncryptOptions* FoilAuthModel::Util::encryptionOptions(FoilMsgEncryptOptions* opt)
+{
+    foilmsg_encrypt_defaults(opt);
+    opt->key_type = ENCRYPT_KEY_TYPE;
+    opt->signature = SIGNATURE_TYPE;
+    return opt;
+}
 
 // ==========================================================================
 // FoilAuthModel::ModelData
@@ -301,14 +321,11 @@ void FoilAuthModel::ModelInfo::save(QString aDir, FoilPrivateKey* aPrivate,
         header[headers.count].value = order.constData();
         headers.count++;
 
-        FoilMsgEncryptOptions opt;
-        memset(&opt, 0, sizeof(opt));
-        opt.key_type = ENCRYPT_KEY_TYPE;
-
         FoilBytes data;
+        FoilMsgEncryptOptions opt;
         foil_bytes_from_string(&data, INFO_CONTENTS);
         foilmsg_encrypt(out, &data, NULL, &headers, aPrivate, aPublic,
-            &opt, NULL);
+            Util::encryptionOptions(&opt), NULL);
         foil_output_unref(out);
     } else {
         HWARN("Failed to open" << fname);
@@ -514,10 +531,6 @@ void FoilAuthModel::EncryptTask::performTask()
     GString* dest = g_string_sized_new(iDestDir.size() + 9);
     FoilOutput* out = FoilAuth::createFoilFile(iDestDir, dest);
     if (out) {
-        FoilMsgEncryptOptions opt;
-        memset(&opt, 0, sizeof(opt));
-        opt.key_type = ENCRYPT_KEY_TYPE;
-
         FoilMsgHeaders headers;
         FoilMsgHeader header[5];
 
@@ -564,8 +577,9 @@ void FoilAuthModel::EncryptTask::performTask()
         body.val = (guint8*)iToken.iBytes.constData();
         body.len = iToken.iBytes.length();
 
+        FoilMsgEncryptOptions opt;
         if (foilmsg_encrypt(out, &body, NULL, &headers,
-            iPrivateKey, iPublicKey, &opt, NULL)) {
+            iPrivateKey, iPublicKey, Util::encryptionOptions(&opt), NULL)) {
             iNewFile = QString::fromLocal8Bit(dest->str, dest->len);
             removeFile(iRemoveFile);
             foil_output_unref(out);
