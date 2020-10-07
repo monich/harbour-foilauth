@@ -16,11 +16,9 @@ Page {
 
     readonly property var foilModel: FoilAuthModel
     readonly property bool landscapeLayout: isLandscape && Screen.sizeCategory < Screen.Large
-    readonly property real screenHeight: isLandscape ? Screen.width : Screen.height
-
-    function canChangePassword() {
-        return currentPassword.length > 0 && newPassword.length > 0 && currentPassword !== newPassword && !wrongPassword
-    }
+    readonly property real screenHeight: isPortrait ? Screen.height : Screen.width
+    readonly property bool canChangePassword: currentPassword.length > 0 && newPassword.length > 0 &&
+                            currentPassword !== newPassword && !wrongPassword
 
     function invalidPassword() {
         wrongPassword = true
@@ -29,7 +27,7 @@ Page {
     }
 
     function changePassword() {
-        if (canChangePassword()) {
+        if (canChangePassword) {
             if (foilModel.checkPassword(currentPassword)) {
                 pageStack.push(Qt.resolvedUrl("ConfirmPasswordPage.qml"), {
                     password: newPassword
@@ -57,7 +55,8 @@ Page {
 
         width: parent.width
         height: childrenRect.height
-        y: (parent.height > height) ? Math.floor((parent.height - height)/2) : (parent.height - height)
+        y: Math.min((parent.height - panel.height)/2,
+            parent.height - (changePasswordButton.y + changePasswordButton.height + Theme.paddingMedium))
 
         InfoLabel {
             id: prompt
@@ -65,6 +64,10 @@ Page {
             //: Password change prompt
             //% "Please enter the current and the new password"
             text: qsTrId("foilauth-change_password_page-label-enter_passwords")
+
+            // Hide it when it's only partially visible
+            opacity: (panel.y < 0) ? 0 : 1
+            Behavior on opacity { FadeAnimation {} }
         }
 
         HarbourPasswordInputField {
@@ -81,8 +84,9 @@ Page {
             //% "Current password"
             label: qsTrId("foilauth-change_password_page-text_field_label-current_password")
             placeholderText: label
-            EnterKey.onClicked: newPasswordField.focus = true
             onTextChanged: page.wrongPassword = false
+            EnterKey.enabled: text.length > 0
+            EnterKey.onClicked: newPasswordField.focus = true
         }
 
         HarbourPasswordInputField {
@@ -98,6 +102,7 @@ Page {
             //% "New password"
             placeholderText: qsTrId("foilauth-change_password_page-text_field_label-new_password")
             label: placeholderText
+            EnterKey.enabled: page.canChangePassword
             EnterKey.onClicked: page.changePassword()
         }
 
@@ -107,7 +112,7 @@ Page {
             //: Button label
             //% "Change password"
             text: qsTrId("foilauth-change_password_page-button-change_password")
-            enabled: canChangePassword()
+            enabled: page.canChangePassword
             onClicked: page.changePassword()
         }
     }
@@ -121,7 +126,8 @@ Page {
             right: parent.right
             rightMargin: Theme.horizontalPageMargin
         }
-        active: FoilAuthSettings.sharedKeyWarning2 && FoilAuth.otherFoilAppsInstalled
+        opacity: (FoilAuthSettings.sharedKeyWarning2 && FoilAuth.otherFoilAppsInstalled) ? 1 : 0
+        active: opacity > 0
         sourceComponent: Component {
             FoilAppsWarning {
                 onClicked: FoilAuthSettings.sharedKeyWarning2 = false

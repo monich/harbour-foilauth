@@ -8,9 +8,12 @@ Page {
 
     allowedOrientations: window.allowedOrientations
     forwardNavigation: false
+
     property string password
     property bool wrongPassword
     readonly property bool landscapeLayout: appLandscapeMode && Screen.sizeCategory < Screen.Large
+    readonly property bool canCheckPassword: inputField.text.length > 0 &&
+                                             inputField.text.length > 0 && !wrongPassword
 
     signal passwordConfirmed()
 
@@ -22,10 +25,6 @@ Page {
             wrongPasswordAnimation.start()
             inputField.requestFocus()
         }
-    }
-
-    function canCheckPassword() {
-        return inputField.text.length > 0 && inputField.text.length > 0 && !wrongPassword
     }
 
     onStatusChanged: {
@@ -47,6 +46,10 @@ Page {
             //: Password confirmation label
             //% "Please type in your new password one more time"
             text: qsTrId("foilnotes-confirm_password_page-info_label")
+
+            // Hide it when it's only partially visible
+            opacity: (panel.y < 0) ? 0 : 1
+            Behavior on opacity { FadeAnimation {} }
         }
 
         Label {
@@ -55,15 +58,15 @@ Page {
             //: Password confirmation description
             //% "Make sure you don't forget your password. It's impossible to either recover it or to access the encrypted notes without knowing it. Better take it seriously."
             text: qsTrId("foilnotes-confirm_password_page-description")
-            x: Theme.horizontalPageMargin
-            width: parent.width - 2*x
-            font.pixelSize: Theme.fontSizeExtraSmall
-            color: Theme.secondaryColor
-            wrapMode: Text.Wrap
             anchors {
+                left: title.left
+                right: title.right
                 top: title.bottom
                 topMargin: Theme.paddingLarge
             }
+            font.pixelSize: Theme.fontSizeExtraSmall
+            color: Theme.secondaryColor
+            wrapMode: Text.Wrap
         }
 
         HarbourPasswordInputField {
@@ -81,17 +84,17 @@ Page {
             //% "New password"
             label: qsTrId("foilnotes-confirm_password_page-text_field_label-new_password")
             onTextChanged: page.wrongPassword = false
+            EnterKey.enabled: page.canCheckPassword
             EnterKey.onClicked: page.checkPassword()
         }
 
         Button {
             id: button
 
-            anchors.horizontalCenter: parent.horizontalCenter
             //: Button label (confirm password)
             //% "Confirm"
             text: qsTrId("foilnotes-confirm_password_page-button-confirm")
-            enabled: page.canCheckPassword()
+            enabled: page.canCheckPassword
             onClicked: page.checkPassword()
         }
     }
