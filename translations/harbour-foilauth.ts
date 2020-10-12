@@ -209,11 +209,6 @@
         <extracomment>Pulley menu item, creates a new authentication token</extracomment>
         <translation>Add token</translation>
     </message>
-    <message id="foilauth-edit_token-add">
-        <source>Add Token</source>
-        <extracomment>Dialog button</extracomment>
-        <translation>Add Token</translation>
-    </message>
     <message id="foilauth-menu-copy">
         <source>Copy</source>
         <extracomment>Context menu item (copy to clipboard)</extracomment>
@@ -223,11 +218,6 @@
         <source>Edit</source>
         <extracomment>Generic menu item</extracomment>
         <translation>Edit</translation>
-    </message>
-    <message id="foilauth-edit_token-save">
-        <source>Save</source>
-        <extracomment>Dialog button</extracomment>
-        <translation>Save</translation>
     </message>
     <message id="foilauth-menu-delete">
         <source>Delete</source>
@@ -303,6 +293,21 @@
         <source>Confirm</source>
         <extracomment>Button label (confirm password)</extracomment>
         <translation>Confirm</translation>
+    </message>
+    <message id="foilauth-add_token-title">
+        <source>Add token</source>
+        <extracomment>Dialog title</extracomment>
+        <translation>Add token</translation>
+    </message>
+    <message id="foilauth-edit_token-title">
+        <source>Edit token</source>
+        <extracomment>Dialog title</extracomment>
+        <translation>Edit token</translation>
+    </message>
+    <message id="foilauth-edit_token-save">
+        <source>Save</source>
+        <extracomment>Dialog button</extracomment>
+        <translation>Save</translation>
     </message>
 </context>
 </TS>

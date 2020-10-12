@@ -95,16 +95,17 @@ SilicaListView {
             onClicked: {
                 var editPage = pageStack.push(Qt.resolvedUrl("EditAuthTokenDialog.qml"), {
                     //: Dialog button
-                    //% "Add Token"
-                    acceptText: qsTrId("foilauth-edit_token-add"),
+                    //% "Save"
+                    acceptText: qsTrId("foilauth-edit_token-save"),
+                    //: Dialog title
+                    //% "Add token"
+                    dialogTitle: qsTrId("foilauth-add_token-title"),
                     canScan: true
                 })
-                if (editPage) {
-                    editPage.accepted.connect(function() {
-                        FoilAuthModel.addToken(editPage.secret, editPage.label,
-                            editPage.issuer, editPage.digits, editPage.timeshift)
-                    })
-                }
+                editPage.accepted.connect(function() {
+                    FoilAuthModel.addToken(editPage.secret, editPage.label,
+                        editPage.issuer, editPage.digits, editPage.timeshift)
+                })
             }
         }
     }
@@ -214,17 +215,18 @@ SilicaListView {
                             //: Dialog button
                             //% "Save"
                             acceptText: qsTrId("foilauth-edit_token-save"),
+                            //: Dialog title
+                            //% "Edit token"
+                            dialogTitle: qsTrId("foilauth-edit_token-title"),
                             label: model.label,
                             secret: model.secret,
                             issuer: model.issuer,
                             digits: model.digits,
                             timeShift: model.timeShift
                         })
-                        if (editPage) {
-                            editPage.accepted.connect(function() {
-                                item.updateToken(editPage)
-                            })
-                        }
+                        editPage.accepted.connect(function() {
+                            item.updateToken(editPage)
+                        })
                     }
                 }
                 MenuItem {

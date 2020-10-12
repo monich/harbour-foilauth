@@ -10,17 +10,12 @@ Dialog {
 
     property bool canScan
     property alias acceptText: header.acceptText
+    property alias dialogTitle: header.title
     property string issuer
     property alias label: labelField.text
     property alias secret: secretField.text
     property alias digits: digitsField.text
     property alias timeShift: timeShiftField.text
-
-    DialogHeader {
-        id: header
-
-        spacing: 0
-    }
 
     HarbourQrCodeGenerator {
         id: generator
@@ -30,21 +25,17 @@ Dialog {
     }
 
     SilicaFlickable {
-        anchors {
-            top: header.bottom
-            bottom: parent.bottom
-            left: parent.left
-            right: parent.right
-        }
+        anchors.fill: parent
         contentHeight: column.height
-        clip: true
 
         Column {
             id: column
 
             width: parent.width
 
-            VerticalPadding { }
+            DialogHeader {
+                id: header
+            }
 
             TextField {
                 id: labelField
