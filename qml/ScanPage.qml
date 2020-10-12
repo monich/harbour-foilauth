@@ -157,10 +157,22 @@ Page {
         }
     }
 
+    HarbourFitLabel {
+        id: titleLabel
+
+        x: Theme.horizontalPageMargin
+        width: parent.width - 2 * x
+        height: isPortrait ? Theme.itemSizeLarge : Theme.itemSizeSmall
+        maxFontSize: isPortrait ? Theme.fontSizeExtraLarge : Theme.fontSizeLarge
+        //: Page title (suggestion to scan QR code)
+        //% "Scan QR code"
+        text: qsTrId("foilauth-scan-title")
+    }
+
     Item {
         anchors {
-            top: parent.top
-            topMargin: Theme.paddingLarge
+            top: titleLabel.bottom
+            topMargin: Theme.paddingMedium
             bottom: toooBar.top
             bottomMargin: Theme.paddingLarge
             left: parent.left

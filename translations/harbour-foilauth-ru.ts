@@ -142,6 +142,11 @@
         <extracomment>Warning notification</extracomment>
         <translation>Какой-то странный у вас QR-код</translation>
     </message>
+    <message id="foilauth-scan-title">
+        <source>Scan QR code</source>
+        <extracomment>Page title (suggestion to scan QR code)</extracomment>
+        <translation>Сосканируйте QR-код</translation>
+    </message>
     <message id="foilauth-scan-zoom_label">
         <source>Zoom</source>
         <extracomment>Slider label</extracomment>

@@ -141,6 +141,11 @@
         <extracomment>Warning notification</extracomment>
         <translation>QR-koden är ogiltig eller saknar stöd</translation>
     </message>
+    <message id="foilauth-scan-title">
+        <source>Scan QR code</source>
+        <extracomment>Page title (suggestion to scan QR code)</extracomment>
+        <translation type="unfinished">Skanna QR-kod</translation>
+    </message>
     <message id="foilauth-scan-zoom_label">
         <source>Zoom</source>
         <extracomment>Slider label</extracomment>
