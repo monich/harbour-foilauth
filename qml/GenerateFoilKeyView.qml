@@ -28,8 +28,8 @@ Item {
         }
     }
 
-    Image {
-        source: "image://" + HarbourImageProvider + "/" + Qt.resolvedUrl("images/key.svg") + "?" + Theme.highlightColor
+    HarbourHighlightIcon {
+        source: "images/key.svg"
         width: Theme.itemSizeHuge
         sourceSize.width: width
         anchors.horizontalCenter: parent.horizontalCenter

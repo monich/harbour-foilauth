@@ -112,7 +112,6 @@ INCLUDEPATH += \
 HEADERS += \
     $${HARBOUR_LIB_INCLUDE}/HarbourBase32.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourDebug.h \
-    $${HARBOUR_LIB_INCLUDE}/HarbourImageProvider.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourOrganizeListModel.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourQrCodeGenerator.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourQrCodeImageProvider.h \
@@ -125,7 +124,6 @@ HEADERS += \
 
 SOURCES += \
     $${HARBOUR_LIB_SRC}/HarbourBase32.cpp \
-    $${HARBOUR_LIB_SRC}/HarbourImageProvider.cpp \
     $${HARBOUR_LIB_SRC}/HarbourMce.cpp \
     $${HARBOUR_LIB_SRC}/HarbourOrganizeListModel.cpp \
     $${HARBOUR_LIB_SRC}/HarbourQrCodeGenerator.cpp \
@@ -138,6 +136,8 @@ SOURCES += \
 
 HARBOUR_QML_COMPONENTS = \
     $${HARBOUR_LIB_QML}/HarbourFitLabel.qml \
+    $${HARBOUR_LIB_QML}/HarbourHighlightIcon.qml \
+    $${HARBOUR_LIB_QML}/HarbourHintIconButton.qml \
     $${HARBOUR_LIB_QML}/HarbourPasswordInputField.qml \
     $${HARBOUR_LIB_QML}/HarbourShakeAnimation.qml \
     $${HARBOUR_LIB_QML}/HarbourTextFlip.qml

@@ -4,6 +4,8 @@ import Sailfish.Silica 1.0
 import org.nemomobile.notifications 1.0
 import harbour.foilauth 1.0
 
+import "harbour"
+
 Page {
     id: page
 
@@ -12,8 +14,6 @@ Page {
     property Item viewFinder
     property Item hint
 
-    readonly property string imageProvider: HarbourTheme.darkOnLight ? HarbourImageProviderDarkOnLight : HarbourImageProvider
-    readonly property string iconSourcePrefix: "image://" + imageProvider + "/"
     readonly property bool canShowViewFinder: Qt.application.active && page.status === PageStatus.Active
     readonly property bool canScan: viewFinder && viewFinder.source.cameraState === Camera.ActiveState
 
@@ -225,7 +225,7 @@ Page {
             bottomMargin: Theme.paddingLarge
         }
 
-        HintIconButton {
+        HarbourHintIconButton {
             id: flashButton
 
             anchors {
@@ -235,9 +235,12 @@ Page {
             }
 
             visible: TorchSupported
-            icon.source: viewFinder && viewFinder.flashOn ?
+            icon {
+                sourceSize: undefined // Let the theme provider to pick the default
+                source: viewFinder && viewFinder.flashOn ?
                     "image://theme/icon-camera-flash-on" :
                     "image://theme/icon-camera-flash-off"
+            }
             //: Hint label
             //% "Toggle flashlight"
             hint: qsTrId("foilauth-scan-hint_toggle_flash")
@@ -279,21 +282,16 @@ Page {
             }
         }
 
-        HintIconButton {
+        HarbourHintIconButton {
             id: aspectButton
 
-            readonly property string icon_16_9: iconSourcePrefix + Qt.resolvedUrl("images/resolution_16_9.svg")
-            readonly property string icon_4_3: iconSourcePrefix +  Qt.resolvedUrl("images/resolution_4_3.svg")
             anchors {
                 right: parent.right
                 rightMargin: Theme.horizontalPageMargin
                 verticalCenter: parent.verticalCenter
             }
             visible: viewFinderContainer.canSwitchResolutions
-            icon {
-                source: FoilAuthSettings.scanWideMode ? icon_4_3 : icon_16_9
-                sourceSize: Qt.size(Theme.iconSizeMedium, Theme.iconSizeMedium)
-            }
+            icon.source: FoilAuthSettings.scanWideMode ? "images/resolution_4_3.svg" : "images/resolution_16_9.svg"
             //: Hint label
             //% "Switch the aspect ratio between 9:16 and 3:4"
             hint: qsTrId("foilauth-scan-hint_aspect_ratio")

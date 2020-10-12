@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2020 Jolla Ltd.
+ * Copyright (C) 2019-2020 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -46,7 +46,6 @@
 #include "HarbourSingleImageProvider.h"
 
 #include "HarbourDebug.h"
-#include "HarbourImageProvider.h"
 #include "HarbourSystemState.h"
 #include "HarbourTheme.h"
 
@@ -147,17 +146,11 @@ int main(int argc, char *argv[])
     QQmlContext* context = view->rootContext();
     QQmlEngine* engine = context->engine();
 
-    QString providerDefault("harbour");
-    QString providerDarkOnLight("harbour-dark");
-    QString qrCodeImageProvider("qrcode");
+    const QString qrCodeImageProvider("qrcode");
     engine->addImageProvider(qrCodeImageProvider, new HarbourQrCodeImageProvider);
-    engine->addImageProvider(providerDefault, new HarbourImageProvider);
-    engine->addImageProvider(providerDarkOnLight, new HarbourImageProvider);
 
     // Initialize global properties
     context->setContextProperty("QrCodeImageProvider", qrCodeImageProvider);
-    context->setContextProperty("HarbourImageProvider", providerDefault);
-    context->setContextProperty("HarbourImageProviderDarkOnLight", providerDarkOnLight);
     context->setContextProperty("FoilAuthAppName", QString(FOILAUTH_APP_NAME));
     context->setContextProperty("TorchSupported", torchSupported);
     context->setContextProperty("FoilAuthDefaultDigits",
