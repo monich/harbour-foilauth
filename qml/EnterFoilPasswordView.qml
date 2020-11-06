@@ -8,11 +8,17 @@ SilicaFlickable {
     id: view
 
     property Page mainPage
+    property var foilModel
     property bool wrongPassword
-    readonly property var foilModel: FoilAuthModel
-    readonly property bool landscapeLayout: appLandscapeMode && Screen.sizeCategory < Screen.Large
+
+    readonly property bool orientationTransitionRunning: mainPage && mainPage.orientationTransitionRunning
+    readonly property bool isLandscape: mainPage && mainPage.isLandscape
+    readonly property real screenHeight: isLandscape ? Screen.width : Screen.height
+    readonly property bool landscapeLayout: isLandscape && Screen.sizeCategory < Screen.Large
     readonly property bool unlocking: foilModel.foilState !== FoilAuthModel.FoilLocked &&
                                     foilModel.foilState !== FoilAuthModel.FoilLockedTimedOut
+    readonly property bool canEnterPassword: inputField.text.length > 0 && !unlocking &&
+                                    !wrongPasswordAnimation.running && !wrongPassword
 
     function enterPassword() {
         if (!foilModel.unlock(inputField.text)) {
@@ -43,9 +49,9 @@ SilicaFlickable {
                     // navigateForward (PageStack.qml:291)
                     // onClicked (private/PageStackIndicator.qml:174)
                     //
-                    warning.canNavigateForward = false
                     pageStack.replace(Qt.resolvedUrl("GenerateFoilKeyPage.qml"), {
-                        mainPage: view.mainPage
+                        mainPage: view.mainPage,
+                        foilModel: view.foilModel
                     })
                 })
             }
@@ -53,14 +59,16 @@ SilicaFlickable {
     }
 
     Image {
+        y: (panel.y > height) ? Math.floor((panel.y - height)/2) : (panel.y - height)
         width: Theme.itemSizeHuge
+        height: width
         sourceSize.width: width
         source: "images/foilauth.svg"
         anchors.horizontalCenter: parent.horizontalCenter
-        y: (panel.y > height) ? Math.floor((panel.y - height)/2) : (panel.y - height)
-        visible: opacity > 0
-        opacity: (y < Theme.paddingMedium) ? 0 : 1
-        Behavior on opacity { FadeAnimation { duration: landscapeLayout ? 0 : 100 } }
+
+        // Hide it when it's only partially visible (i.e. in langscape)
+        // or getting too close to the edge of the screen
+        visible: y >= Theme.paddingLarge && !orientationTransitionRunning
     }
 
     Item {
@@ -68,14 +76,13 @@ SilicaFlickable {
 
         width: parent.width
         height: childrenRect.height
-        anchors.verticalCenter: parent.verticalCenter
+        y: (parent.height > height) ? Math.floor((parent.height - height)/2) : (parent.height - height)
 
         readonly property bool showLongPrompt: y >= Theme.paddingLarge
 
         InfoLabel {
             id: longPrompt
 
-            height: implicitHeight
             visible: panel.showLongPrompt
             //: Password prompt label (long)
             //% "Secret tokens are locked. Please enter your password"
@@ -83,7 +90,6 @@ SilicaFlickable {
         }
 
         InfoLabel {
-            height: implicitHeight
             anchors.bottom: longPrompt.bottom
             visible: !panel.showLongPrompt
             //: Password prompt label (short)
@@ -100,8 +106,9 @@ SilicaFlickable {
                 topMargin: Theme.paddingLarge
             }
             enabled: !unlocking
-            EnterKey.onClicked: view.enterPassword()
             onTextChanged: view.wrongPassword = false
+            EnterKey.onClicked: view.enterPassword()
+            EnterKey.enabled: view.canEnterPassword
         }
 
         Button {
@@ -114,9 +121,15 @@ SilicaFlickable {
                 //: Button label
                 //% "Unlock"
                 qsTrId("foilauth-foil_password-button-unlock")
-            enabled: inputField.text.length > 0 && !unlocking && !wrongPasswordAnimation.running && !wrongPassword
+            enabled: view.canEnterPassword
             onClicked: view.enterPassword()
         }
+    }
+
+    HarbourShakeAnimation  {
+        id: wrongPasswordAnimation
+
+        target: panel
     }
 
     Loader {
@@ -128,19 +141,15 @@ SilicaFlickable {
             right: parent.right
             rightMargin: Theme.horizontalPageMargin
         }
-        active: FoilAuthSettings.sharedKeyWarning && FoilAuth.otherFoilAppsInstalled
+        readonly property bool display: FoilAuthSettings.sharedKeyWarning && FoilAuth.otherFoilAppsInstalled
+        opacity: display ? 1 : 0
+        active: opacity > 0
         sourceComponent: Component {
             FoilAppsWarning {
                 onClicked: FoilAuthSettings.sharedKeyWarning = false
             }
         }
         Behavior on opacity { FadeAnimation {} }
-    }
-
-    HarbourShakeAnimation  {
-        id: wrongPasswordAnimation
-
-        target: panel
     }
 
     states: [

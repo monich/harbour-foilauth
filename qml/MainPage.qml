@@ -11,7 +11,9 @@ Page {
     allowedOrientations: appAllowedOrientations
 
     readonly property var foilModel: FoilAuthModel
-    readonly property real screenHeight: isPortrait ? Screen.height : Screen.width
+
+    // Otherwise width may change with a delay, causing visible layout changes
+    onIsLandscapeChanged: width = isLandscape ? Screen.height : Screen.width
 
     Connections {
         target: foilModel
@@ -62,7 +64,13 @@ Page {
         anchors.fill: parent
         active: opacity > 0
         opacity: (foilModel.foilState === FoilAuthModel.FoilKeyMissing) ? 1 : 0
-        sourceComponent: Component { GenerateFoilKeyView { mainPage: page } }
+        sourceComponent: Component {
+            GenerateFoilKeyView {
+                parentPage: page
+                mainPage: page
+                foilModel: page.foilModel
+            }
+        }
         Behavior on opacity { FadeAnimation { } }
     }
 
@@ -72,7 +80,11 @@ Page {
         active: opacity > 0
         opacity: (foilModel.foilState === FoilAuthModel.FoilGeneratingKey ||
                     generatingKeyTimer.running) ? 1 : 0
-        sourceComponent: Component { GeneratingFoilKeyView { } }
+        sourceComponent: Component {
+            GeneratingFoilKeyView {
+                mainPage: page
+            }
+        }
         Behavior on opacity { FadeAnimation { } }
     }
 
@@ -82,7 +94,12 @@ Page {
         active: opacity > 0
         opacity: (foilModel.foilState === FoilAuthModel.FoilLocked ||
                     foilModel.foilState === FoilAuthModel.FoilLockedTimedOut) ? 1 : 0
-        sourceComponent: Component { EnterFoilPasswordView { mainPage: page } }
+        sourceComponent: Component {
+            EnterFoilPasswordView {
+                mainPage: page
+                foilModel: page.foilModel
+            }
+        }
         Behavior on opacity { FadeAnimation { } }
     }
 
@@ -92,7 +109,12 @@ Page {
         active: opacity > 0
         opacity: (foilModel.foilState === FoilAuthModel.FoilDecrypting ||
                     decryptingTimer.running) ? 1 : 0
-        sourceComponent: Component { DecryptingView { } }
+        sourceComponent: Component {
+            DecryptingView {
+                mainPage: page
+                foilModel: page.foilModel
+            }
+        }
         Behavior on opacity { FadeAnimation {} }
     }
 
@@ -102,7 +124,12 @@ Page {
         active: opacity > 0
         readonly property bool ready: foilModel.foilState === FoilAuthModel.FoilModelReady
         opacity: (ready && !generatingKeyTimer.running && !decryptingTimer.running) ? 1 : 0
-        sourceComponent: Component { TokenListView { mainPage: page } }
+        sourceComponent: Component {
+            TokenListView {
+                mainPage: page
+                foilModel: page.foilModel
+            }
+        }
         Behavior on opacity { FadeAnimation {} }
     }
 

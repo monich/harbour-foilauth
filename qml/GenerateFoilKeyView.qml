@@ -7,54 +7,59 @@ import "harbour"
 Item {
     id: view
 
+    property Page parentPage
     property Page mainPage
-    property alias title: title.text
+    property var foilModel
+    property alias prompt: promptLabel.text
+
     readonly property int minPassphraseLen: 8
-    readonly property var foilModel: FoilAuthModel
+    readonly property bool orientationTransitionRunning: parentPage && parentPage.orientationTransitionRunning
+    readonly property bool isLandscape: parentPage && parentPage.isLandscape
     readonly property bool canGenerate: inputField.text.length >= minPassphraseLen && !generating
     readonly property bool generating: foilModel.foilState === FoilAuthModel.FoilGeneratingKey
-    readonly property bool landscapeLayout: appLandscapeMode && Screen.sizeCategory < Screen.Large
+    readonly property bool landscapeLayout: isLandscape && Screen.sizeCategory < Screen.Large
 
     function generateKey() {
         if (canGenerate) {
-            var confirm = pageStack.push(Qt.resolvedUrl("ConfirmPasswordPage.qml"), {
+            var dialog = pageStack.push(Qt.resolvedUrl("ConfirmPasswordPage.qml"), {
                 password: inputField.text
             })
-            confirm.passwordConfirmed.connect(function() {
-                confirm.backNavigation = false
+            dialog.passwordConfirmed.connect(function() {
                 foilModel.generateKey(keySize.value, inputField.text)
-                    pageStack.pop(mainPage)
+                pageStack.pop(mainPage)
             })
         }
     }
 
     HarbourHighlightIcon {
-        source: "images/key.svg"
+        y: (panel.y > height) ? Math.floor((panel.y - height)/2) :
+            (promptLabel.opacity > 0) ? (panel.y - height) :
+            Math.floor((panel.y + keySize.y - height)/2)
         width: Theme.itemSizeHuge
         sourceSize.width: width
+        source: "images/key.svg"
         anchors.horizontalCenter: parent.horizontalCenter
-        y: (panel.y > height) ? Math.floor((panel.y - height)/2) : (panel.y - height)
-        opacity: (y < Theme.paddingLarge) ? 0 : 1
-        visible: opacity > 0
-        Behavior on opacity { FadeAnimation { duration: 100 } }
+
+        // Hide it when it's only partially visible (i.e. in langscape)
+        // or getting too close to the edge of the screen
+        visible: y >= Theme.paddingLarge && !orientationTransitionRunning
     }
 
     Item {
         id: panel
 
         width: parent.width
-        height: childrenRect.height
-        y: (parent.height > height) ? Math.floor((parent.height - height)/2) : (parent.height - height)
+        height: Math.max(button.y + button.height, inputField.y + inputField.height) + (landscapeLayout ? 0 : Theme.paddingLarge)
+        // Try to keep the input field centered on the screen
+        y: (parent.height > height) ? Math.max(Math.floor(parent.height/2) - inputField.y, 0) : (parent.height - height)
 
         InfoLabel {
-            id: title
+            id: promptLabel
 
-            height: implicitHeight
             //: Label text
             //% "You need to generate the key and select the password before you can encrypt your authentication tokens"
             text: qsTrId("foilauth-generate-label-key_needed")
-            opacity: (parent.y >= Theme.paddingLarge) ? 1 : 0
-            Behavior on opacity { FadeAnimation { } }
+            opacity: (parent.y >= Theme.paddingLarge && !orientationTransitionRunning) ? 1 : 0
         }
 
         ComboBox {
@@ -66,7 +71,7 @@ Item {
             enabled: !generating
             width: parent.width
             anchors {
-                top: title.bottom
+                top: promptLabel.bottom
                 topMargin: Theme.paddingLarge
             }
             menu: ContextMenu {
@@ -98,6 +103,7 @@ Item {
         Button {
             id: button
 
+            anchors.topMargin: Theme.paddingLarge
             text: generating ?
                 //: Button label
                 //% "Generating..."
@@ -132,10 +138,7 @@ Item {
                 },
                 PropertyChanges {
                     target: button
-                    anchors {
-                        topMargin: Theme.paddingLarge
-                        rightMargin: 0
-                    }
+                    anchors.rightMargin: 0
                 }
             ]
         },
@@ -161,10 +164,7 @@ Item {
                 },
                 PropertyChanges {
                     target: button
-                    anchors {
-                        topMargin: Theme.paddingLarge
-                        rightMargin: Theme.horizontalPageMargin
-                    }
+                    anchors.rightMargin: Theme.horizontalPageMargin
                 }
             ]
         }

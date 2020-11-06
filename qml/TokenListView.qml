@@ -8,6 +8,15 @@ import "harbour"
 SilicaListView {
     id: tokenList
 
+    property Page mainPage
+    property var foilModel
+    property var dragItem
+
+    readonly property bool isLandscape: mainPage && mainPage.isLandscape
+    readonly property real dragThresholdX: Theme.itemSizeSmall/2
+    readonly property real dragThresholdY: Theme.itemSizeSmall/5
+    readonly property real maxContentY: Math.max(originY + contentHeight - height, originY)
+
     anchors.fill: parent
     interactive: !scrollAnimation.running
     currentIndex: listModel.dragPos
@@ -17,15 +26,6 @@ SilicaListView {
 
         sourceModel: foilModel
     }
-
-    property Page mainPage
-    property var dragItem
-
-    readonly property var foilModel: FoilAuthModel
-    readonly property bool landscape: mainPage && mainPage.isLandscape
-    readonly property real dragThresholdX: Theme.itemSizeSmall/2
-    readonly property real dragThresholdY: Theme.itemSizeSmall/5
-    readonly property real maxContentY: Math.max(originY + contentHeight - height, originY)
 
     Notification {
         id: clipboardNotification
@@ -66,7 +66,8 @@ SilicaListView {
             //% "Change password"
             text: qsTrId("foilauth-menu-change_foil_password")
             onClicked: pageStack.push(Qt.resolvedUrl("ChangeFoilPasswordPage.qml"), {
-                mainPage: tokenList.mainPage
+                mainPage: tokenList.mainPage,
+                foilModel: tokenList.foilModel
             })
         }
         MenuItem {

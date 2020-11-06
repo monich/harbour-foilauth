@@ -10,13 +10,13 @@ Page {
     allowedOrientations: window.allowedOrientations
 
     property Page mainPage
+    property var foilModel
     property bool wrongPassword
     property alias currentPassword: currentPasswordField.text
     property alias newPassword: newPasswordField.text
 
-    readonly property var foilModel: FoilAuthModel
     readonly property bool landscapeLayout: isLandscape && Screen.sizeCategory < Screen.Large
-    readonly property real screenHeight: isPortrait ? Screen.height : Screen.width
+    readonly property real screenHeight: isLandscape ? Screen.width : Screen.height
     readonly property bool canChangePassword: currentPassword.length > 0 && newPassword.length > 0 &&
                             currentPassword !== newPassword && !wrongPassword
 
@@ -50,13 +50,16 @@ Page {
         }
     }
 
+    // Otherwise width is changing with a delay, causing visible layout changes
+    onIsLandscapeChanged: width = isLandscape ? Screen.height : Screen.width
+
     Item {
         id: panel
 
         width: parent.width
-        height: childrenRect.height
-        y: Math.min((parent.height - panel.height)/2,
-            parent.height - (changePasswordButton.y + changePasswordButton.height + Theme.paddingMedium))
+        height: Math.max(button.y + button.height, newPasswordField.y + newPasswordField.height) +
+            (landscapeLayout ? 0 : Theme.paddingLarge)
+        y: (parent.height > height) ? Math.floor((parent.height - height)/2) : (parent.height - height)
 
         InfoLabel {
             id: prompt
@@ -107,7 +110,7 @@ Page {
         }
 
         Button {
-            id: changePasswordButton
+            id: button
 
             //: Button label
             //% "Change password"
@@ -159,17 +162,19 @@ Page {
                     }
                 },
                 AnchorChanges {
-                    target: changePasswordButton
+                    target: button
                     anchors {
                         top: newPasswordField.bottom
                         right: undefined
                         horizontalCenter: parent.horizontalCenter
-                        bottom: undefined
                     }
                 },
                 PropertyChanges {
-                    target: changePasswordButton
-                    anchors.rightMargin: 0
+                    target: button
+                    anchors {
+                        topMargin: Theme.paddingLarge
+                        rightMargin: 0
+                    }
                 }
             ]
         },
@@ -179,7 +184,7 @@ Page {
             changes: [
                 AnchorChanges {
                     target: currentPasswordField
-                    anchors.right: changePasswordButton.left
+                    anchors.right: button.left
                 },
                 PropertyChanges {
                     target: currentPasswordField
@@ -189,17 +194,19 @@ Page {
                     }
                 },
                 AnchorChanges {
-                    target: changePasswordButton
+                    target: button
                     anchors {
-                        top: undefined
+                        top: currentPasswordField.bottom
                         right: panel.right
                         horizontalCenter: undefined
-                        bottom: newPasswordField.verticalCenter
                     }
                 },
                 PropertyChanges {
-                    target: changePasswordButton
-                    anchors.rightMargin: Theme.horizontalPageMargin
+                    target: button
+                    anchors {
+                        topMargin: 0
+                        rightMargin: Theme.horizontalPageMargin
+                    }
                 }
             ]
         }
