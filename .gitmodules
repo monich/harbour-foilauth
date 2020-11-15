@@ -10,3 +10,6 @@
 [submodule "libqrencode"]
 	path = libqrencode
 	url = https://github.com/fukuchi/libqrencode.git
+[submodule "foil-ui"]
+	path = foil-ui
+	url = https://github.com/monich/foil-ui.git

@@ -3,12 +3,14 @@ import Sailfish.Silica 1.0
 import org.nemomobile.notifications 1.0
 import harbour.foilauth 1.0
 
+import "foil-ui"
 import "harbour"
 
 SilicaListView {
     id: tokenList
 
     property Page mainPage
+    property var foilUi
     property var foilModel
     property var dragItem
 
@@ -65,9 +67,22 @@ SilicaListView {
             //: Pulley menu item, changes Foil password
             //% "Change password"
             text: qsTrId("foilauth-menu-change_foil_password")
-            onClicked: pageStack.push(Qt.resolvedUrl("ChangeFoilPasswordPage.qml"), {
+            onClicked: pageStack.push(Qt.resolvedUrl("foil-ui/FoilUiChangePasswordPage.qml"), {
                 mainPage: tokenList.mainPage,
-                foilModel: tokenList.foilModel
+                foilUi: tokenList.foilUi,
+                foilModel: tokenList.foilModel,
+                //: Password change prompt
+                //% "Please enter the current and the new password"
+                promptText: qsTrId("foilauth-change_password_page-label-enter_passwords"),
+                //: Placeholder and label for the current password prompt
+                //% "Current password"
+                currentPasswordLabel: qsTrId("foilauth-change_password_page-text_field_label-current_password"),
+                //: Placeholder and label for the new password prompt
+                //% "New password"
+                newPasswordLabel: qsTrId("foilauth-change_password_page-text_field_label-new_password"),
+                //: Button label
+                //% "Change password"
+                buttonText: qsTrId("foilauth-change_password_page-button-change_password")
             })
         }
         MenuItem {
@@ -253,7 +268,7 @@ SilicaListView {
                 currentPassword: model.currentPassword
                 nextPassword: model.nextPassword
                 favorite: model.favorite
-                landscape: tokenList.landscape
+                landscape: tokenList.isLandscape
                 color: dragging ? Theme.rgba(Theme.highlightBackgroundColor, 0.2) : "transparent"
 
                 onFavoriteToggled: model.favorite = !model.favorite
