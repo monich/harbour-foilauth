@@ -145,7 +145,7 @@
     <message id="foilauth-scan-title">
         <source>Scan QR code</source>
         <extracomment>Page title (suggestion to scan QR code)</extracomment>
-        <translation type="unfinished">Zeskanuj kod QR</translation>
+        <translation>Zeskanuj kod QR</translation>
     </message>
     <message id="foilauth-scan-zoom_label">
         <source>Zoom</source>
@@ -279,7 +279,7 @@
     <message id="foilauth-confirm_password-description">
         <source>Make sure you don&apos;t forget your password. It&apos;s impossible to either recover it or to access the encrypted tokens without knowing it. Better take it seriously.</source>
         <extracomment>Password confirmation description</extracomment>
-        <translation type="unfinished">Upewnij się, że nie zapomniałeś hasła. Nie można go odzyskać ani uzyskać dostępu do zaszyfrowanych tokenów, nie znając go. Lepiej potraktuj to poważnie.</translation>
+        <translation>Upewnij się, że nie zapomniałeś hasła. Nie można go odzyskać ani uzyskać dostępu do zaszyfrowanych tokenów, nie znając go. Lepiej potraktuj to poważnie.</translation>
     </message>
     <message id="foilauth-confirm_password-placeholder-new_password">
         <source>New password again</source>
@@ -299,12 +299,12 @@
     <message id="foilauth-add_token-title">
         <source>Add token</source>
         <extracomment>Dialog title</extracomment>
-        <translation type="unfinished">Nowy token</translation>
+        <translation>Dodaj token</translation>
     </message>
     <message id="foilauth-edit_token-title">
         <source>Edit token</source>
         <extracomment>Dialog title</extracomment>
-        <translation type="unfinished">Edycja tokena</translation>
+        <translation>Edytuj token</translation>
     </message>
     <message id="foilauth-edit_token-save">
         <source>Save</source>
