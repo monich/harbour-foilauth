@@ -70,38 +70,43 @@ Dialog {
               EnterKey.onClicked: digitsField.focus = true
             }
 
-            TextField {
-                id: digitsField
-
+            Grid {
+                columns: isLandscape ? 2 : 1
                 width: parent.width
-                //: Text field label (number of password digits)
-                //% "Digits"
-                label: qsTrId("foilauth-token-digits-text")
-                //: Text field placeholder (number of password digits)
-                //% "Number of password digits"
-                placeholderText: qsTrId("foilauth-token-digits-placeholder")
-                text: FoilAuthDefaultDigits
-                validator: IntValidator { bottom: 1 }
 
-                EnterKey.iconSource: "image://theme/icon-m-enter-next"
-                EnterKey.onClicked: timeShiftField.focus = true
-            }
+                TextField {
+                    id: digitsField
 
-            TextField {
-                id: timeShiftField
+                    width: parent.width/parent.columns
+                    //: Text field label (number of password digits)
+                    //% "Digits"
+                    label: qsTrId("foilauth-token-digits-text")
+                    //: Text field placeholder (number of password digits)
+                    //% "Number of password digits"
+                    placeholderText: qsTrId("foilauth-token-digits-placeholder")
+                    text: FoilAuthDefaultDigits
+                    validator: IntValidator { bottom: 1 }
 
-                width: parent.width
-                //: Text field label (number of password digits)
-                //% "Time shift (seconds)"
-                label: qsTrId("foilauth-token-timeshift-text")
-                //: Text field placeholder (number of password digits)
-                //% "OTP time shift, in seconds"
-                placeholderText: qsTrId("foilauth-token-timeshift-placeholder")
-                text: FoilAuthDefaultTimeShift
-                validator: IntValidator {}
+                    EnterKey.iconSource: "image://theme/icon-m-enter-next"
+                    EnterKey.onClicked: timeShiftField.focus = true
+                }
 
-                EnterKey.iconSource: "image://theme/icon-m-enter-accept"
-                EnterKey.onClicked: dialog.accept()
+                TextField {
+                    id: timeShiftField
+
+                    width: parent.width/parent.columns
+                    //: Text field label (number of password digits)
+                    //% "Time shift (seconds)"
+                    label: qsTrId("foilauth-token-timeshift-text")
+                    //: Text field placeholder (number of password digits)
+                    //% "OTP time shift, in seconds"
+                    placeholderText: qsTrId("foilauth-token-timeshift-placeholder")
+                    text: FoilAuthDefaultTimeShift
+                    validator: IntValidator {}
+
+                    EnterKey.iconSource: "image://theme/icon-m-enter-accept"
+                    EnterKey.onClicked: dialog.accept()
+                }
             }
 
             VerticalPadding { }
