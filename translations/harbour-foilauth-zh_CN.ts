@@ -58,7 +58,7 @@
         <extracomment>Label text</extracomment>
         <translation>你需要生成密钥并选择密码才能加密身份验证令牌</translation>
     </message>
-    <message id="foilnotes-generate_key_page-title">
+    <message id="foilauth-generate_key-title">
         <source>You are about to generate a new key</source>
         <extracomment>Label text</extracomment>
         <translation>你即将生成一个新密钥</translation>
@@ -237,11 +237,6 @@
         <extracomment>Placeholder text</extracomment>
         <translation>你还没有任何加密令牌</translation>
     </message>
-    <message id="foilauth-generate_key_warning-accept">
-        <source>Continue</source>
-        <extracomment>Dialog button (accept the warning and continue)</extracomment>
-        <translation>继续</translation>
-    </message>
     <message id="foilauth-generate_key_warning-title">
         <source>Warning</source>
         <extracomment>Title for the new key warning</extracomment>
@@ -272,27 +267,27 @@
         <extracomment>Button label</extracomment>
         <translation>更改密码</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-info_label">
+    <message id="foilauth-confirm_password-info_label">
         <source>Please type in your new password one more time</source>
         <extracomment>Password confirmation label</extracomment>
         <translation>请再次输入你的新密码</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-description">
-        <source>Make sure you don&apos;t forget your password. It&apos;s impossible to either recover it or to access the encrypted notes without knowing it. Better take it seriously.</source>
+    <message id="foilauth-confirm_password-description">
+        <source>Make sure you don&apos;t forget your password. It&apos;s impossible to either recover it or to access the encrypted tokens without knowing it. Better take it seriously.</source>
         <extracomment>Password confirmation description</extracomment>
-        <translation>确保你不会忘记密码。 在不知道它的情况下，不可能恢复它或访问加密笔记。 最好认证对待此事。</translation>
+        <translation type="unfinished">确保你不会忘记密码。 在不知道它的情况下，不可能恢复它或访问加密笔记。 最好认证对待此事。</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-text_field_placeholder-new_password">
+    <message id="foilauth-confirm_password-placeholder-new_password">
         <source>New password again</source>
         <extracomment>Placeholder for the password confirmation prompt</extracomment>
         <translation>再次输入新密码</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-text_field_label-new_password">
+    <message id="foilauth-confirm_password-label-new_password">
         <source>New password</source>
         <extracomment>Label for the password confirmation prompt</extracomment>
         <translation>新密码</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-button-confirm">
+    <message id="foilauth-confirm_password-button">
         <source>Confirm</source>
         <extracomment>Button label (confirm password)</extracomment>
         <translation>确认</translation>

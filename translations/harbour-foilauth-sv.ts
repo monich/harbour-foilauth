@@ -58,7 +58,7 @@
         <extracomment>Label text</extracomment>
         <translation>Du måste generera nyckeln och välja ett lösenord, innan du kan kryptera dina autentiserings-token</translation>
     </message>
-    <message id="foilnotes-generate_key_page-title">
+    <message id="foilauth-generate_key-title">
         <source>You are about to generate a new key</source>
         <extracomment>Label text</extracomment>
         <translation>Du är på väg att generera en ny nyckel</translation>
@@ -239,11 +239,6 @@
         <extracomment>Placeholder text</extracomment>
         <translation>Du har inga krypterade token</translation>
     </message>
-    <message id="foilauth-generate_key_warning-accept">
-        <source>Continue</source>
-        <extracomment>Dialog button (accept the warning and continue)</extracomment>
-        <translation>Fortsätt</translation>
-    </message>
     <message id="foilauth-generate_key_warning-title">
         <source>Warning</source>
         <extracomment>Title for the new key warning</extracomment>
@@ -274,27 +269,27 @@
         <extracomment>Button label</extracomment>
         <translation>Ändra lösenord</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-info_label">
+    <message id="foilauth-confirm_password-info_label">
         <source>Please type in your new password one more time</source>
         <extracomment>Password confirmation label</extracomment>
         <translation>Skriv ditt nya lösenord en gång till</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-description">
-        <source>Make sure you don&apos;t forget your password. It&apos;s impossible to either recover it or to access the encrypted notes without knowing it. Better take it seriously.</source>
+    <message id="foilauth-confirm_password-description">
+        <source>Make sure you don&apos;t forget your password. It&apos;s impossible to either recover it or to access the encrypted tokens without knowing it. Better take it seriously.</source>
         <extracomment>Password confirmation description</extracomment>
-        <translation>Tillse att du inte glömmer ditt lösenord. Det går inte att återställa lösenordet, eller att få tillgång till de krypterade filerna utan det. Seriöst alltså.</translation>
+        <translation type="unfinished">Tillse att du inte glömmer ditt lösenord. Det går inte att återställa lösenordet, eller att få tillgång till de krypterade tokens utan det. Seriöst alltså.</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-text_field_placeholder-new_password">
+    <message id="foilauth-confirm_password-placeholder-new_password">
         <source>New password again</source>
         <extracomment>Placeholder for the password confirmation prompt</extracomment>
         <translation>Nytt lösenord igen</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-text_field_label-new_password">
+    <message id="foilauth-confirm_password-label-new_password">
         <source>New password</source>
         <extracomment>Label for the password confirmation prompt</extracomment>
         <translation>Nytt lösenord</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-button-confirm">
+    <message id="foilauth-confirm_password-button">
         <source>Confirm</source>
         <extracomment>Button label (confirm password)</extracomment>
         <translation>Bekräfta</translation>

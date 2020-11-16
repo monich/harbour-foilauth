@@ -58,7 +58,7 @@
         <extracomment>Label text</extracomment>
         <translation>Vous devez générer une clef et choisir un mot de passe avant de pouvoir chiffrer des jetons d&apos;authentification</translation>
     </message>
-    <message id="foilnotes-generate_key_page-title">
+    <message id="foilauth-generate_key-title">
         <source>You are about to generate a new key</source>
         <extracomment>Label text</extracomment>
         <translation>Vous allez générer une nouvelle clef</translation>
@@ -239,11 +239,6 @@
         <extracomment>Placeholder text</extracomment>
         <translation>Vous n&apos;avez aucun jeton chiffré</translation>
     </message>
-    <message id="foilauth-generate_key_warning-accept">
-        <source>Continue</source>
-        <extracomment>Dialog button (accept the warning and continue)</extracomment>
-        <translation>Continuer</translation>
-    </message>
     <message id="foilauth-generate_key_warning-title">
         <source>Warning</source>
         <extracomment>Title for the new key warning</extracomment>
@@ -274,27 +269,27 @@
         <extracomment>Button label</extracomment>
         <translation>Modifier le mot de passe</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-info_label">
+    <message id="foilauth-confirm_password-info_label">
         <source>Please type in your new password one more time</source>
         <extracomment>Password confirmation label</extracomment>
         <translation>Merci de saisir le nouveau mot de passe de nouveau</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-description">
-        <source>Make sure you don&apos;t forget your password. It&apos;s impossible to either recover it or to access the encrypted notes without knowing it. Better take it seriously.</source>
+    <message id="foilauth-confirm_password-description">
+        <source>Make sure you don&apos;t forget your password. It&apos;s impossible to either recover it or to access the encrypted tokens without knowing it. Better take it seriously.</source>
         <extracomment>Password confirmation description</extracomment>
-        <translation>Faites en sorte de ne pas oublier le mot de passe. Il est impossible de le récupérer ou d’accèder aux notes chiffrées sans le connaître. Prenez cela au sérieux.</translation>
+        <translation type="unfinished">Faites en sorte de ne pas oublier le mot de passe. Il est impossible de le récupérer ou d’accèder aux secrets chiffrées sans le connaître. Prenez cela au sérieux.</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-text_field_placeholder-new_password">
+    <message id="foilauth-confirm_password-placeholder-new_password">
         <source>New password again</source>
         <extracomment>Placeholder for the password confirmation prompt</extracomment>
         <translation>Nouveau mot de passe de nouveau</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-text_field_label-new_password">
+    <message id="foilauth-confirm_password-label-new_password">
         <source>New password</source>
         <extracomment>Label for the password confirmation prompt</extracomment>
         <translation>Nouveau mot de passe</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-button-confirm">
+    <message id="foilauth-confirm_password-button">
         <source>Confirm</source>
         <extracomment>Button label (confirm password)</extracomment>
         <translation>Confirmer</translation>

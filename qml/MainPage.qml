@@ -88,7 +88,7 @@ Page {
             function qsTrGenerateNewKeyPrompt() {
                 //: Label text
                 //% "You are about to generate a new key"
-                return qsTrId("foilnotes-generate_key_page-title")
+                return qsTrId("foilauth-generate_key-title")
             }
             function qsTrGenerateKeySizeLabel() {
                 //: Combo box label
@@ -113,27 +113,27 @@ Page {
             function qsTrConfirmPasswordPrompt() {
                 //: Password confirmation label
                 //% "Please type in your new password one more time"
-                return qsTrId("foilnotes-confirm_password_page-info_label")
+                return qsTrId("foilauth-confirm_password-info_label")
             }
             function qsTrConfirmPasswordDescription() {
                 //: Password confirmation description
-                //% "Make sure you don't forget your password. It's impossible to either recover it or to access the encrypted notes without knowing it. Better take it seriously."
-                return qsTrId("foilnotes-confirm_password_page-description")
+                //% "Make sure you don't forget your password. It's impossible to either recover it or to access the encrypted tokens without knowing it. Better take it seriously."
+                return qsTrId("foilauth-confirm_password-description")
             }
             function qsTrConfirmPasswordRepeatPlaceholder() {
                 //: Placeholder for the password confirmation prompt
                 //% "New password again"
-                return qsTrId("foilnotes-confirm_password_page-text_field_placeholder-new_password")
+                return qsTrId("foilauth-confirm_password-placeholder-new_password")
             }
             function qsTrConfirmPasswordRepeatLabel() {
                 //: Label for the password confirmation prompt
                 //% "New password"
-                return qsTrId("foilnotes-confirm_password_page-text_field_label-new_password")
+                return qsTrId("foilauth-confirm_password-label-new_password")
             }
             function qsTrConfirmPasswordButton() {
                 //: Button label (confirm password)
                 //% "Confirm"
-                return qsTrId("foilnotes-confirm_password_page-button-confirm")
+                return qsTrId("foilauth-confirm_password-button")
             }
         }
     }

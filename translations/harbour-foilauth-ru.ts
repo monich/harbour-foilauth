@@ -58,7 +58,7 @@
         <extracomment>Label text</extracomment>
         <translation>Прежде чем что-нибудь зашифровать, надо создать ключ и выбрать пароль</translation>
     </message>
-    <message id="foilnotes-generate_key_page-title">
+    <message id="foilauth-generate_key-title">
         <source>You are about to generate a new key</source>
         <extracomment>Label text</extracomment>
         <translation>Создание нового ключа</translation>
@@ -241,11 +241,6 @@
         <extracomment>Placeholder text</extracomment>
         <translation>Здесь пусто, совсем ничего нет</translation>
     </message>
-    <message id="foilauth-generate_key_warning-accept">
-        <source>Continue</source>
-        <extracomment>Dialog button (accept the warning and continue)</extracomment>
-        <translation>Продолжить</translation>
-    </message>
     <message id="foilauth-generate_key_warning-title">
         <source>Warning</source>
         <extracomment>Title for the new key warning</extracomment>
@@ -276,27 +271,27 @@
         <extracomment>Button label</extracomment>
         <translation>Поменять пароль</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-info_label">
+    <message id="foilauth-confirm_password-info_label">
         <source>Please type in your new password one more time</source>
         <extracomment>Password confirmation label</extracomment>
         <translation>На всякий случай наберите новый пароль ещё раз</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-description">
-        <source>Make sure you don&apos;t forget your password. It&apos;s impossible to either recover it or to access the encrypted notes without knowing it. Better take it seriously.</source>
+    <message id="foilauth-confirm_password-description">
+        <source>Make sure you don&apos;t forget your password. It&apos;s impossible to either recover it or to access the encrypted tokens without knowing it. Better take it seriously.</source>
         <extracomment>Password confirmation description</extracomment>
         <translation>Если вы забудете пароль, то восстановить его будет невозможно и таким образом доступ к зашифрованным кодам будет утерян. Так что лучше отнеситесь к этому серьёзно.</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-text_field_placeholder-new_password">
+    <message id="foilauth-confirm_password-placeholder-new_password">
         <source>New password again</source>
         <extracomment>Placeholder for the password confirmation prompt</extracomment>
         <translation>Новый пароль ещё раз</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-text_field_label-new_password">
+    <message id="foilauth-confirm_password-label-new_password">
         <source>New password</source>
         <extracomment>Label for the password confirmation prompt</extracomment>
         <translation>Новый пароль</translation>
     </message>
-    <message id="foilnotes-confirm_password_page-button-confirm">
+    <message id="foilauth-confirm_password-button">
         <source>Confirm</source>
         <extracomment>Button label (confirm password)</extracomment>
         <translation>Подтвердить</translation>
