@@ -249,7 +249,15 @@ SilicaListView {
                     //: Generic menu item
                     //% "Delete"
                     text: qsTrId("foilauth-menu-delete")
-                    onClicked: tokenListDelegate.deleteToken()
+                    onClicked: {
+                        var model = foilModel
+                        var tokenId = tokenListDelegate.tokenId
+                        //: Remorse popup text
+                        //% "Deleting"
+                        remorseAction(qsTrId("foilauth-menu-delete_remorse"), function() {
+                            model.deleteToken(tokenId)
+                        })
+                    }
                 }
             }
         }
@@ -352,19 +360,6 @@ SilicaListView {
             model.timeShift = token.timeShift
         }
 
-        function deleteToken() {
-            var item = tokenListDelegate
-            var remorse = remorseComponent.createObject(null)
-            remorse.execute(tokenListDelegate,
-                //: Remorse popup text
-                //% "Deleting"
-                qsTrId("foilauth-menu-delete_remorse"),
-                function() {
-                    foilModel.deleteToken(item.tokenId)
-                    remorse.destroy()
-                })
-        }
-
         property real pressX
         property real pressY
 
@@ -435,12 +430,6 @@ SilicaListView {
         dragItem = null
         listModel.dragIndex = -1
         dragTimer.stop()
-    }
-
-    Component {
-        id: remorseComponent
-
-        RemorseItem { }
     }
 
     RemorsePopup {
