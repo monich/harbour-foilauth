@@ -219,6 +219,11 @@
         <extracomment>Context menu item (copy to clipboard)</extracomment>
         <translation>Kopiera</translation>
     </message>
+    <message id="foilauth-menu-show_qr_code">
+        <source>Show QR code</source>
+        <extracomment>Context menu item</extracomment>
+        <translation>Visa QR-kod</translation>
+    </message>
     <message id="foilauth-menu-edit">
         <source>Edit</source>
         <extracomment>Generic menu item</extracomment>

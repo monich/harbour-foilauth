@@ -222,6 +222,17 @@ SilicaListView {
                     }
                 }
                 MenuItem {
+                    //: Context menu item
+                    //% "Show QR code"
+                    text: qsTrId("foilauth-menu-show_qr_code")
+                    onClicked: {
+                        pageStack.push(Qt.resolvedUrl("QRCodePage.qml"), {
+                            allowedOrientations: mainPage.allowedOrientations,
+                            uri: FoilAuth.toUri(model.secret, model.label, model.issuer, model.digits, model.timeShift)
+                        })
+                    }
+                }
+                MenuItem {
                     //: Generic menu item
                     //% "Edit"
                     text: qsTrId("foilauth-menu-edit")

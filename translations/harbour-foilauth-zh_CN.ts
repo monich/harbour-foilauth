@@ -217,6 +217,11 @@
         <extracomment>Context menu item (copy to clipboard)</extracomment>
         <translation>复制</translation>
     </message>
+    <message id="foilauth-menu-show_qr_code">
+        <source>Show QR code</source>
+        <extracomment>Context menu item</extracomment>
+        <translation>显示二维码</translation>
+    </message>
     <message id="foilauth-menu-edit">
         <source>Edit</source>
         <extracomment>Generic menu item</extracomment>
