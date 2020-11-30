@@ -3,11 +3,14 @@ import Sailfish.Silica 1.0
 import harbour.foilauth 1.0
 
 Dialog {
-    id: dialog
+    id: thisDialog
 
     allowedOrientations: appAllowedOrientations
+    forwardNavigation: !qrCodeOnly
+    backNavigation: !qrCodeOnly
     canAccept: generator.text !== ""
 
+    property bool qrCodeOnly
     property bool canScan
     property alias acceptText: header.acceptText
     property alias dialogTitle: header.title
@@ -20,13 +23,27 @@ Dialog {
     HarbourQrCodeGenerator {
         id: generator
 
-        text: FoilAuth.toUri(secretField.text, labelField.text, dialog.issuer,
+        text: FoilAuth.toUri(secretField.text, labelField.text, thisDialog.issuer,
             digitsField.text, timeShiftField.text)
     }
 
+    Item {
+        id: fullScreenQrcodeContainer
+
+        y: Math.round(((isPortrait ? Screen.height : Screen.width) - height)/2)
+        width: qrcodeImage.width
+        height: qrcodeImage.height
+        anchors.horizontalCenter: thisDialog.horizontalCenter
+        visible: qrCodeOnly
+    }
+
     SilicaFlickable {
+        id: flickable
+
         anchors.fill: parent
         contentHeight: column.height
+        visible: opacity > 0
+        Behavior on opacity { FadeAnimation { } }
 
         Column {
             id: column
@@ -47,6 +64,7 @@ Dialog {
                 //: Text field placeholder (OTP label)
                 //% "OTP label"
                 placeholderText: qsTrId("foilauth-token-label-placeholder")
+                enabled: !qrCodeOnly
 
                 EnterKey.enabled: text.length > 0
                 EnterKey.iconSource: "image://theme/icon-m-enter-next"
@@ -64,6 +82,7 @@ Dialog {
               //% "Secret OTP key"
               placeholderText: qsTrId("foilauth-token-secret-placeholder")
               errorHighlight: !FoilAuth.isValidBase32(text)
+              enabled: !qrCodeOnly
 
               EnterKey.enabled: text.length > 10
               EnterKey.iconSource: "image://theme/icon-m-enter-next"
@@ -86,6 +105,7 @@ Dialog {
                     placeholderText: qsTrId("foilauth-token-digits-placeholder")
                     text: FoilAuthDefaultDigits
                     validator: IntValidator { bottom: 1 }
+                    enabled: !qrCodeOnly
 
                     EnterKey.iconSource: "image://theme/icon-m-enter-next"
                     EnterKey.onClicked: timeShiftField.focus = true
@@ -103,9 +123,10 @@ Dialog {
                     placeholderText: qsTrId("foilauth-token-timeshift-placeholder")
                     text: FoilAuthDefaultTimeShift
                     validator: IntValidator {}
+                    enabled: !qrCodeOnly
 
                     EnterKey.iconSource: "image://theme/icon-m-enter-accept"
-                    EnterKey.onClicked: dialog.accept()
+                    EnterKey.onClicked: thisDialog.accept()
                 }
             }
 
@@ -136,26 +157,27 @@ Dialog {
 
             VerticalPadding { visible: scanButton.visible }
 
-            Rectangle {
-                color: "white"
-                radius: Theme.paddingMedium
-                x: Math.floor((parent.width - width)/2)
-                width: qrcodeImage.width + 2 * Theme.horizontalPageMargin
-                height: qrcodeImage.height + 2 * Theme.horizontalPageMargin
-                visible: generator.qrcode !== ""
+            Item {
+                id: flickableQrcodeContainer
 
-                Image {
+                width: qrcodeImage.width
+                height: qrcodeImage.height
+                anchors.horizontalCenter: parent.horizontalCenter
+
+                QRCodeImage {
                     id: qrcodeImage
 
-                    asynchronous: true
                     anchors.centerIn: parent
-                    source: generator.qrcode ? "image://qrcode/" + generator.qrcode : ""
-                    readonly property int maxDisplaySize: Math.min(Screen.width, Screen.height) - Theme.itemSizeLarge - 4 * Theme.horizontalPageMargin
-                    readonly property int maxSourceSize: Math.max(sourceSize.width, sourceSize.height)
-                    readonly property int n: Math.floor(maxDisplaySize/maxSourceSize)
-                    width: sourceSize.width * n
-                    height: sourceSize.height * n
-                    smooth: false
+                    qrcode: generator.qrcode
+
+                    MouseArea {
+                        enabled: !qrCodeOnly
+                        anchors.fill: parent
+                        onClicked: {
+                            qrCodeOnly = true
+                            flickable.focus = true
+                        }
+                    }
                 }
             }
 
@@ -164,4 +186,37 @@ Dialog {
 
         VerticalScrollDecorator { }
     }
+
+    MouseArea {
+        enabled: qrCodeOnly
+        anchors.fill: parent
+        onClicked: qrCodeOnly = false
+    }
+
+    states: [
+        State {
+            name: "qrcode"
+            when: qrCodeOnly
+            ParentChange {
+                target: qrcodeImage
+                parent: fullScreenQrcodeContainer
+            }
+            PropertyChanges {
+                target: flickable
+                opacity: 0
+            }
+        },
+        State {
+            name: "normal"
+            when: !qrCodeOnly
+            PropertyChanges {
+                target: flickable
+                opacity: 1
+            }
+            ParentChange {
+                target: qrcodeImage
+                parent: flickableQrcodeContainer
+            }
+        }
+    ]
 }
