@@ -247,12 +247,7 @@ Page {
             }
 
             visible: TorchSupported
-            icon {
-                sourceSize: undefined // Let the theme provider to pick the default
-                source: viewFinder && viewFinder.flashOn ?
-                    "image://theme/icon-camera-flash-on" :
-                    "image://theme/icon-camera-flash-off"
-            }
+            icon.source: (viewFinder && viewFinder.flashOn) ? "images/flash-on.svg" : "images/flash-off.svg"
             //: Hint label
             //% "Toggle flashlight"
             hint: qsTrId("foilauth-scan-hint_toggle_flash")
