@@ -63,6 +63,12 @@ SilicaListView {
         }
     }
 
+    Component {
+        id: remorsePopupComponent
+
+        RemorsePopup { }
+    }
+
     PullDownMenu {
         MenuItem {
             //: Pulley menu item, changes Foil password
@@ -98,10 +104,13 @@ SilicaListView {
             text: qsTrId("foilauth-menu-delete_all_tokens")
             visible: foilModel.count > 0
             onClicked: {
+                var remorsePopup = remorsePopupComponent.createObject(mainPage)
                 //: Remorse popup text
                 //% "Deleting all tokens"
-                remorsePopup.execute(qsTrId("foilauth-remorse-delete_all_tokens"),
-                    function() { foilModel.deleteAll() })
+                remorsePopup.execute(qsTrId("foilauth-remorse-delete_all_tokens"), function() {
+                    foilModel.deleteAll()
+                    remorsePopup.destroy()
+                })
             }
         }
         MenuItem {
@@ -443,10 +452,6 @@ SilicaListView {
         dragItem = null
         listModel.dragIndex = -1
         dragTimer.stop()
-    }
-
-    RemorsePopup {
-        id: remorsePopup
     }
 
     VerticalScrollDecorator { }
