@@ -31,6 +31,7 @@ SilicaListView {
 
     Notification {
         id: clipboardNotification
+
         //: Pop-up notification
         //% "Password copied to clipboard"
         previewBody: qsTrId("foilauth-notification-copied_to_clipboard")
@@ -105,6 +106,7 @@ SilicaListView {
         }
         MenuItem {
             id: newNoteMenuItem
+
             //: Pulley menu item, creates a new authentication token
             //% "Add token"
             text: qsTrId("foilauth-menu-new_auth_token")
@@ -348,7 +350,7 @@ SilicaListView {
                     when: !dragging
                     ParentChange {
                         target: draggableItem
-                        parent: tokenListDelegate
+                        parent: tokenListDelegate.contentItem
                         y: 0
                     }
                 }
