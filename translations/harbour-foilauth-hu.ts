@@ -73,7 +73,6 @@
         <extracomment>Password field label</extracomment>
         <translation>
             <numerusform>Írj be legalább %0 karaktert</numerusform>
-            <numerusform>Írj be legalább %0 karaktert</numerusform>
         </translation>
     </message>
     <message id="foilauth-generate-button-generating_key">
@@ -180,7 +179,6 @@
         <source>FoilAuth has found %0 unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
         <extracomment>Text for import page</extracomment>
         <translation>
-            <numerusform>A FoilAuth %0 titkosítítlan SailOTP tokent talált a készülékeden. Szeretnéd importálni és titkosítani?</numerusform>
             <numerusform>A FoilAuth %0 titkosítítlan SailOTP tokent talált a készülékeden. Szeretnéd importálni és titkosítani?</numerusform>
         </translation>
     </message>
