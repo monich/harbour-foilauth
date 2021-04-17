@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2020 Jolla Ltd.
- * Copyright (C) 2019-2020 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2021 Jolla Ltd.
+ * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -41,6 +41,10 @@
 #include "foil_digest.h"
 #include "foil_random.h"
 #include "foil_output.h"
+#include "foil_input.h"
+#include "foil_util.h"
+
+#include "gutil_misc.h"
 
 #include <QStringList>
 #include <QFile>
@@ -50,6 +54,8 @@
 #define FOILAPPS_DIR    "/usr/bin"
 #define FOILPICS_PATH   FOILAPPS_DIR "/harbour-foilpics"
 #define FOILNOTES_PATH  FOILAPPS_DIR "/harbour-foilnotes"
+
+#define FOILAUTH_MIGRATION_PREFIX   "otpauth-migration://offline?data="
 
 // ==========================================================================
 // FoilAuth::Private
@@ -254,6 +260,54 @@ QVariantMap FoilAuth::parseUri(QString aUri)
     FoilAuthToken token;
     token.parseUri(aUri);
     return token.toVariantMap();
+}
+
+QVariantList FoilAuth::parseMigrationUri(QString aUri)
+{
+    const QByteArray uri(aUri.trimmed().toUtf8());
+
+    FoilParsePos pos;
+    pos.ptr = (const guint8*)uri.constData();
+    pos.end = pos.ptr + uri.size();
+
+    QVariantList result;
+    FoilBytes prefixBytes;
+    foil_bytes_from_string(&prefixBytes, FOILAUTH_MIGRATION_PREFIX);
+    if (foil_parse_skip_bytes(&pos, &prefixBytes)) {
+        // uri must be NULL-terminated
+        char* unescaped = g_uri_unescape_string((char*)pos.ptr, NULL);
+        if (unescaped) {
+            pos.ptr = (const guint8*) unescaped;
+            pos.end = pos.ptr + strlen(unescaped);
+            GBytes* bytes = foil_parse_base64(&pos, FOIL_INPUT_BASE64_VALIDATE);
+            if (bytes) {
+                gsize size;
+                gconstpointer data = g_bytes_get_data(bytes, &size);
+
+#if HARBOUR_DEBUG
+                pos.ptr = (const guint8*) g_bytes_get_data(bytes, &size);
+                pos.end = pos.ptr + size;
+                HDEBUG("Decoded" << size << "bytes");
+                while (pos.ptr < pos.end) {
+                    char line[GUTIL_HEXDUMP_BUFSIZE];
+                    pos.ptr += gutil_hexdump(line, pos.ptr, pos.end - pos.ptr);
+                    HDEBUG(line);
+                }
+#endif // HARBOUR_DEBUG
+
+                const QByteArray buf((const char*)data, size);
+                const QList<FoilAuthToken> tokens(FoilAuthToken::parseProtoBuf(buf));
+                const int n = tokens.count();
+                HDEBUG(n << "tokens");
+                for (int i = 0; i < n; i++) {
+                    result.append(tokens.at(i).toVariantMap());
+                }
+                g_bytes_unref(bytes);
+            }
+            g_free(unescaped);
+        }
+    }
+    return result;
 }
 
 #include "FoilAuth.moc"

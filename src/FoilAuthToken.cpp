@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2021 Jolla Ltd.
+ * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -234,4 +234,250 @@ QVariantMap FoilAuthToken::toVariantMap() const
         out.insert(KEY_TIMESHIFT, iTimeShift);
     }
     return out;
+}
+
+// otpauth-migration payload
+//
+// message MigrationPayload {
+// enum Algorithm {
+//   ALGORITHM_UNSPECIFIED = 0;
+//   ALGORITHM_SHA1 = 1;
+//   ALGORITHM_SHA256 = 2;
+//   ALGORITHM_SHA512 = 3;
+//   ALGORITHM_MD5 = 4;
+// }
+//
+// enum DigitCount {
+//   DIGIT_COUNT_UNSPECIFIED = 0;
+//   DIGIT_COUNT_SIX = 1;
+//   DIGIT_COUNT_EIGHT = 2;
+// }
+//
+// enum OtpType {
+//   OTP_TYPE_UNSPECIFIED = 0;
+//   OTP_TYPE_HOTP = 1;
+//   OTP_TYPE_TOTP = 2;
+// }
+//
+// message OtpParameters {
+//   bytes secret = 1;
+//   string name = 2;
+//   string issuer = 3;
+//   Algorithm algorithm = 4;
+//   DigitCount digits = 5;
+//   OtpType type = 6;
+//   int64 counter = 7;
+// }
+//
+// repeated OtpParameters otp_parameters = 1;
+// int32 version = 2;
+// int32 batch_size = 3;
+// int32 batch_index = 4;
+// int32 batch_id = 5;
+// }
+
+class FoilAuthToken::Private {
+public:
+    enum Algorithm {
+        ALGORITHM_UNSPECIFIED,
+        ALGORITHM_SHA1,
+        ALGORITHM_SHA256,
+        ALGORITHM_SHA512,
+        ALGORITHM_MD5
+    };
+
+    enum DigitCount {
+        DIGIT_COUNT_UNSPECIFIED,
+        DIGIT_COUNT_SIX,
+        DIGIT_COUNT_EIGHT,
+    };
+
+    enum OtpType {
+        OTP_TYPE_UNSPECIFIED,
+        OTP_TYPE_HOTP,
+        OTP_TYPE_TOTP
+    };
+
+    static const uint PROTOBUF_TYPE_SHIFT = 3;
+    static const uint PROTOBUF_TYPE_MASK = ((1 << PROTOBUF_TYPE_SHIFT)-1);
+    static const uint PROTOBUF_TYPE_VARINT = 0;
+    static const uint PROTOBUF_TYPE_BYTES = 2;
+
+#define BYTES_TAG(x) (((x) << PROTOBUF_TYPE_SHIFT) | PROTOBUF_TYPE_BYTES)
+#define VARINT_TAG(x) (((x) << PROTOBUF_TYPE_SHIFT) | PROTOBUF_TYPE_VARINT)
+
+    static const uint OTP_PARAMETERS_TAG = BYTES_TAG(1);
+    static const uint SECRET_TAG = BYTES_TAG(1);
+    static const uint NAME_TAG = BYTES_TAG(2);
+    static const uint ISSUER_TAG = BYTES_TAG(3);
+    static const uint ALGORITHM_TAG = VARINT_TAG(4);
+    static const uint DIGITS_TAG = VARINT_TAG(5);
+    static const uint TYPE_TAG = VARINT_TAG(6);
+    static const uint COUNTER_TAG = VARINT_TAG(7);
+
+    struct OtpParameters {
+        QByteArray secret;
+        QString name;
+        QString issuer;
+        Algorithm algorithm;
+        DigitCount digits;
+        OtpType type;
+        quint64 counter;
+
+        OtpParameters() { clear(); }
+        void clear() {
+            secret.clear();
+            name.clear();
+            issuer.clear();
+            algorithm = ALGORITHM_SHA1;
+            digits = DIGIT_COUNT_SIX;
+            type = OTP_TYPE_TOTP;
+            counter = 0;
+        }
+        bool isValid() const {
+            return !secret.isEmpty() &&
+                algorithm == ALGORITHM_SHA1 &&
+                (digits == DIGIT_COUNT_SIX || digits == DIGIT_COUNT_EIGHT) &&
+                type == OTP_TYPE_TOTP;
+        }
+        int numDigits() const {
+            // Assume it's valid
+            return (digits == DIGIT_COUNT_EIGHT) ? 8 : 6;
+        }
+    };
+
+    static bool parseVarInt(FoilParsePos* aPos, quint64* aResult);
+    static bool parsePayload(FoilParsePos* aPos, FoilBytes* aResult);
+    static bool parseOtpParameters(FoilParsePos* aPos, OtpParameters* aResult);
+};
+
+bool FoilAuthToken::Private::parseVarInt(FoilParsePos* aPos, quint64* aResult)
+{
+    quint64 value = 0;
+    const guint8* ptr = aPos->ptr;
+    for (int i = 0; i < 10 && ptr < aPos->end; i++, ptr++) {
+        value = (value << 7) | (*ptr & 0x7f);
+        if (!(*ptr & 0x80)) {
+            aPos->ptr = ptr + 1;
+            *aResult = value;
+            return true;
+        }
+    }
+    // Premature end of stream or too many bytes
+    *aResult = 0;
+    return false;
+}
+
+bool FoilAuthToken::Private::parsePayload(FoilParsePos* aPos, FoilBytes* aResult)
+{
+    // Varint size followed by payload bytes
+    FoilParsePos pos = *aPos;
+    quint64 size;
+    if (parseVarInt(&pos, &size) && (pos.ptr + size) <= pos.end) {
+        aResult->val = pos.ptr;
+        aResult->len = size;
+        aPos->ptr = pos.ptr + size;
+        return true;
+    }
+    return false;
+}
+
+bool FoilAuthToken::Private::parseOtpParameters(FoilParsePos* aPos, OtpParameters* aResult)
+{
+    quint64 tag, value;
+    FoilParsePos pos = *aPos;
+    while (parseVarInt(&pos, &tag) && (tag & PROTOBUF_TYPE_MASK) == PROTOBUF_TYPE_VARINT) {
+        // Skip varints
+        if (!parseVarInt(&pos, &value)) {
+            return false;
+        }
+    }
+
+    // If parseVarInt failed, tag is zero
+    FoilBytes payload;
+    if (tag == OTP_PARAMETERS_TAG && parsePayload(&pos, &payload)) {
+        // Looks like OtpParameters
+        pos.ptr = payload.val;
+        pos.end = payload.val + payload.len;
+        OtpParameters params;
+        quint64 value;
+        while (parseVarInt(&pos, &tag)) {
+            switch (tag) {
+            case SECRET_TAG:
+                if (parsePayload(&pos, &payload)) {
+                    params.secret = QByteArray((const char*)payload.val, payload.len);
+                } else {
+                    return false;
+                }
+                break;
+            case NAME_TAG:
+                if (parsePayload(&pos, &payload)) {
+                    params.name = QString::fromUtf8((const char*)payload.val, payload.len);
+                } else {
+                    return false;
+                }
+                break;
+            case ISSUER_TAG:
+                if (parsePayload(&pos, &payload)) {
+                    params.issuer = QString::fromUtf8((const char*)payload.val, payload.len);
+                } else {
+                    return false;
+                }
+                break;
+            case ALGORITHM_TAG:
+                if (parseVarInt(&pos, &value)) {
+                    params.algorithm = (Algorithm)value;
+                } else {
+                    return false;
+                }
+                break;
+            case DIGITS_TAG:
+                if (parseVarInt(&pos, &value)) {
+                    params.digits = (DigitCount)value;
+                } else {
+                    return false;
+                }
+                break;
+            case TYPE_TAG:
+                if (parseVarInt(&pos, &value)) {
+                    params.type = (OtpType)value;
+                } else {
+                    return false;
+                }
+                break;
+            case COUNTER_TAG:
+                if (!parseVarInt(&pos, &value)) {
+                    return false;
+                }
+                break;
+            default:
+                // Something unintelligible
+                return false;
+            }
+        }
+        if (pos.ptr == pos.end && params.isValid()) {
+            // The whole thing has been parsed
+            aPos->ptr = pos.end;
+            *aResult = params;
+            return true;
+        }
+    }
+    return false;
+}
+
+QList<FoilAuthToken> FoilAuthToken::parseProtoBuf(const QByteArray& aData)
+{
+    FoilParsePos pos;
+    pos.ptr = (const guint8*) aData.constData();
+    pos.end = pos.ptr + aData.size();
+
+    QList<FoilAuthToken> result;
+    Private::OtpParameters p;
+    while (Private::parseOtpParameters(&pos, &p)) {
+        if (p.isValid()) {
+            result.append(FoilAuthToken(p.secret, p.name, p.issuer, p.numDigits()));
+        }
+        p.clear();
+    }
+    return result;
 }

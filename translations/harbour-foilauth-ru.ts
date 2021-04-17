@@ -316,5 +316,10 @@
         <extracomment>Dialog button</extracomment>
         <translation>Сохранить</translation>
     </message>
+    <message id="foilauth-select_token-title">
+        <source>This QR code contains multiple tokens. Please select one:</source>
+        <extracomment>Wrappable page title</extracomment>
+        <translation>Этот QR-код содержит сразу несколько кодов авторизации. Выберите какой-нибудь один:</translation>
+    </message>
 </context>
 </TS>

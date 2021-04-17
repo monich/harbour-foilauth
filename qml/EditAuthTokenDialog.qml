@@ -139,19 +139,20 @@ Dialog {
                 //: Button label, opens QR code scan window
                 //% "Scan QR code"
                 text: qsTrId("foilauth-token-scan-button")
-                visible: canScan && !secretField.text
+                visible: canScan && !secretField.text.length
                 onClicked: {
-                    var scanPage = pageStack.push(Qt.resolvedUrl("ScanPage.qml"))
-                    if (scanPage) {
-                        scanPage.scanCompleted.connect(function(token) {
-                            if (token.valid) {
-                                labelField.text = token.label
-                                secretField.text = token.secret
-                                digitsField.text = token.digits
-                                timeShiftField.text = token.timeshift
-                            }
-                        })
-                    }
+                    var scanPage = pageStack.push(Qt.resolvedUrl("ScanPage.qml"), {
+                        allowedOrientations: thisDialog.allowedOrientations,
+                        parentPage: thisDialog
+                    })
+                    scanPage.scanCompleted.connect(function(token) {
+                        if (token.valid) {
+                            labelField.text = token.label
+                            secretField.text = token.secret
+                            digitsField.text = token.digits
+                            timeShiftField.text = token.timeshift
+                        }
+                    })
                 }
             }
 

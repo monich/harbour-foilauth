@@ -314,5 +314,10 @@
         <extracomment>Dialog button</extracomment>
         <translation>Spara</translation>
     </message>
+    <message id="foilauth-select_token-title">
+        <source>This QR code contains multiple tokens. Please select one:</source>
+        <extracomment>Wrappable page title</extracomment>
+        <translation type="unfinished">Denna QR-kod innehåller flera tokens. Välj en:</translation>
+    </message>
 </context>
 </TS>

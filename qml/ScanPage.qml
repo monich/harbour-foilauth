@@ -7,17 +7,22 @@ import harbour.foilauth 1.0
 import "harbour"
 
 Page {
-    id: page
+    id: thisPage
 
-    allowedOrientations: appAllowedOrientations
-
+    property Page parentPage
     property Item viewFinder
     property Item hint
 
-    readonly property bool canShowViewFinder: Qt.application.active && page.status === PageStatus.Active
+    readonly property bool canShowViewFinder: Qt.application.active && thisPage.status === PageStatus.Active
     readonly property bool canScan: viewFinder && viewFinder.source.cameraState === Camera.ActiveState
 
     signal scanCompleted(var token)
+
+    onStatusChanged: {
+        if (status === PageStatus.Active) {
+            markImage.visible = false
+        }
+    }
 
     onCanShowViewFinderChanged: {
         if (canShowViewFinder) {
@@ -70,7 +75,7 @@ Page {
 
     function showHint(text) {
         if (!hint) {
-            hint = hintComponent.createObject(page)
+            hint = hintComponent.createObject(thisPage)
         }
         hint.text = text
         hint.opacity = 1.0
@@ -98,18 +103,39 @@ Page {
                     unsupportedCodeNotification.close()
                     scanCompleted(token)
                     pageStackPopTimer.start()
-                } else if (lastInvalidCode !== result.text) {
-                    lastInvalidCode = result.text
-                    markImageProvider.image = image
-                    markImage.visible = true
-                    unsupportedCodeNotification.publish()
-                    restartScanTimer.start()
                 } else {
-                    if (page.canScan) {
-                        scanner.start()
+                    var tokens = FoilAuth.parseMigrationUri(result.text)
+                    if (tokens.length === 1) {
+                        markImageProvider.image = image
+                        markImage.visible = true
+                        unsupportedCodeNotification.close()
+                        scanCompleted(tokens[0])
+                        pageStackPopTimer.start()
+                    } else if (tokens.length > 1) {
+                        markImageProvider.image = image
+                        markImage.visible = true
+                        unsupportedCodeNotification.close()
+                        var page = pageStack.push(Qt.resolvedUrl("SelectTokenPage.qml"), {
+                            allowedOrientations: thisPage.allowedOrientations,
+                            tokens: tokens
+                        })
+                        page.tokenSelected.connect(function(token) {
+                            thisPage.scanCompleted(token)
+                            pageStack.pop(parentPage)
+                        })
+                    } else if (lastInvalidCode !== result.text) {
+                        lastInvalidCode = result.text
+                        markImageProvider.image = image
+                        markImage.visible = true
+                        unsupportedCodeNotification.publish()
+                        restartScanTimer.start()
+                    } else {
+                        if (thisPage.canScan) {
+                            scanner.start()
+                        }
                     }
                 }
-            } else if (page.canScan) {
+            } else if (thisPage.canScan) {
                 scanner.start()
             }
         }
@@ -118,7 +144,7 @@ Page {
     Timer {
         id: pageStackPopTimer
 
-        interval:  2000
+        interval:  1000
         onTriggered: pageStack.pop()
     }
 
@@ -129,7 +155,7 @@ Page {
         onTriggered: {
             markImage.visible = false
             markImageProvider.clear()
-            if (page.canScan) {
+            if (thisPage.canScan) {
                 scanner.start()
             }
         }
@@ -205,8 +231,8 @@ Page {
             readonly property int landscapeHeight: Math.floor((parent.width/parent.height > ratio) ? parent.height : (parent.width / ratio))
 
             anchors.centerIn: parent
-            width: page.isPortrait ? portraitWidth : landscapeWidth
-            height: page.isPortrait ? portraitHeight : landscapeHeight
+            width: thisPage.isPortrait ? portraitWidth : landscapeWidth
+            height: thisPage.isPortrait ? portraitHeight : landscapeHeight
             color: "#20000000"
 
             onWidthChanged: updateViewFinderPosition()
@@ -251,8 +277,8 @@ Page {
             //: Hint label
             //% "Toggle flashlight"
             hint: qsTrId("foilauth-scan-hint_toggle_flash")
-            onShowHint: page.showHint(hint)
-            onHideHint: page.hideHint()
+            onShowHint: thisPage.showHint(hint)
+            onHideHint: thisPage.hideHint()
             onClicked: if (viewFinder) viewFinder.toggleFlash()
         }
 
@@ -302,8 +328,8 @@ Page {
             //: Hint label
             //% "Switch the aspect ratio between 9:16 and 3:4"
             hint: qsTrId("foilauth-scan-hint_aspect_ratio")
-            onShowHint: page.showHint(hint)
-            onHideHint: page.hideHint()
+            onShowHint: thisPage.showHint(hint)
+            onHideHint: thisPage.hideHint()
             onClicked: FoilAuthSettings.scanWideMode = !FoilAuthSettings.scanWideMode
         }
     }

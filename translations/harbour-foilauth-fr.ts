@@ -314,5 +314,10 @@
         <extracomment>Dialog button</extracomment>
         <translation>Enregistrer</translation>
     </message>
+    <message id="foilauth-select_token-title">
+        <source>This QR code contains multiple tokens. Please select one:</source>
+        <extracomment>Wrappable page title</extracomment>
+        <translation type="unfinished">Ce code QR contient plusieurs jetons. S&apos;il vous plait sélectionner en un:</translation>
+    </message>
 </context>
 </TS>

@@ -314,5 +314,10 @@
         <extracomment>Dialog button</extracomment>
         <translation>Save</translation>
     </message>
+    <message id="foilauth-select_token-title">
+        <source>This QR code contains multiple tokens. Please select one:</source>
+        <extracomment>Wrappable page title</extracomment>
+        <translation>This QR code contains multiple tokens. Please select one:</translation>
+    </message>
 </context>
 </TS>

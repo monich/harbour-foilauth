@@ -312,5 +312,10 @@
         <extracomment>Dialog button</extracomment>
         <translation>保存</translation>
     </message>
+    <message id="foilauth-select_token-title">
+        <source>This QR code contains multiple tokens. Please select one:</source>
+        <extracomment>Wrappable page title</extracomment>
+        <translation type="unfinished">此QR码包含多个令牌。 请选择一个：</translation>
+    </message>
 </context>
 </TS>

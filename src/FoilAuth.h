@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2021 Jolla Ltd.
+ * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -40,8 +40,7 @@
 #include <QObject>
 #include <QByteArray>
 #include <QVariantMap>
-
-#include <glib.h>
+#include <QVariantList>
 
 class QQmlEngine;
 class QJSEngine;
@@ -75,6 +74,7 @@ public:
     Q_INVOKABLE static QString toUri(QString aSecretBase32, QString aLabel,
         QString aIssuer, int aDigits, int aTimeShift);
     Q_INVOKABLE static QVariantMap parseUri(QString aUri);
+    Q_INVOKABLE static QVariantList parseMigrationUri(QString aUri);
     Q_INVOKABLE static bool isValidBase32(QString aBase32);
 
 Q_SIGNALS:

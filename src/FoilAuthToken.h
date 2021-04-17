@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2021 Jolla Ltd.
+ * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -39,6 +39,7 @@
 #include <QVariantMap>
 
 class FoilAuthToken {
+class Private;
 public:
     static const int DEFAULT_DIGITS = 6;
     static const int MIN_DIGITS = 1;
@@ -75,6 +76,8 @@ public:
 
     QString toUri() const;
     QVariantMap toVariantMap() const;
+
+    static QList<FoilAuthToken> parseProtoBuf(const QByteArray& aData);
 
 public:
     QByteArray iBytes;

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2021 Jolla Ltd.
+ * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -293,7 +293,7 @@ test_parseUri(
 {
     // Invalid token
     QVariantMap map = FoilAuth::parseUri(QString());
-    g_assert(map.count() == 1);
+    g_assert_cmpint(map.count(), == ,1);
     g_assert(map.contains(FoilAuthToken::KEY_VALID));
     g_assert(!map.value(FoilAuthToken::KEY_VALID).toBool());
 
@@ -307,6 +307,31 @@ test_parseUri(
     g_assert(map.value(FoilAuthToken::KEY_ISSUER).toString() == QString("Issuer"));
     g_assert(map.value(FoilAuthToken::KEY_DIGITS).toInt() == 5);
     g_assert(map.value(FoilAuthToken::KEY_TIMESHIFT).toInt() == 0);
+}
+
+/*==========================================================================*
+ * parseMigrationUri
+ *==========================================================================*/
+
+static
+void
+test_parseMigrationUri(
+    void)
+{
+    QVariantList list = FoilAuth::parseMigrationUri(QString());
+    g_assert_cmpint(list.count(), == ,0);
+
+    list = FoilAuth::parseMigrationUri(QString("otpauth-migration://offline?data=CjcKCl96gqF5WDwySA4SGFdvcmRQcmVzczpUaGlua2luZ1RlYXBvdBoJV29yZFByZXNzIAEoAjAC"));
+    g_assert_cmpint(list.count(), == ,1);
+    QVariantMap map = list.at(0).toMap();
+    g_assert(map.count() == 7);
+    g_assert(map.value(FoilAuthToken::KEY_VALID).toBool());
+    g_assert(map.value(FoilAuthToken::KEY_TYPE).toString() == FoilAuthToken::TYPE_TOTP);
+    g_assert(map.value(FoilAuthToken::KEY_LABEL).toString() == QString("WordPress:ThinkingTeapot"));
+    g_assert(map.value(FoilAuthToken::KEY_SECRET).toString() == QString("l55ifilzla6desao"));
+    g_assert(map.value(FoilAuthToken::KEY_ISSUER).toString() == QString("WordPress"));
+    g_assert_cmpint(map.value(FoilAuthToken::KEY_DIGITS).toInt(), == ,8);
+    g_assert_cmpint(map.value(FoilAuthToken::KEY_TIMESHIFT).toInt(), == ,0);
 }
 
 /*==========================================================================*
@@ -331,6 +356,7 @@ int main(int argc, char* argv[])
     g_test_add_func(TEST_("totp"), test_totp);
     g_test_add_func(TEST_("toUri"), test_toUri);
     g_test_add_func(TEST_("parseUri"), test_parseUri);
+    g_test_add_func(TEST_("parseMigrationUri"), test_parseMigrationUri);
     return g_test_run();
 }
 

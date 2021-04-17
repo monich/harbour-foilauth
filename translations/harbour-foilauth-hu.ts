@@ -312,5 +312,10 @@
         <extracomment>Dialog button</extracomment>
         <translation>Mentés</translation>
     </message>
+    <message id="foilauth-select_token-title">
+        <source>This QR code contains multiple tokens. Please select one:</source>
+        <extracomment>Wrappable page title</extracomment>
+        <translation type="unfinished">Ez a QR-kód több tokent tartalmaz. Kérlek válassz egyet:</translation>
+    </message>
 </context>
 </TS>
