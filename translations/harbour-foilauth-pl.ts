@@ -319,7 +319,7 @@
     <message id="foilauth-select_token-title">
         <source>This QR code contains multiple tokens. Please select one:</source>
         <extracomment>Wrappable page title</extracomment>
-        <translation type="unfinished">Ten kod QR zawiera kilka tokenów. Wybierz jeden:</translation>
+        <translation>Ten kod QR zawiera kilka tokenów. Wybierz jeden:</translation>
     </message>
 </context>
 </TS>
