@@ -112,6 +112,16 @@
         <extracomment>Text field placeholder (OTP secret)</extracomment>
         <translation>Код авторизации в кодировке Base32</translation>
     </message>
+    <message id="foilauth-token-digest_algorithm-label">
+        <source>Digest algorithm</source>
+        <extracomment>Combo box label</extracomment>
+        <translation>Алгоритм дайджеста</translation>
+    </message>
+    <message id="foilauth-token-digest_algorithm-default">
+        <source>%1 (default)</source>
+        <extracomment>Menu item for the default digest algorithm</extracomment>
+        <translation>%1 (по умолчанию)</translation>
+    </message>
     <message id="foilauth-token-digits-text">
         <source>Digits</source>
         <extracomment>Text field label (number of password digits)</extracomment>

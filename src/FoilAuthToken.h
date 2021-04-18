@@ -34,17 +34,22 @@
 #ifndef FOILAUTH_TOKEN_H
 #define FOILAUTH_TOKEN_H
 
+#include "FoilAuthTypes.h"
+
 #include <QString>
 #include <QByteArray>
 #include <QVariantMap>
 
-class FoilAuthToken {
+class FoilAuthToken : public FoilAuthTypes {
 class Private;
 public:
-    static const int DEFAULT_DIGITS = 6;
+    static const QString ALGORITHM_MD5;
+    static const QString ALGORITHM_SHA1;
+    static const QString ALGORITHM_SHA256;
+    static const QString ALGORITHM_SHA512;
+
     static const int MIN_DIGITS = 1;
     static const int MAX_DIGITS = 9;
-    static const int DEFAULT_TIMESHIFT = 0;
 
     static const QString KEY_VALID;
     static const QString KEY_TYPE;
@@ -52,6 +57,7 @@ public:
     static const QString KEY_SECRET;
     static const QString KEY_ISSUER;
     static const QString KEY_DIGITS;
+    static const QString KEY_ALGORITHM;
     static const QString KEY_TIMESHIFT;
 
     static const QString TYPE_TOTP;
@@ -60,7 +66,8 @@ public:
     FoilAuthToken();
     FoilAuthToken(const FoilAuthToken& aToken);
     FoilAuthToken(QByteArray aBytes, QString aLabel, QString aIssuer,
-        int aDigits = DEFAULT_DIGITS, int aTimeShift = DEFAULT_TIMESHIFT);
+        int aDigits = DEFAULT_DIGITS, int aTimeShift = DEFAULT_TIMESHIFT,
+        DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM);
 
     FoilAuthToken& operator=(const FoilAuthToken& aToken);
     bool operator==(const FoilAuthToken& aToken) const;
@@ -68,6 +75,7 @@ public:
 
     bool isValid() const;
     bool setDigits(int aDigits);
+    bool setAlgorithm(DigestAlgorithm aAlgorithm);
     bool parseUri(QString aUri);
     uint password(quint64 aTime) const;
     QString passwordString(quint64 aTime) const;
@@ -80,6 +88,7 @@ public:
     static QList<FoilAuthToken> parseProtoBuf(const QByteArray& aData);
 
 public:
+    DigestAlgorithm iAlgorithm;
     QByteArray iBytes;
     QString iLabel;
     QString iIssuer;

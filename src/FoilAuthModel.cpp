@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2020 Jolla Ltd.
- * Copyright (C) 2019-2020 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2021 Jolla Ltd.
+ * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -55,6 +55,7 @@
 
 #define HEADER_LABEL            "OTP-Label"
 #define HEADER_ISSUER           "OTP-Issuer"
+#define HEADER_ALGORITHM        "OTP-Algorithm"
 #define HEADER_DIGITS           "OTP-Digits"
 #define HEADER_TIMESHIFT        "OTP-TimeShift"
 #define HEADER_FAVORITE         "OTP-Favorite"
@@ -77,6 +78,7 @@
     role(Secret,secret) \
     role(Issuer,issuer) \
     role(Digits,digits) \
+    role(Algorithm,algorithm) \
     role(TimeShift,timeShift) \
     role(Label,label) \
     role(PrevPassword,prevPassword) \
@@ -110,7 +112,7 @@ const FoilMsgEncryptOptions* FoilAuthModel::Util::encryptionOptions(FoilMsgEncry
 // FoilAuthModel::ModelData
 // ==========================================================================
 
-class FoilAuthModel::ModelData {
+class FoilAuthModel::ModelData : public FoilAuthTypes {
 public:
     enum Role {
 #define FIRST(X,x) FirstRole = Qt::UserRole, X##Role = FirstRole,
@@ -127,6 +129,7 @@ public:
     ModelData(QString aPath, QByteArray aSecret, QString aLabel, QString aIssuer,
         int aDigits = FoilAuthToken::DEFAULT_DIGITS,
         int aTimeShift = FoilAuthToken::DEFAULT_TIMESHIFT,
+        DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM,
         bool aFavorite = true);
     ModelData(QString aPath, const FoilAuthToken& aToken, bool aFavorite = true);
 
@@ -134,6 +137,7 @@ public:
     QString label() { return iToken.iLabel; }
     void setTokenPath(QString aPath);
 
+    static DigestAlgorithm headerAlgorithm(const FoilMsg* aMsg);
     static QString headerString(const FoilMsg* aMsg, const char* aKey);
     static int headerInt(const FoilMsg* aMsg, const char* aKey, int aDefault);
     static bool headerBool(const FoilMsg* aMsg, const char* aKey, bool aDefault);
@@ -151,11 +155,11 @@ public:
 
 FoilAuthModel::ModelData::ModelData(QString aPath, QByteArray aSecret,
     QString aLabel, QString aIssuer, int aDigits, int aTimeShift,
-    bool aFavorite) :
+    DigestAlgorithm aAlgorithm, bool aFavorite) :
     iPath(aPath),
     iId(QFileInfo(aPath).fileName()),
     iFavorite(aFavorite),
-    iToken(aSecret, aLabel, aIssuer, aDigits, aTimeShift),
+    iToken(aSecret, aLabel, aIssuer, aDigits, aTimeShift, aAlgorithm),
     iSecretBase32(FoilAuth::toBase32(aSecret))
 {
     HDEBUG(iSecretBase32 << aLabel);
@@ -186,6 +190,7 @@ QVariant FoilAuthModel::ModelData::get(Role aRole) const
     case SecretRole: return iSecretBase32;
     case IssuerRole: return iToken.iIssuer;
     case DigitsRole: return iToken.iDigits;
+    case AlgorithmRole: return iToken.iAlgorithm;
     case TimeShiftRole: return iToken.iTimeShift;
     case LabelRole: return iToken.iLabel;
     case PrevPasswordRole: return iPrevPassword;
@@ -193,6 +198,23 @@ QVariant FoilAuthModel::ModelData::get(Role aRole) const
     case NextPasswordRole: return iNextPassword;
     }
     return QVariant();
+}
+
+FoilAuthTypes::DigestAlgorithm FoilAuthModel::ModelData::headerAlgorithm(const FoilMsg* aMsg)
+{
+    const char* value = foilmsg_get_value(aMsg, HEADER_ALGORITHM);
+    if (value) {
+        if (!g_ascii_strcasecmp(value, FOILAUTH_ALGORITHM_MD5)) {
+            return DigestAlgorithmMD5;
+        } else if (!g_ascii_strcasecmp(value, FOILAUTH_ALGORITHM_SHA1)) {
+            return DigestAlgorithmSHA1;
+        } else if (!g_ascii_strcasecmp(value, FOILAUTH_ALGORITHM_SHA256)) {
+            return DigestAlgorithmSHA256;
+        } else if (!g_ascii_strcasecmp(value, FOILAUTH_ALGORITHM_SHA512)) {
+            return DigestAlgorithmSHA512;
+        }
+    }
+    return DEFAULT_ALGORITHM;
 }
 
 QString FoilAuthModel::ModelData::headerString(const FoilMsg* aMsg, const char* aKey)
@@ -489,7 +511,7 @@ void FoilAuthModel::GenerateKeyTask::performTask()
 // FoilAuthModel::EncryptTask
 // ==========================================================================
 
-class FoilAuthModel::EncryptTask : public BaseTask {
+class FoilAuthModel::EncryptTask : public BaseTask, public FoilAuthTypes {
     Q_OBJECT
 
 public:
@@ -532,7 +554,7 @@ void FoilAuthModel::EncryptTask::performTask()
     FoilOutput* out = FoilAuth::createFoilFile(iDestDir, dest);
     if (out) {
         FoilMsgHeaders headers;
-        FoilMsgHeader header[5];
+        FoilMsgHeader header[6];
 
         headers.header = header;
         headers.count = 0;
@@ -567,6 +589,26 @@ void FoilAuthModel::EncryptTask::performTask()
             snprintf(timeshift, sizeof(timeshift), "%d", iToken.iTimeShift);
             header[headers.count].name = HEADER_TIMESHIFT;
             header[headers.count].value = timeshift;
+            headers.count++;
+        }
+
+        if (iToken.iAlgorithm != DEFAULT_ALGORITHM) {
+            header[headers.count].name = HEADER_ALGORITHM;
+            header[headers.count].value = FOILAUTH_ALGORITHM_DEFAULT;
+            switch (iToken.iAlgorithm) {
+            case DigestAlgorithmMD5:
+                header[headers.count].value = FOILAUTH_ALGORITHM_MD5;
+                break;
+            case DigestAlgorithmSHA1:
+                header[headers.count].value = FOILAUTH_ALGORITHM_SHA1;
+                break;
+            case DigestAlgorithmSHA256:
+                header[headers.count].value = FOILAUTH_ALGORITHM_SHA256;
+                break;
+            case DigestAlgorithmSHA512:
+                header[headers.count].value = FOILAUTH_ALGORITHM_SHA512;
+                break;
+            }
             headers.count++;
         }
 
@@ -745,6 +787,7 @@ bool FoilAuthModel::DecryptAllTask::decryptToken(QString aPath)
                 ModelData::headerString(msg, HEADER_ISSUER),
                 ModelData::headerInt(msg, HEADER_DIGITS, FoilAuthToken::DEFAULT_DIGITS),
                 ModelData::headerInt(msg, HEADER_TIMESHIFT, FoilAuthToken::DEFAULT_TIMESHIFT),
+                ModelData::headerAlgorithm(msg),
                 ModelData::headerBool(msg, HEADER_FAVORITE, false));
 
             // Calculate current passwords while we are on it
@@ -1781,6 +1824,24 @@ bool FoilAuthModel::setData(const QModelIndex& aIndex, const QVariant& aValue, i
                     if (data->iToken.iDigits == digits) {
                         return true;
                     } else if (data->iToken.setDigits(digits)) {
+                        iPrivate->encrypt(data);
+                        iPrivate->emitQueuedSignals();
+                        roles.append(aRole);
+                        Q_EMIT dataChanged(aIndex, aIndex, roles);
+                        return true;
+                    }
+                }
+            }
+            break;
+        case ModelData::AlgorithmRole:
+            {
+                bool ok;
+                const int alg = aValue.toInt(&ok);
+                if (ok) {
+                    HDEBUG(row << "algorithm" << alg);
+                    if (data->iToken.iAlgorithm == (FoilAuthTypes::DigestAlgorithm)alg) {
+                        return true;
+                    } else if (data->iToken.setAlgorithm((FoilAuthTypes::DigestAlgorithm)alg)) {
                         iPrivate->encrypt(data);
                         iPrivate->emitQueuedSignals();
                         roles.append(aRole);

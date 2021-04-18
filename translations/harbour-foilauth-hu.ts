@@ -110,6 +110,16 @@
         <extracomment>Text field placeholder (OTP secret)</extracomment>
         <translation>Titkos OTP kulcs</translation>
     </message>
+    <message id="foilauth-token-digest_algorithm-label">
+        <source>Digest algorithm</source>
+        <extracomment>Combo box label</extracomment>
+        <translation type="unfinished">Digest algoritmus</translation>
+    </message>
+    <message id="foilauth-token-digest_algorithm-default">
+        <source>%1 (default)</source>
+        <extracomment>Menu item for the default digest algorithm</extracomment>
+        <translation type="unfinished">%1 (alapértelmezett)</translation>
+    </message>
     <message id="foilauth-token-digits-text">
         <source>Digits</source>
         <extracomment>Text field label (number of password digits)</extracomment>

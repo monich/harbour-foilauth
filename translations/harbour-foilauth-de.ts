@@ -111,6 +111,16 @@
         <extracomment>Text field placeholder (OTP secret)</extracomment>
         <translation>Geheimer OTP Schlüssel</translation>
     </message>
+    <message id="foilauth-token-digest_algorithm-label">
+        <source>Digest algorithm</source>
+        <extracomment>Combo box label</extracomment>
+        <translation type="unfinished">Digest-Algorithmus</translation>
+    </message>
+    <message id="foilauth-token-digest_algorithm-default">
+        <source>%1 (default)</source>
+        <extracomment>Menu item for the default digest algorithm</extracomment>
+        <translation type="unfinished">%1 (Standard)</translation>
+    </message>
     <message id="foilauth-token-digits-text">
         <source>Digits</source>
         <extracomment>Text field label (number of password digits)</extracomment>

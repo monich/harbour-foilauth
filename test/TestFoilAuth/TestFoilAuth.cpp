@@ -277,9 +277,18 @@ void
 test_toUri(
     void)
 {
-    g_assert(FoilAuth::toUri("", "Label", "Issuer", 5, 0).isEmpty());
-    g_assert(FoilAuth::toUri("aebagbafa", "Label", "Issuer", 5, 0) ==
+    g_assert(FoilAuth::toUri("", "Label", "Issuer", 5,
+        FoilAuthTypes::DEFAULT_TIMESHIFT,
+        FoilAuthTypes::DEFAULT_ALGORITHM).isEmpty());
+    g_assert(FoilAuth::toUri("aebagbafa", "Label", "Issuer", 5,
+        FoilAuthTypes::DEFAULT_TIMESHIFT,
+        FoilAuthTypes::DEFAULT_ALGORITHM) ==
         "otpauth://totp/Label?secret=aebagbaf&issuer=Issuer&digits=5");
+    g_assert(FoilAuth::toUri("aebagbafa", "Label", "Issuer",
+        FoilAuthTypes::DEFAULT_DIGITS,
+        FoilAuthTypes::DEFAULT_TIMESHIFT,
+        FoilAuthTypes::DEFAULT_ALGORITHM) ==
+        "otpauth://totp/Label?secret=aebagbaf&issuer=Issuer&digits=6");
 }
 
 /*==========================================================================*
@@ -299,14 +308,15 @@ test_parseUri(
 
     // Valid token
     map = FoilAuth::parseUri("otpauth://totp/Test?secret=vhiiktvjc6meoftj&issuer=Issuer&digits=5");
-    g_assert(map.count() == 7);
+    g_assert(map.count() == 8);
     g_assert(map.value(FoilAuthToken::KEY_VALID).toBool());
     g_assert(map.value(FoilAuthToken::KEY_TYPE).toString() == FoilAuthToken::TYPE_TOTP);
     g_assert(map.value(FoilAuthToken::KEY_LABEL).toString() == QString("Test"));
     g_assert(map.value(FoilAuthToken::KEY_SECRET).toString() == QString("vhiiktvjc6meoftj"));
     g_assert(map.value(FoilAuthToken::KEY_ISSUER).toString() == QString("Issuer"));
-    g_assert(map.value(FoilAuthToken::KEY_DIGITS).toInt() == 5);
-    g_assert(map.value(FoilAuthToken::KEY_TIMESHIFT).toInt() == 0);
+    g_assert_cmpint(map.value(FoilAuthToken::KEY_DIGITS).toInt(), == ,5);
+    g_assert_cmpint(map.value(FoilAuthToken::KEY_TIMESHIFT).toInt(), == ,0);
+    g_assert_cmpint(map.value(FoilAuthToken::KEY_ALGORITHM).toInt(), == ,FoilAuthToken::DEFAULT_ALGORITHM);
 }
 
 /*==========================================================================*
@@ -324,7 +334,7 @@ test_parseMigrationUri(
     list = FoilAuth::parseMigrationUri(QString("otpauth-migration://offline?data=CjcKCl96gqF5WDwySA4SGFdvcmRQcmVzczpUaGlua2luZ1RlYXBvdBoJV29yZFByZXNzIAEoAjAC"));
     g_assert_cmpint(list.count(), == ,1);
     QVariantMap map = list.at(0).toMap();
-    g_assert(map.count() == 7);
+    g_assert(map.count() == 8);
     g_assert(map.value(FoilAuthToken::KEY_VALID).toBool());
     g_assert(map.value(FoilAuthToken::KEY_TYPE).toString() == FoilAuthToken::TYPE_TOTP);
     g_assert(map.value(FoilAuthToken::KEY_LABEL).toString() == QString("WordPress:ThinkingTeapot"));
@@ -332,6 +342,7 @@ test_parseMigrationUri(
     g_assert(map.value(FoilAuthToken::KEY_ISSUER).toString() == QString("WordPress"));
     g_assert_cmpint(map.value(FoilAuthToken::KEY_DIGITS).toInt(), == ,8);
     g_assert_cmpint(map.value(FoilAuthToken::KEY_TIMESHIFT).toInt(), == ,0);
+    g_assert_cmpint(map.value(FoilAuthToken::KEY_ALGORITHM).toInt(), == ,FoilAuthToken::DEFAULT_ALGORITHM);
 }
 
 /*==========================================================================*

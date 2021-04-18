@@ -239,7 +239,7 @@ SilicaListView {
                     onClicked: {
                         pageStack.push(Qt.resolvedUrl("QRCodePage.qml"), {
                             allowedOrientations: mainPage.allowedOrientations,
-                            uri: FoilAuth.toUri(model.secret, model.label, model.issuer, model.digits, model.timeShift)
+                            uri: FoilAuth.toUri(model.secret, model.label, model.issuer, model.digits, model.timeShift, model.algorithm)
                         })
                     }
                 }
@@ -259,6 +259,7 @@ SilicaListView {
                             label: model.label,
                             secret: model.secret,
                             issuer: model.issuer,
+                            algorithm: model.algorithm,
                             digits: model.digits,
                             timeShift: model.timeShift
                         })
@@ -378,6 +379,7 @@ SilicaListView {
             model.secret = token.secret
             model.label = token.label
             //model.issuer = token.issuer
+            model.algorithm = token.algorithm
             model.digits = token.digits
             model.timeShift = token.timeShift
         }

@@ -45,6 +45,7 @@
 #define FOILAUTH_KEY_SECRET "secret"
 #define FOILAUTH_KEY_ISSUER "issuer"
 #define FOILAUTH_KEY_DIGITS "digits"
+#define FOILAUTH_KEY_ALGORITHM "algorithm"
 #define FOILAUTH_KEY_TIMESHIFT "timeshift"
 
 const QString FoilAuthToken::KEY_VALID("valid");
@@ -53,6 +54,7 @@ const QString FoilAuthToken::KEY_LABEL(FOILAUTH_KEY_LABEL);
 const QString FoilAuthToken::KEY_SECRET(FOILAUTH_KEY_SECRET);
 const QString FoilAuthToken::KEY_ISSUER(FOILAUTH_KEY_ISSUER);
 const QString FoilAuthToken::KEY_DIGITS(FOILAUTH_KEY_DIGITS);
+const QString FoilAuthToken::KEY_ALGORITHM(FOILAUTH_KEY_ALGORITHM);
 const QString FoilAuthToken::KEY_TIMESHIFT(FOILAUTH_KEY_TIMESHIFT);
 
 #define FOILAUTH_TYPE_TOTP "totp"
@@ -61,15 +63,22 @@ const QString FoilAuthToken::KEY_TIMESHIFT(FOILAUTH_KEY_TIMESHIFT);
 const QString FoilAuthToken::TYPE_TOTP(FOILAUTH_TYPE_TOTP);
 const QString FoilAuthToken::TYPE_HOTP(FOILAUTH_TYPE_HOTP);
 
+const QString FoilAuthToken::ALGORITHM_MD5(FOILAUTH_ALGORITHM_MD5);
+const QString FoilAuthToken::ALGORITHM_SHA1(FOILAUTH_ALGORITHM_SHA1);
+const QString FoilAuthToken::ALGORITHM_SHA256(FOILAUTH_ALGORITHM_SHA256);
+const QString FoilAuthToken::ALGORITHM_SHA512(FOILAUTH_ALGORITHM_SHA512);
+
 #define FOILAUTH_SCHEME "otpauth"
 
 FoilAuthToken::FoilAuthToken() :
+    iAlgorithm(DEFAULT_ALGORITHM),
     iDigits(DEFAULT_DIGITS),
     iTimeShift(DEFAULT_TIMESHIFT)
 {
 }
 
 FoilAuthToken::FoilAuthToken(const FoilAuthToken& aToken) :
+    iAlgorithm(aToken.iAlgorithm),
     iBytes(aToken.iBytes),
     iLabel(aToken.iLabel),
     iIssuer(aToken.iIssuer),
@@ -79,17 +88,21 @@ FoilAuthToken::FoilAuthToken(const FoilAuthToken& aToken) :
 }
 
 FoilAuthToken::FoilAuthToken(QByteArray aBytes, QString aLabel,
-    QString aIssuer, int aDigits, int aTimeShift) :
+    QString aIssuer, int aDigits, int aTimeShift, DigestAlgorithm aAlgorithm) :
+    iAlgorithm(DEFAULT_ALGORITHM),
     iBytes(aBytes),
     iLabel(aLabel),
     iIssuer(aIssuer),
-    iDigits((aDigits >= 1 && aDigits <= MAX_DIGITS) ? aDigits : DEFAULT_DIGITS),
+    iDigits(DEFAULT_DIGITS),
     iTimeShift(aTimeShift)
 {
+    setDigits(aDigits);
+    setAlgorithm(aAlgorithm);
 }
 
 FoilAuthToken& FoilAuthToken::operator=(const FoilAuthToken& aToken)
 {
+    iAlgorithm = aToken.iAlgorithm;
     iBytes = aToken.iBytes;
     iLabel = aToken.iLabel;
     iIssuer = aToken.iIssuer;
@@ -100,7 +113,8 @@ FoilAuthToken& FoilAuthToken::operator=(const FoilAuthToken& aToken)
 
 bool FoilAuthToken::equals(const FoilAuthToken& aToken) const
 {
-    return iDigits == aToken.iDigits &&
+    return iAlgorithm == aToken.iAlgorithm &&
+        iDigits == aToken.iDigits &&
         iTimeShift == aToken.iTimeShift &&
         iBytes == aToken.iBytes &&
         iLabel == aToken.iLabel &&
@@ -113,7 +127,7 @@ uint FoilAuthToken::password(quint64 aTime) const
     for (int i = 1; i < iDigits; i++) {
         maxPass *= 10;
     }
-    return FoilAuth::TOTP(iBytes, aTime, maxPass);
+    return FoilAuth::TOTP(iBytes, aTime, maxPass, iAlgorithm);
 }
 
 QString FoilAuthToken::passwordString(quint64 aTime) const
@@ -125,6 +139,19 @@ bool FoilAuthToken::setDigits(int aDigits)
 {
     if (aDigits >= 1 && aDigits <= MAX_DIGITS) {
         iDigits = aDigits;
+        return true;
+    }
+    return false;
+}
+
+bool FoilAuthToken::setAlgorithm(DigestAlgorithm aAlgorithm)
+{
+    switch (aAlgorithm) {
+    case DigestAlgorithmMD5:
+    case DigestAlgorithmSHA1:
+    case DigestAlgorithmSHA256:
+    case DigestAlgorithmSHA512:
+        iAlgorithm = aAlgorithm;
         return true;
     }
     return false;
@@ -142,7 +169,7 @@ bool FoilAuthToken::parseUri(QString aUri)
     foil_bytes_from_string(&prefixBytes, FOILAUTH_SCHEME "://"
         FOILAUTH_TYPE_TOTP "/");
     if (foil_parse_skip_bytes(&pos, &prefixBytes)) {
-        QByteArray label, secret, issuer, digits;
+        QByteArray label, secret, issuer, algorithm, digits;
         while (pos.ptr < pos.end && pos.ptr[0] != '?') {
             label.append(*pos.ptr++);
         }
@@ -150,9 +177,11 @@ bool FoilAuthToken::parseUri(QString aUri)
         FoilBytes secretTag;
         FoilBytes issuerTag;
         FoilBytes digitsTag;
+        FoilBytes algorithmTag;
         foil_bytes_from_string(&secretTag, FOILAUTH_KEY_SECRET "=");
         foil_bytes_from_string(&issuerTag, FOILAUTH_KEY_ISSUER "=");
         foil_bytes_from_string(&digitsTag, FOILAUTH_KEY_DIGITS "=");
+        foil_bytes_from_string(&algorithmTag, FOILAUTH_KEY_ALGORITHM "=");
         QByteArray* value;
 
         while (pos.ptr < pos.end) {
@@ -163,6 +192,8 @@ bool FoilAuthToken::parseUri(QString aUri)
                 value = &issuer;
             } else if (foil_parse_skip_bytes(&pos, &digitsTag)) {
                 value = &digits;
+            } else if (foil_parse_skip_bytes(&pos, &algorithmTag)) {
+                value = &algorithm;
             } else {
                 value = Q_NULLPTR;
             }
@@ -185,12 +216,25 @@ bool FoilAuthToken::parseUri(QString aUri)
                 iLabel = QUrl::fromPercentEncoding(label);
                 iIssuer = QUrl::fromPercentEncoding(issuer);
                 iDigits = DEFAULT_DIGITS;
+                iAlgorithm = DEFAULT_ALGORITHM;
                 iTimeShift = DEFAULT_TIMESHIFT;
 
                 if (!digits.isEmpty()) {
                     const int n = digits.toInt();
                     if (n >=  MIN_DIGITS && n <= MAX_DIGITS) {
                         iDigits = n;
+                    }
+                }
+                if (!algorithm.isEmpty()) {
+                    const QString alg(QString::fromLatin1(algorithm));
+                    if (alg == ALGORITHM_MD5) {
+                        iAlgorithm = DigestAlgorithmMD5;
+                    } else if (alg == ALGORITHM_SHA1) {
+                        iAlgorithm = DigestAlgorithmSHA1;
+                    } else if (alg == ALGORITHM_SHA256) {
+                        iAlgorithm = DigestAlgorithmSHA256;
+                    } else if (alg == ALGORITHM_SHA512) {
+                        iAlgorithm = DigestAlgorithmSHA512;
                     }
                 }
                 return true;
@@ -215,6 +259,21 @@ QString FoilAuthToken::toUri() const
         }
         buf.append("&" FOILAUTH_KEY_DIGITS "=");
         buf.append(QString::number(iDigits));
+        if (iAlgorithm != DEFAULT_ALGORITHM) {
+            switch (iAlgorithm) {
+            case DigestAlgorithmMD5:
+                buf.append("&" FOILAUTH_KEY_ALGORITHM "=" FOILAUTH_ALGORITHM_MD5);
+                break;
+            case DigestAlgorithmSHA256:
+                buf.append("&" FOILAUTH_KEY_ALGORITHM "=" FOILAUTH_ALGORITHM_SHA256);
+                break;
+            case DigestAlgorithmSHA512:
+                buf.append("&" FOILAUTH_KEY_ALGORITHM "=" FOILAUTH_ALGORITHM_SHA512);
+                break;
+            case DEFAULT_ALGORITHM: // DigestAlgorithmSHA1
+                break;
+            }
+        }
         return buf;
     }
     return QString();
@@ -232,6 +291,7 @@ QVariantMap FoilAuthToken::toVariantMap() const
         out.insert(KEY_ISSUER, iIssuer);
         out.insert(KEY_DIGITS, iDigits);
         out.insert(KEY_TIMESHIFT, iTimeShift);
+        out.insert(KEY_ALGORITHM, (int) iAlgorithm);
     }
     return out;
 }
@@ -244,7 +304,7 @@ QVariantMap FoilAuthToken::toVariantMap() const
 //   ALGORITHM_SHA1 = 1;
 //   ALGORITHM_SHA256 = 2;
 //   ALGORITHM_SHA512 = 3;
-//   ALGORITHM_MD5 = 4;
+//   ALGORITHM_MD5 = 4;  really???
 // }
 //
 // enum DigitCount {
@@ -336,13 +396,24 @@ public:
         }
         bool isValid() const {
             return !secret.isEmpty() &&
-                algorithm == ALGORITHM_SHA1 &&
+                (algorithm == ALGORITHM_SHA1 || algorithm == ALGORITHM_SHA256 ||
+                 algorithm == ALGORITHM_SHA512 || algorithm == ALGORITHM_MD5) &&
                 (digits == DIGIT_COUNT_SIX || digits == DIGIT_COUNT_EIGHT) &&
                 type == OTP_TYPE_TOTP;
         }
         int numDigits() const {
             // Assume it's valid
             return (digits == DIGIT_COUNT_EIGHT) ? 8 : 6;
+        }
+        DigestAlgorithm digestAlgorithm() const {
+            switch (algorithm) {
+            case ALGORITHM_MD5: return DigestAlgorithmMD5;
+            case ALGORITHM_SHA1: return DigestAlgorithmSHA1;
+            case ALGORITHM_SHA256: return DigestAlgorithmSHA256;
+            case ALGORITHM_SHA512:  return DigestAlgorithmSHA512;
+            case ALGORITHM_UNSPECIFIED: break;
+            }
+            return DEFAULT_ALGORITHM;
         }
     };
 
@@ -475,7 +546,8 @@ QList<FoilAuthToken> FoilAuthToken::parseProtoBuf(const QByteArray& aData)
     Private::OtpParameters p;
     while (Private::parseOtpParameters(&pos, &p)) {
         if (p.isValid()) {
-            result.append(FoilAuthToken(p.secret, p.name, p.issuer, p.numDigits()));
+            result.append(FoilAuthToken(p.secret, p.name, p.issuer, p.numDigits(),
+                DEFAULT_TIMESHIFT, p.digestAlgorithm()));
         }
         p.clear();
     }

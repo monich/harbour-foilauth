@@ -15,6 +15,7 @@ Dialog {
     property alias acceptText: header.acceptText
     property alias dialogTitle: header.title
     property string issuer
+    property int algorithm: FoilAuth.DefaultAlgorithm
     property alias label: labelField.text
     property alias secret: secretField.text
     property alias digits: digitsField.text
@@ -24,7 +25,7 @@ Dialog {
         id: generator
 
         text: FoilAuth.toUri(secretField.text, labelField.text, thisDialog.issuer,
-            digitsField.text, timeShiftField.text)
+            digitsField.text, timeShiftField.text, algorithm)
     }
 
     Item {
@@ -89,6 +90,25 @@ Dialog {
               EnterKey.onClicked: digitsField.focus = true
             }
 
+            ComboBox {
+                id: algorithmComboBox
+
+                width: parent.width
+                //: Combo box label
+                //% "Digest algorithm"
+                label: qsTrId("foilauth-token-digest_algorithm-label")
+                menu: ContextMenu {
+                    MenuItem { text: "MD5" }
+                    //: Menu item for the default digest algorithm
+                    //% "%1 (default)"
+                    MenuItem { text: qsTrId("foilauth-token-digest_algorithm-default").arg("SHA1") }
+                    MenuItem { text: "SHA256" }
+                    MenuItem { text: "SHA512" }
+                }
+                Component.onCompleted: currentIndex = algorithm
+                onCurrentIndexChanged: algorithm = currentIndex
+            }
+
             Grid {
                 columns: isLandscape ? 2 : 1
                 width: parent.width
@@ -151,6 +171,7 @@ Dialog {
                             secretField.text = token.secret
                             digitsField.text = token.digits
                             timeShiftField.text = token.timeshift
+                            algorithmComboBox.currentIndex = token.algorithm
                         }
                     })
                 }

@@ -34,6 +34,8 @@
 #ifndef FOILAUTH_H
 #define FOILAUTH_H
 
+#include "FoilAuthTypes.h"
+
 #include "foil_types.h"
 
 #include <QSize>
@@ -46,13 +48,23 @@ class QQmlEngine;
 class QJSEngine;
 
 // Static utilities
-class FoilAuth : public QObject {
+class FoilAuth : public QObject, public FoilAuthTypes {
     Q_OBJECT
     Q_PROPERTY(bool otherFoilAppsInstalled READ otherFoilAppsInstalled NOTIFY otherFoilAppsInstalledChanged)
     Q_DISABLE_COPY(FoilAuth)
+    Q_ENUMS(Algorithm)
 
 public:
     static const int PERIOD = 30;
+
+    // Export these to QML
+    enum Algorithm {
+        AlgorithmMD5 = DigestAlgorithmMD5,
+        AlgorithmSHA1 = DigestAlgorithmSHA1,
+        AlgorithmSHA256 = DigestAlgorithmSHA256,
+        AlgorithmSHA512 = DigestAlgorithmSHA512,
+        DefaultAlgorithm = DEFAULT_ALGORITHM
+    };
 
     explicit FoilAuth(QObject* aParent = Q_NULLPTR);
 
@@ -68,11 +80,12 @@ public:
     static QByteArray toByteArray(GBytes* aData);
     static FoilOutput* createFoilFile(QString aDestDir, GString* aOutPath);
     static QString createEmptyFoilFile(QString aDestDir);
-    static uint TOTP(QByteArray aSecret, quint64 aTime, uint aMaxPass);
+    static uint TOTP(QByteArray aSecret, quint64 aTime, uint aMaxPass,
+        DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM);
 
     // Invokable from QML
     Q_INVOKABLE static QString toUri(QString aSecretBase32, QString aLabel,
-        QString aIssuer, int aDigits, int aTimeShift);
+        QString aIssuer, int aDigits, int aTimeShift, Algorithm aAlgorithm);
     Q_INVOKABLE static QVariantMap parseUri(QString aUri);
     Q_INVOKABLE static QVariantList parseMigrationUri(QString aUri);
     Q_INVOKABLE static bool isValidBase32(QString aBase32);

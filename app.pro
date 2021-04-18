@@ -80,6 +80,7 @@ HEADERS += \
     src/FoilAuthModel.h \
     src/FoilAuthSettings.h \
     src/FoilAuthToken.h \
+    src/FoilAuthTypes.h \
     src/QrCodeDecoder.h \
     src/QrCodeImageSource.h \
     src/QrCodeScanner.h \
