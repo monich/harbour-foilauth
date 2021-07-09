@@ -90,25 +90,6 @@ Dialog {
               EnterKey.onClicked: digitsField.focus = true
             }
 
-            ComboBox {
-                id: algorithmComboBox
-
-                width: parent.width
-                //: Combo box label
-                //% "Digest algorithm"
-                label: qsTrId("foilauth-token-digest_algorithm-label")
-                menu: ContextMenu {
-                    MenuItem { text: "MD5" }
-                    //: Menu item for the default digest algorithm
-                    //% "%1 (default)"
-                    MenuItem { text: qsTrId("foilauth-token-digest_algorithm-default").arg("SHA1") }
-                    MenuItem { text: "SHA256" }
-                    MenuItem { text: "SHA512" }
-                }
-                Component.onCompleted: currentIndex = algorithm
-                onCurrentIndexChanged: algorithm = currentIndex
-            }
-
             Grid {
                 columns: isLandscape ? 2 : 1
                 width: parent.width
@@ -148,6 +129,25 @@ Dialog {
                     EnterKey.iconSource: "image://theme/icon-m-enter-accept"
                     EnterKey.onClicked: thisDialog.accept()
                 }
+            }
+
+            ComboBox {
+                id: algorithmComboBox
+
+                width: parent.width
+                //: Combo box label
+                //% "Digest algorithm"
+                label: qsTrId("foilauth-token-digest_algorithm-label")
+                menu: ContextMenu {
+                    MenuItem { text: "MD5" }
+                    //: Menu item for the default digest algorithm
+                    //% "%1 (default)"
+                    MenuItem { text: qsTrId("foilauth-token-digest_algorithm-default").arg("SHA1") }
+                    MenuItem { text: "SHA256" }
+                    MenuItem { text: "SHA512" }
+                }
+                Component.onCompleted: currentIndex = algorithm
+                onCurrentIndexChanged: algorithm = currentIndex
             }
 
             VerticalPadding { }
