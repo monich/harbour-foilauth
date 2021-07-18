@@ -72,8 +72,8 @@
         <source>Type at least %0 character(s)</source>
         <extracomment>Password field label</extracomment>
         <translation>
+            <numerusform>Mindestens %0 Zeiche eingeben</numerusform>
             <numerusform>Mindestens %0 Zeichen eingeben</numerusform>
-            <numerusform></numerusform>
         </translation>
     </message>
     <message id="foilauth-generate-button-generating_key">
@@ -191,7 +191,7 @@
         <extracomment>Text for import page</extracomment>
         <translation>
             <numerusform>FoilAuth hat %0 unverschlüsselte SailOTP Token auf dem Gerät gefunden. Möchstest Du diese importieren und verschlüssen?</numerusform>
-            <numerusform>FoilAuth has found %0 unencrypted SailOTP tokens on your device. Would you like to import and encrypt them?</numerusform>
+            <numerusform>FoilAuth hat %0 unverschlüsselte SailOTP Token auf dem Gerät gefunden. Möchstest Du diese importieren und verschlüssen?</numerusform>
         </translation>
     </message>
     <message id="foilauth-notification-copied_to_clipboard">
@@ -209,15 +209,20 @@
         <extracomment>Pulley menu item, locks the tokens</extracomment>
         <translation>Sperren</translation>
     </message>
-    <message id="foilauth-menu-delete_all_tokens">
-        <source>Delete all</source>
-        <extracomment>Pulley menu item, deletes all tokens</extracomment>
-        <translation>Alle löschen</translation>
+    <message id="foilauth-menu-select_tokens">
+        <source>Select</source>
+        <extracomment>Pulley menu item, opens selection page</extracomment>
+        <translation type="unfinished">Auswählen</translation>
     </message>
-    <message id="foilauth-remorse-delete_all_tokens">
-        <source>Deleting all tokens</source>
-        <extracomment>Remorse popup text</extracomment>
-        <translation>Alle Token löschen</translation>
+    <message id="foilauth-menu-select_none">
+        <source>Deselect all</source>
+        <extracomment>Pulley menu item</extracomment>
+        <translation type="unfinished">Nichts auswählen</translation>
+    </message>
+    <message id="foilauth-menu-select_all">
+        <source>Select all</source>
+        <extracomment>Pulley menu item, selects all tokens</extracomment>
+        <translation type="unfinished">Alle auswählen</translation>
     </message>
     <message id="foilauth-menu-new_auth_token">
         <source>Add token</source>
@@ -248,6 +253,16 @@
         <source>Deleting</source>
         <extracomment>Remorse popup text</extracomment>
         <translation>Lösche</translation>
+    </message>
+    <message id="foilauth-remorse-deleting_selected_tokens">
+        <source>Deleting selected tokens</source>
+        <extracomment>Remorse popup text (multiple tokens selected)</extracomment>
+        <translation type="unfinished">Löschen von ausgewählten Token</translation>
+    </message>
+    <message id="foilauth-remorse-deleting_selected_token">
+        <source>Deleting selected token</source>
+        <extracomment>Remorse popup text (single token selected)</extracomment>
+        <translation type="unfinished">Löschen von ausgewählten Token</translation>
     </message>
     <message id="foilauth-password_list-placeholder">
         <source>You do not have any encrypted tokens</source>
@@ -328,6 +343,16 @@
         <source>This QR code contains multiple tokens. Please select one:</source>
         <extracomment>Wrappable page title</extracomment>
         <translation type="unfinished">Dieser QR-Code enthält mehrere Token. Bitte wählen eine aus:</translation>
+    </message>
+    <message id="foilauth-select_page-header">
+        <source>Select tokens</source>
+        <extracomment>Page title</extracomment>
+        <translation type="unfinished">Wählen Sie Token</translation>
+    </message>
+    <message id="foilauth-select_page-hint_delete_selected">
+        <source>Delete selected tokens</source>
+        <extracomment>Hint text</extracomment>
+        <translation type="unfinished">Ausgewählte Token löschen</translation>
     </message>
 </context>
 </TS>

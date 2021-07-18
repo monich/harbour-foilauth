@@ -4,20 +4,22 @@ import Sailfish.Silica 1.0
 import "harbour"
 
 Rectangle {
-    id: item
+    id: thisItem
 
     color: "transparent"
 
+    property alias interactive: favoriteButton.enabled
     property alias description: descriptionLabel.text
     property string prevPassword
     property string nextPassword
     property string currentPassword
     property bool favorite
     property bool landscape
+    property bool selected
 
     signal favoriteToggled()
 
-    IconButton {
+    HarbourIconTextButton {
         id: favoriteButton
 
         anchors {
@@ -25,8 +27,9 @@ Rectangle {
             leftMargin: Theme.paddingMedium
             verticalCenter: parent.verticalCenter
         }
-        icon.source: favorite ? "image://theme/icon-m-favorite-selected" : "image://theme/icon-m-favorite"
-        onClicked: item.favoriteToggled()
+        iconSource: favorite ? "image://theme/icon-m-favorite-selected" : "image://theme/icon-m-favorite"
+        highlighted: down || thisItem.selected
+        onClicked: thisItem.favoriteToggled()
     }
 
     Label {
@@ -40,7 +43,7 @@ Rectangle {
         }
         truncationMode: TruncationMode.Fade
         horizontalAlignment: Text.AlignLeft
-        color: Theme.highlightColor
+        color: thisItem.selected ? Theme.secondaryHighlightColor : Theme.highlightColor
         textFormat: Text.PlainText
     }
 
@@ -56,7 +59,7 @@ Rectangle {
         color: Theme.highlightColor
         visible: landscape
         transform: HarbourTextFlip {
-            text: item.prevPassword
+            text: thisItem.prevPassword
             target: prevPasswordLabel
         }
     }
@@ -64,6 +67,7 @@ Rectangle {
     Label {
         id: currentPasswordLabel
 
+        color: thisItem.selected ? Theme.highlightColor : Theme.primaryColor
         anchors {
             right: parent.right
             rightMargin: landscape ? Theme.paddingLarge : Theme.horizontalPageMargin
@@ -75,7 +79,7 @@ Rectangle {
             bold: true
         }
         transform: HarbourTextFlip {
-            text: item.currentPassword
+            text: thisItem.currentPassword
             target: currentPasswordLabel
         }
     }
@@ -92,7 +96,7 @@ Rectangle {
         color: Theme.highlightColor
         visible: landscape
         transform: HarbourTextFlip {
-            text: item.nextPassword
+            text: thisItem.nextPassword
             target: nextPasswordLabel
         }
     }

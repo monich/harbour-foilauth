@@ -89,6 +89,7 @@ public:
     Q_INVOKABLE static QVariantMap parseUri(QString aUri);
     Q_INVOKABLE static QVariantList parseMigrationUri(QString aUri);
     Q_INVOKABLE static bool isValidBase32(QString aBase32);
+    Q_INVOKABLE static QStringList stringListRemove(QStringList aList, QString aString);
 
 Q_SIGNALS:
     void otherFoilAppsInstalledChanged();

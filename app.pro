@@ -144,6 +144,7 @@ HEADERS += \
     $${HARBOUR_LIB_INCLUDE}/HarbourOrganizeListModel.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourQrCodeGenerator.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourQrCodeImageProvider.h \
+    $${HARBOUR_LIB_INCLUDE}/HarbourSelectionListModel.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourSingleImageProvider.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourSystemState.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourSystem.h \
@@ -157,6 +158,7 @@ SOURCES += \
     $${HARBOUR_LIB_SRC}/HarbourOrganizeListModel.cpp \
     $${HARBOUR_LIB_SRC}/HarbourQrCodeGenerator.cpp \
     $${HARBOUR_LIB_SRC}/HarbourQrCodeImageProvider.cpp \
+    $${HARBOUR_LIB_SRC}/HarbourSelectionListModel.cpp \
     $${HARBOUR_LIB_SRC}/HarbourSingleImageProvider.cpp \
     $${HARBOUR_LIB_SRC}/HarbourSystemState.cpp \
     $${HARBOUR_LIB_SRC}/HarbourSystem.cpp \
@@ -166,6 +168,7 @@ SOURCES += \
 HARBOUR_QML_COMPONENTS = \
     $${HARBOUR_LIB_QML}/HarbourFitLabel.qml \
     $${HARBOUR_LIB_QML}/HarbourHighlightIcon.qml \
+    $${HARBOUR_LIB_QML}/HarbourIconTextButton.qml \
     $${HARBOUR_LIB_QML}/HarbourHintIconButton.qml \
     $${HARBOUR_LIB_QML}/HarbourPasswordInputField.qml \
     $${HARBOUR_LIB_QML}/HarbourShakeAnimation.qml \

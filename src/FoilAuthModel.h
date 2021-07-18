@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2020 Jolla Ltd.
- * Copyright (C) 2019-2020 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2021 Jolla Ltd.
+ * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -107,7 +107,9 @@ public:
         QString aIssuer, int aDigits, int aTimeShift);
     Q_INVOKABLE bool addTokenUri(QString aUri);
     Q_INVOKABLE void deleteToken(QString aId);
+    Q_INVOKABLE void deleteTokens(QStringList aIds);
     Q_INVOKABLE void deleteAll();
+    Q_INVOKABLE QStringList getIdsAt(QList<int> aRows);
 
     // QAbstractItemModel
     Qt::ItemFlags flags(const QModelIndex& aIndex) const Q_DECL_OVERRIDE;

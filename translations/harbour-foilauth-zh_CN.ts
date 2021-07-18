@@ -207,16 +207,6 @@
         <extracomment>Pulley menu item, locks the tokens</extracomment>
         <translation>锁定</translation>
     </message>
-    <message id="foilauth-menu-delete_all_tokens">
-        <source>Delete all</source>
-        <extracomment>Pulley menu item, deletes all tokens</extracomment>
-        <translation>全部删除</translation>
-    </message>
-    <message id="foilauth-remorse-delete_all_tokens">
-        <source>Deleting all tokens</source>
-        <extracomment>Remorse popup text</extracomment>
-        <translation>正在删除全部令牌</translation>
-    </message>
     <message id="foilauth-menu-new_auth_token">
         <source>Add token</source>
         <extracomment>Pulley menu item, creates a new authentication token</extracomment>
@@ -326,6 +316,41 @@
         <source>This QR code contains multiple tokens. Please select one:</source>
         <extracomment>Wrappable page title</extracomment>
         <translation type="unfinished">此QR码包含多个令牌。 请选择一个：</translation>
+    </message>
+    <message id="foilauth-menu-select_tokens">
+        <source>Select</source>
+        <extracomment>Pulley menu item, opens selection page</extracomment>
+        <translation type="unfinished">选择</translation>
+    </message>
+    <message id="foilauth-select_page-header">
+        <source>Select tokens</source>
+        <extracomment>Page title</extracomment>
+        <translation type="unfinished">选择令牌</translation>
+    </message>
+    <message id="foilauth-select_page-hint_delete_selected">
+        <source>Delete selected tokens</source>
+        <extracomment>Hint text</extracomment>
+        <translation type="unfinished">删除选定的令牌</translation>
+    </message>
+    <message id="foilauth-menu-select_none">
+        <source>Deselect all</source>
+        <extracomment>Pulley menu item</extracomment>
+        <translation type="unfinished">全不选</translation>
+    </message>
+    <message id="foilauth-menu-select_all">
+        <source>Select all</source>
+        <extracomment>Pulley menu item, selects all tokens</extracomment>
+        <translation type="unfinished">全选</translation>
+    </message>
+    <message id="foilauth-remorse-deleting_selected_tokens">
+        <source>Deleting selected tokens</source>
+        <extracomment>Remorse popup text (multiple tokens selected)</extracomment>
+        <translation type="unfinished">删除选定的令牌</translation>
+    </message>
+    <message id="foilauth-remorse-deleting_selected_token">
+        <source>Deleting selected token</source>
+        <extracomment>Remorse popup text (single token selected)</extracomment>
+        <translation type="unfinished">删除选定的令牌</translation>
     </message>
 </context>
 </TS>

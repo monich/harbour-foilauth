@@ -919,6 +919,7 @@ public:
     bool destroyItemAndRemoveFilesAt(int aIndex);
     bool destroyLastItemAndRemoveFiles();
     void deleteToken(QString aId);
+    void deleteTokens(QStringList aIds);
     void deleteAll();
     void clearModel();
     bool busy() const;
@@ -1533,6 +1534,28 @@ void FoilAuthModel::Private::deleteToken(QString aId)
     }
 }
 
+void FoilAuthModel::Private::deleteTokens(QStringList aIds)
+{
+    const bool wasBusy = busy();
+    const int n = aIds.count();
+    int deleted = 0;
+    for (int i = 0; i < n; i++) {
+        const QString id(aIds.at(i));
+        if (destroyItemAndRemoveFilesAt(findDataPos(id))) {
+            deleted++;
+        } else {
+            HDEBUG("Invalid token id" << id);
+        }
+    }
+    if (deleted) {
+        saveInfo();
+        // saveInfo() doesn't queue BusyChanged signal, we have to do it here
+        if (wasBusy != busy()) {
+            queueSignal(SignalBusyChanged);
+        }
+    }
+}
+
 void FoilAuthModel::Private::deleteAll()
 {
     const int n = iData.count();
@@ -2027,11 +2050,32 @@ void FoilAuthModel::deleteToken(QString aId)
     iPrivate->emitQueuedSignals();
 }
 
+void FoilAuthModel::deleteTokens(QStringList aIds)
+{
+    HDEBUG(aIds);
+    iPrivate->deleteTokens(aIds);
+    iPrivate->emitQueuedSignals();
+}
+
 void FoilAuthModel::deleteAll()
 {
     HDEBUG("deleting all tokena");
     iPrivate->deleteAll();
     iPrivate->emitQueuedSignals();
+}
+
+QStringList FoilAuthModel::getIdsAt(QList<int> aRows)
+{
+    QStringList ids;
+    const int n = aRows.count();
+    ids.reserve(n);
+    for (int i = 0; i < n; i++) {
+        ModelData* data = iPrivate->dataAt(aRows.at(i));
+        if (data) {
+            ids.append(data->iId);
+        }
+    }
+    return ids;
 }
 
 int FoilAuthModel::indexOf(const FoilAuthToken* aToken) const

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2020 Jolla Ltd.
- * Copyright (C) 2019-2020 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2021 Jolla Ltd.
+ * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -43,6 +43,7 @@
 #include "HarbourQrCodeGenerator.h"
 #include "HarbourQrCodeImageProvider.h"
 #include "HarbourOrganizeListModel.h"
+#include "HarbourSelectionListModel.h"
 #include "HarbourSingleImageProvider.h"
 
 #include "HarbourDebug.h"
@@ -72,6 +73,7 @@ static void register_types(const char* uri, int v1 = 1, int v2 = 0)
     qmlRegisterType<FoilAuthFavoritesModel>(uri, v1, v2, "FoilAuthFavoritesModel");
     qmlRegisterType<HarbourOrganizeListModel>(uri, v1, v2, "HarbourOrganizeListModel");
     qmlRegisterType<HarbourQrCodeGenerator>(uri, v1, v2, "HarbourQrCodeGenerator");
+    qmlRegisterType<HarbourSelectionListModel>(uri, v1, v2, "HarbourSelectionListModel");
     qmlRegisterType<HarbourSingleImageProvider>(uri, v1, v2, "HarbourSingleImageProvider");
     qmlRegisterType<QrCodeScanner>(uri, v1, v2, "QrCodeScanner");
 }

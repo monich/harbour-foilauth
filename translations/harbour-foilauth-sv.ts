@@ -209,16 +209,6 @@
         <extracomment>Pulley menu item, locks the tokens</extracomment>
         <translation>Lås</translation>
     </message>
-    <message id="foilauth-menu-delete_all_tokens">
-        <source>Delete all</source>
-        <extracomment>Pulley menu item, deletes all tokens</extracomment>
-        <translation>Ta bort alla</translation>
-    </message>
-    <message id="foilauth-remorse-delete_all_tokens">
-        <source>Deleting all tokens</source>
-        <extracomment>Remorse popup text</extracomment>
-        <translation>Tar bort alla token</translation>
-    </message>
     <message id="foilauth-menu-new_auth_token">
         <source>Add token</source>
         <extracomment>Pulley menu item, creates a new authentication token</extracomment>
@@ -328,6 +318,41 @@
         <source>This QR code contains multiple tokens. Please select one:</source>
         <extracomment>Wrappable page title</extracomment>
         <translation type="unfinished">Denna QR-kod innehåller flera tokens. Välj en:</translation>
+    </message>
+    <message id="foilauth-menu-select_tokens">
+        <source>Select</source>
+        <extracomment>Pulley menu item, opens selection page</extracomment>
+        <translation type="unfinished">Markera</translation>
+    </message>
+    <message id="foilauth-select_page-header">
+        <source>Select tokens</source>
+        <extracomment>Page title</extracomment>
+        <translation type="unfinished">Välj tokens</translation>
+    </message>
+    <message id="foilauth-select_page-hint_delete_selected">
+        <source>Delete selected tokens</source>
+        <extracomment>Hint text</extracomment>
+        <translation type="unfinished">Ta bort valda tokens</translation>
+    </message>
+    <message id="foilauth-menu-select_none">
+        <source>Deselect all</source>
+        <extracomment>Pulley menu item</extracomment>
+        <translation type="unfinished">Välj ingen</translation>
+    </message>
+    <message id="foilauth-menu-select_all">
+        <source>Select all</source>
+        <extracomment>Pulley menu item, selects all tokens</extracomment>
+        <translation type="unfinished">Välj alla</translation>
+    </message>
+    <message id="foilauth-remorse-deleting_selected_tokens">
+        <source>Deleting selected tokens</source>
+        <extracomment>Remorse popup text (multiple tokens selected)</extracomment>
+        <translation type="unfinished">Tar bort valda tokens</translation>
+    </message>
+    <message id="foilauth-remorse-deleting_selected_token">
+        <source>Deleting selected token</source>
+        <extracomment>Remorse popup text (single token selected)</extracomment>
+        <translation type="unfinished">Tar bort valda token</translation>
     </message>
 </context>
 </TS>

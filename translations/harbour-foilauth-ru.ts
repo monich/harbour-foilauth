@@ -211,15 +211,20 @@
         <extracomment>Pulley menu item, locks the tokens</extracomment>
         <translation>Заблокировать</translation>
     </message>
-    <message id="foilauth-menu-delete_all_tokens">
-        <source>Delete all</source>
-        <extracomment>Pulley menu item, deletes all tokens</extracomment>
-        <translation>Удалить все коды</translation>
+    <message id="foilauth-menu-select_tokens">
+        <source>Select</source>
+        <extracomment>Pulley menu item, opens selection page</extracomment>
+        <translation>Выбрать</translation>
     </message>
-    <message id="foilauth-remorse-delete_all_tokens">
-        <source>Deleting all tokens</source>
-        <extracomment>Remorse popup text</extracomment>
-        <translation>Все коды будут удалены</translation>
+    <message id="foilauth-menu-select_none">
+        <source>Deselect all</source>
+        <extracomment>Pulley menu item</extracomment>
+        <translation>Сбросить выбор</translation>
+    </message>
+    <message id="foilauth-menu-select_all">
+        <source>Select all</source>
+        <extracomment>Pulley menu item, selects all tokens</extracomment>
+        <translation>Выбрать все</translation>
     </message>
     <message id="foilauth-menu-new_auth_token">
         <source>Add token</source>
@@ -330,6 +335,26 @@
         <source>This QR code contains multiple tokens. Please select one:</source>
         <extracomment>Wrappable page title</extracomment>
         <translation>Этот QR-код содержит сразу несколько кодов авторизации. Выберите какой-нибудь один:</translation>
+    </message>
+    <message id="foilauth-remorse-deleting_selected_token">
+        <source>Deleting selected token</source>
+        <extracomment>Remorse popup text (single token selected)</extracomment>
+        <translation>Выбранный код будет удалён</translation>
+    </message>
+    <message id="foilauth-remorse-deleting_selected_tokens">
+        <source>Deleting selected tokens</source>
+        <extracomment>Remorse popup text (multiple tokens selected)</extracomment>
+        <translation>Выбранные коды будут удалены</translation>
+    </message>
+    <message id="foilauth-select_page-header">
+        <source>Select tokens</source>
+        <extracomment>Page title</extracomment>
+        <translation>Выберите коды</translation>
+    </message>
+    <message id="foilauth-select_page-hint_delete_selected">
+        <source>Delete selected tokens</source>
+        <extracomment>Hint text</extracomment>
+        <translation>Удалить выбранные коды авторизации</translation>
     </message>
 </context>
 </TS>

@@ -13,6 +13,7 @@ SilicaListView {
     property var foilUi
     property var foilModel
     property var dragItem
+    property var disabledItems: []
 
     readonly property bool isLandscape: mainPage && mainPage.isLandscape
     readonly property real dragThresholdX: Theme.itemSizeSmall/2
@@ -99,17 +100,40 @@ SilicaListView {
             onClicked: foilModel.lock(false)
         }
         MenuItem {
-            //: Pulley menu item, deletes all tokens
-            //% "Delete all"
-            text: qsTrId("foilauth-menu-delete_all_tokens")
+            //: Pulley menu item, opens selection page
+            //% "Select"
+            text: qsTrId("foilauth-menu-select_tokens")
             visible: foilModel.count > 0
             onClicked: {
-                var remorsePopup = remorsePopupComponent.createObject(mainPage)
-                //: Remorse popup text
-                //% "Deleting all tokens"
-                remorsePopup.execute(qsTrId("foilauth-remorse-delete_all_tokens"), function() {
-                    foilModel.deleteAll()
-                    remorsePopup.destroy()
+                disabledItems = []
+                var selectPage = pageStack.push(Qt.resolvedUrl("SelectPage.qml"), {
+                    allowedOrientations: mainPage.allowedOrientations,
+                    sourceModel: mainPage.foilModel
+                })
+                selectPage.deleteRows.connect(function(rows) {
+                    disabledItems = foilModel.getIdsAt(rows)
+                    pageStack.pop()
+                    if (disabledItems.length > 0) {
+                        var remorsePopup = remorsePopupComponent.createObject(mainPage)
+                        remorsePopup.canceled.connect(function() {
+                            disabledItems = []
+                            remorsePopup.destroy()
+                        })
+                        remorsePopup.triggered.connect(function() {
+                            // disabledItems will be updated when the remove animation
+                            // gets completed so that the item keeps looking disabled
+                            // during removal
+                            foilModel.deleteTokens(disabledItems)
+                            remorsePopup.destroy()
+                        })
+                        remorsePopup.execute((disabledItems.length === 1) ?
+                            //: Remorse popup text (single token selected)
+                            //% "Deleting selected token"
+                            qsTrId("foilauth-remorse-deleting_selected_token") :
+                            //: Remorse popup text (multiple tokens selected)
+                            //% "Deleting selected tokens"
+                            qsTrId("foilauth-remorse-deleting_selected_tokens"))
+                    }
                 })
             }
         }
@@ -216,8 +240,9 @@ SilicaListView {
     delegate: ListItem {
         id: tokenListDelegate
 
+        enabled: !disabledItems || !disabledItems.length || disabledItems.indexOf(tokenId) < 0
+
         readonly property string tokenId: model.modelId
-        readonly property string modelPrevPassword: model.prevPassword
         readonly property int modelIndex: index
         readonly property bool dragging: tokenList.dragItem === tokenListDelegate
 
@@ -295,12 +320,15 @@ SilicaListView {
             TokenListItem {
                 anchors.fill: parent
                 description: model.label
-                prevPassword: modelPrevPassword
+                prevPassword: model.prevPassword
                 currentPassword: model.currentPassword
                 nextPassword: model.nextPassword
                 favorite: model.favorite
                 landscape: tokenList.isLandscape
                 color: dragging ? Theme.rgba(Theme.highlightBackgroundColor, 0.2) : "transparent"
+                selected: tokenListDelegate.down
+                enabled: tokenListDelegate.enabled
+                opacity: enabled ? 1 : 0.2
 
                 onFavoriteToggled: model.favorite = !model.favorite
 
@@ -418,7 +446,14 @@ SilicaListView {
         drag.axis: Drag.YAxis
 
         ListView.onAdd: AddAnimation { target: tokenListDelegate }
-        ListView.onRemove: RemoveAnimation { target: tokenListDelegate }
+        ListView.onRemove: RemoveAnimation {
+            target: tokenListDelegate
+            onRunningChanged: {
+                if (!running) {
+                    disabledItems = FoilAuth.stringListRemove(disabledItems, tokenId)
+                }
+            }
+        }
     }
 
     moveDisplaced: Transition {

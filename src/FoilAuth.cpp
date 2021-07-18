@@ -192,6 +192,14 @@ QByteArray FoilAuth::toByteArray(GBytes* aData)
     return QByteArray();
 }
 
+// QStringList is an array like object, but it is not an array in QML.
+// Couldn't figure out how to modify it from QML
+QStringList FoilAuth::stringListRemove(QStringList aList, QString aString)
+{
+    aList.removeOne(aString);
+    return aList;
+}
+
 FoilOutput* FoilAuth::createFoilFile(QString aDestDir, GString* aOutPath)
 {
     // Generate random name for the encrypted file
