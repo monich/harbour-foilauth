@@ -39,6 +39,7 @@
 #include <QString>
 #include <QByteArray>
 #include <QVariantMap>
+#include <QList>
 
 class FoilAuthToken : public FoilAuthTypes {
 class Private;
@@ -88,6 +89,7 @@ public:
 
     static QList<FoilAuthToken> fromProtoBuf(const QByteArray& aData);
     static QByteArray toProtoBuf(const QList<FoilAuthToken>& aTokens);
+    static QList<QByteArray> toProtoBufs(const QList<FoilAuthToken>& aTokens, int aMaxBatchSize = 1000);
 
 public:
     DigestAlgorithm iAlgorithm;

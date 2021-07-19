@@ -444,7 +444,8 @@ public:
     static bool parseVarInt(FoilParsePos* aPos, quint64* aResult);
     static bool parsePayload(FoilParsePos* aPos, FoilBytes* aResult);
     static bool parseOtpParameters(FoilParsePos* aPos, OtpParameters* aResult);
-    static void encodeVarInt(quint64 aValue, QByteArray* aOutput);
+    static void encodeVarInt(QByteArray* aOutput, quint64 aValue);
+    static void encodeTrailer(QByteArray* aOutput, uint aBatchIndex, uint aBatchSize, quint64 aBatchId);
     static QByteArray encodeBytes(const QByteArray aBytes);
 };
 
@@ -465,7 +466,7 @@ bool FoilAuthToken::Private::parseVarInt(FoilParsePos* aPos, quint64* aResult)
     return false;
 }
 
-void FoilAuthToken::Private::encodeVarInt(quint64 aValue, QByteArray* aOutput)
+void FoilAuthToken::Private::encodeVarInt(QByteArray* aOutput, quint64 aValue)
 {
     uchar out[10];
     quint64 value = aValue;
@@ -498,9 +499,22 @@ bool FoilAuthToken::Private::parsePayload(FoilParsePos* aPos, FoilBytes* aResult
 QByteArray FoilAuthToken::Private::encodeBytes(const QByteArray aBytes)
 {
     QByteArray output;
-    encodeVarInt(aBytes.size(), &output);
+    encodeVarInt(&output, aBytes.size());
     output.append(aBytes);
     return output;
+}
+
+void FoilAuthToken::Private::encodeTrailer(QByteArray* aOutput,
+    uint aBatchIndex, uint aBatchSize, quint64 aBatchId)
+{
+    aOutput->append(VERSION_TAG);
+    encodeVarInt(aOutput, VERSION);
+    aOutput->append(BATCH_SIZE_TAG);
+    encodeVarInt(aOutput, aBatchSize);
+    aOutput->append(BATCH_INDEX_TAG);
+    encodeVarInt(aOutput, aBatchIndex);
+    aOutput->append(BATCH_ID_TAG);
+    encodeVarInt(aOutput, aBatchId);
 }
 
 bool FoilAuthToken::Private::parseOtpParameters(FoilParsePos* aPos, OtpParameters* aResult)
@@ -614,13 +628,13 @@ QByteArray FoilAuthToken::toProtoBuf() const
     payload.append(Private::ISSUER_TAG);
     payload.append(Private::encodeBytes(iIssuer.toUtf8()));
     payload.append(Private::ALGORITHM_TAG);
-    Private::encodeVarInt(Private::OtpParameters::encodeAlgorithm(iAlgorithm), &payload);
+    Private::encodeVarInt(&payload, Private::OtpParameters::encodeAlgorithm(iAlgorithm));
     payload.append(Private::DIGITS_TAG);
-    Private::encodeVarInt(Private::OtpParameters::encodeDigits(iDigits), &payload);
+    Private::encodeVarInt(&payload, Private::OtpParameters::encodeDigits(iDigits));
     payload.append(Private::TYPE_TAG);
-    Private::encodeVarInt(Private::OTP_TYPE_TOTP, &payload);
+    Private::encodeVarInt(&payload, Private::OTP_TYPE_TOTP);
     payload.append(Private::COUNTER_TAG);
-    Private::encodeVarInt(0, &payload);
+    Private::encodeVarInt(&payload, 0);
 
     QByteArray protobuf;
     protobuf.reserve(payload.size() + 2);
@@ -632,19 +646,64 @@ QByteArray FoilAuthToken::toProtoBuf() const
 QByteArray FoilAuthToken::toProtoBuf(const QList<FoilAuthToken>& aTokens)
 {
     QByteArray output;
-    for (int i = 0; i < aTokens.count(); i++) {
+    const int n = aTokens.count();
+    for (int i = 0; i < n; i++) {
         output.append(aTokens.at(i).toProtoBuf());
     }
     // Trailer
-    output.append(Private::VERSION_TAG);
-    Private::encodeVarInt(Private::VERSION, &output);
-    output.append(Private::BATCH_SIZE_TAG);
-    Private::encodeVarInt(1, &output);
-    output.append(Private::BATCH_INDEX_TAG);
-    Private::encodeVarInt(0, &output);
-    quint64 batch_id = 0;
-    foil_random(&batch_id, sizeof(batch_id));
-    output.append(Private::BATCH_ID_TAG);
-    Private::encodeVarInt(batch_id, &output);
+    quint64 batchId;
+    foil_random(&batchId, sizeof(batchId));
+    Private::encodeTrailer(&output, 0, 1, batchId);
     return output;
+}
+
+// Note that the actual amount of information which end up
+// in the QR code will be greater than aMaxBatchSize because
+// of otpauth-migration://offline?data= prefix, BASE64 and URI
+// encoding. Meaning that it's not a big deal if we exceed
+// aMaxBatchSize by a few bytes.
+QList<QByteArray> FoilAuthToken::toProtoBufs(const QList<FoilAuthToken>& aTokens, int aMaxBatchSize)
+{
+    QList<QByteArray> result;
+    const int n = aTokens.count();
+
+    if (n > 0) {
+        // Generate batch id
+        quint64 batchId;
+        foil_random(&batchId, sizeof(batchId));
+
+        // Estimate the maximum size of the trailer
+        QByteArray buf;
+        Private::encodeTrailer(&buf, n - 1, n, batchId);
+        const int maxTrailerSize = buf.size();
+
+        int i;
+        buf.resize(0);
+        for (i = 0; i < n; i++) {
+            const QByteArray tokenBuf(aTokens.at(i).toProtoBuf());
+            if (buf.size() + tokenBuf.size() + maxTrailerSize < aMaxBatchSize) {
+                buf.append(tokenBuf);
+                // Can't add the trailer just yet, the batch size is unknown
+            } else {
+                // This token doesn't fit
+                if (buf.size() > 0) {
+                    result.append(buf);
+                    buf = tokenBuf;
+                } else {
+                    // This token doesn't fit at all, skip it
+                }
+            }
+        }
+
+        if (buf.size() > 0) {
+            result.append(buf);
+        }
+
+        // Add the trailer
+        const int batchSize = result.count();
+        for (i = 0; i < batchSize; i++) {
+            Private::encodeTrailer(&result[i], i, batchSize, batchId);
+        }
+    }
+    return result;
 }
