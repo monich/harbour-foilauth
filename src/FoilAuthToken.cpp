@@ -37,6 +37,7 @@
 #include "qrencode.h"
 
 #include <foil_util.h>
+#include <foil_random.h>
 
 #include <QUrl>
 
@@ -358,22 +359,29 @@ public:
         OTP_TYPE_TOTP
     };
 
-    static const uint PROTOBUF_TYPE_SHIFT = 3;
-    static const uint PROTOBUF_TYPE_MASK = ((1 << PROTOBUF_TYPE_SHIFT)-1);
-    static const uint PROTOBUF_TYPE_VARINT = 0;
-    static const uint PROTOBUF_TYPE_BYTES = 2;
+    static const uchar PROTOBUF_TYPE_SHIFT = 3;
+    static const uchar PROTOBUF_TYPE_MASK = ((1 << PROTOBUF_TYPE_SHIFT)-1);
+    static const uchar PROTOBUF_TYPE_VARINT = 0;
+    static const uchar PROTOBUF_TYPE_BYTES = 2;
 
 #define BYTES_TAG(x) (((x) << PROTOBUF_TYPE_SHIFT) | PROTOBUF_TYPE_BYTES)
 #define VARINT_TAG(x) (((x) << PROTOBUF_TYPE_SHIFT) | PROTOBUF_TYPE_VARINT)
 
-    static const uint OTP_PARAMETERS_TAG = BYTES_TAG(1);
-    static const uint SECRET_TAG = BYTES_TAG(1);
-    static const uint NAME_TAG = BYTES_TAG(2);
-    static const uint ISSUER_TAG = BYTES_TAG(3);
-    static const uint ALGORITHM_TAG = VARINT_TAG(4);
-    static const uint DIGITS_TAG = VARINT_TAG(5);
-    static const uint TYPE_TAG = VARINT_TAG(6);
-    static const uint COUNTER_TAG = VARINT_TAG(7);
+    static const uchar OTP_PARAMETERS_TAG = BYTES_TAG(1);
+    static const uchar SECRET_TAG = BYTES_TAG(1);
+    static const uchar NAME_TAG = BYTES_TAG(2);
+    static const uchar ISSUER_TAG = BYTES_TAG(3);
+    static const uchar ALGORITHM_TAG = VARINT_TAG(4);
+    static const uchar DIGITS_TAG = VARINT_TAG(5);
+    static const uchar TYPE_TAG = VARINT_TAG(6);
+    static const uchar COUNTER_TAG = VARINT_TAG(7);
+
+    static const uchar VERSION_TAG = VARINT_TAG(2);
+    static const uchar BATCH_SIZE_TAG = VARINT_TAG(3);
+    static const uchar BATCH_INDEX_TAG = VARINT_TAG(4);
+    static const uchar BATCH_ID_TAG = VARINT_TAG(5);
+
+    static const uchar VERSION = 1;
 
     struct OtpParameters {
         QByteArray secret;
@@ -401,9 +409,25 @@ public:
                 (digits == DIGIT_COUNT_SIX || digits == DIGIT_COUNT_EIGHT) &&
                 type == OTP_TYPE_TOTP;
         }
+        static DigitCount encodeDigits(int aDigits) {
+            switch (aDigits) {
+            case 6: return DIGIT_COUNT_SIX;
+            case 8: return DIGIT_COUNT_EIGHT;
+            }
+            return DIGIT_COUNT_UNSPECIFIED;
+        }
         int numDigits() const {
             // Assume it's valid
             return (digits == DIGIT_COUNT_EIGHT) ? 8 : 6;
+        }
+        static Algorithm encodeAlgorithm(DigestAlgorithm aAlgorithm) {
+            switch (aAlgorithm) {
+            case DigestAlgorithmMD5: return ALGORITHM_MD5;
+            case DigestAlgorithmSHA1: return ALGORITHM_SHA1;
+            case DigestAlgorithmSHA256: return ALGORITHM_SHA256;
+            case DigestAlgorithmSHA512:  return ALGORITHM_SHA512;
+            }
+            return ALGORITHM_UNSPECIFIED;
         }
         DigestAlgorithm digestAlgorithm() const {
             switch (algorithm) {
@@ -420,6 +444,8 @@ public:
     static bool parseVarInt(FoilParsePos* aPos, quint64* aResult);
     static bool parsePayload(FoilParsePos* aPos, FoilBytes* aResult);
     static bool parseOtpParameters(FoilParsePos* aPos, OtpParameters* aResult);
+    static void encodeVarInt(quint64 aValue, QByteArray* aOutput);
+    static QByteArray encodeBytes(const QByteArray aBytes);
 };
 
 bool FoilAuthToken::Private::parseVarInt(FoilParsePos* aPos, quint64* aResult)
@@ -439,6 +465,22 @@ bool FoilAuthToken::Private::parseVarInt(FoilParsePos* aPos, quint64* aResult)
     return false;
 }
 
+void FoilAuthToken::Private::encodeVarInt(quint64 aValue, QByteArray* aOutput)
+{
+    uchar out[10];
+    quint64 value = aValue;
+    int i = sizeof(out) - 1;
+    out[i] = value & 0x7f;
+    value >>= 7;
+    while (value) {
+        out[--i] = 0x80 | (uchar)value;
+        value >>= 7;
+    }
+    const int n = sizeof(out) - i;
+    aOutput->reserve(aOutput->size() + n);
+    aOutput->append((char*)(out + i), n);
+}
+
 bool FoilAuthToken::Private::parsePayload(FoilParsePos* aPos, FoilBytes* aResult)
 {
     // Varint size followed by payload bytes
@@ -451,6 +493,14 @@ bool FoilAuthToken::Private::parsePayload(FoilParsePos* aPos, FoilBytes* aResult
         return true;
     }
     return false;
+}
+
+QByteArray FoilAuthToken::Private::encodeBytes(const QByteArray aBytes)
+{
+    QByteArray output;
+    encodeVarInt(aBytes.size(), &output);
+    output.append(aBytes);
+    return output;
 }
 
 bool FoilAuthToken::Private::parseOtpParameters(FoilParsePos* aPos, OtpParameters* aResult)
@@ -536,7 +586,7 @@ bool FoilAuthToken::Private::parseOtpParameters(FoilParsePos* aPos, OtpParameter
     return false;
 }
 
-QList<FoilAuthToken> FoilAuthToken::parseProtoBuf(const QByteArray& aData)
+QList<FoilAuthToken> FoilAuthToken::fromProtoBuf(const QByteArray& aData)
 {
     FoilParsePos pos;
     pos.ptr = (const guint8*) aData.constData();
@@ -552,4 +602,49 @@ QList<FoilAuthToken> FoilAuthToken::parseProtoBuf(const QByteArray& aData)
         p.clear();
     }
     return result;
+}
+
+QByteArray FoilAuthToken::toProtoBuf() const
+{
+    QByteArray payload;
+    payload.append(Private::SECRET_TAG);
+    payload.append(Private::encodeBytes(iBytes));
+    payload.append(Private::NAME_TAG);
+    payload.append(Private::encodeBytes(iLabel.toUtf8()));
+    payload.append(Private::ISSUER_TAG);
+    payload.append(Private::encodeBytes(iIssuer.toUtf8()));
+    payload.append(Private::ALGORITHM_TAG);
+    Private::encodeVarInt(Private::OtpParameters::encodeAlgorithm(iAlgorithm), &payload);
+    payload.append(Private::DIGITS_TAG);
+    Private::encodeVarInt(Private::OtpParameters::encodeDigits(iDigits), &payload);
+    payload.append(Private::TYPE_TAG);
+    Private::encodeVarInt(Private::OTP_TYPE_TOTP, &payload);
+    payload.append(Private::COUNTER_TAG);
+    Private::encodeVarInt(0, &payload);
+
+    QByteArray protobuf;
+    protobuf.reserve(payload.size() + 2);
+    protobuf.append(Private::OTP_PARAMETERS_TAG);
+    protobuf.append(Private::encodeBytes(payload));
+    return protobuf;
+}
+
+QByteArray FoilAuthToken::toProtoBuf(const QList<FoilAuthToken>& aTokens)
+{
+    QByteArray output;
+    for (int i = 0; i < aTokens.count(); i++) {
+        output.append(aTokens.at(i).toProtoBuf());
+    }
+    // Trailer
+    output.append(Private::VERSION_TAG);
+    Private::encodeVarInt(Private::VERSION, &output);
+    output.append(Private::BATCH_SIZE_TAG);
+    Private::encodeVarInt(1, &output);
+    output.append(Private::BATCH_INDEX_TAG);
+    Private::encodeVarInt(0, &output);
+    quint64 batch_id = 0;
+    foil_random(&batch_id, sizeof(batch_id));
+    output.append(Private::BATCH_ID_TAG);
+    Private::encodeVarInt(batch_id, &output);
+    return output;
 }

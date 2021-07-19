@@ -84,8 +84,10 @@ public:
 
     QString toUri() const;
     QVariantMap toVariantMap() const;
+    QByteArray toProtoBuf() const;
 
-    static QList<FoilAuthToken> parseProtoBuf(const QByteArray& aData);
+    static QList<FoilAuthToken> fromProtoBuf(const QByteArray& aData);
+    static QByteArray toProtoBuf(const QList<FoilAuthToken>& aTokens);
 
 public:
     DigestAlgorithm iAlgorithm;

@@ -320,7 +320,7 @@ QVariantList FoilAuth::parseMigrationUri(QString aUri)
 #endif // HARBOUR_DEBUG
 
                 const QByteArray buf((const char*)data, size);
-                const QList<FoilAuthToken> tokens(FoilAuthToken::parseProtoBuf(buf));
+                const QList<FoilAuthToken> tokens(FoilAuthToken::fromProtoBuf(buf));
                 const int n = tokens.count();
                 HDEBUG(n << "tokens");
                 for (int i = 0; i < n; i++) {
