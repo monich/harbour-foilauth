@@ -279,15 +279,15 @@ test_toUri(
 {
     g_assert(FoilAuth::toUri("", "Label", "Issuer", 5,
         FoilAuthTypes::DEFAULT_TIMESHIFT,
-        FoilAuthTypes::DEFAULT_ALGORITHM).isEmpty());
+        FoilAuth::DefaultAlgorithm).isEmpty());
     g_assert(FoilAuth::toUri("aebagbafa", "Label", "Issuer", 5,
         FoilAuthTypes::DEFAULT_TIMESHIFT,
-        FoilAuthTypes::DEFAULT_ALGORITHM) ==
+        FoilAuth::DefaultAlgorithm) ==
         "otpauth://totp/Label?secret=aebagbaf&issuer=Issuer&digits=5");
     g_assert(FoilAuth::toUri("aebagbafa", "Label", "Issuer",
         FoilAuthTypes::DEFAULT_DIGITS,
         FoilAuthTypes::DEFAULT_TIMESHIFT,
-        FoilAuthTypes::DEFAULT_ALGORITHM) ==
+        FoilAuth::DefaultAlgorithm) ==
         "otpauth://totp/Label?secret=aebagbaf&issuer=Issuer&digits=6");
 }
 
@@ -346,6 +346,23 @@ test_parseMigrationUri(
 }
 
 /*==========================================================================*
+ * stringListRemove
+ *==========================================================================*/
+
+static
+void
+test_stringListRemove(
+    void)
+{
+    QStringList list;
+
+    list.append("foo");
+    list.append("bar");
+    g_assert(FoilAuth::stringListRemove(list, "foobar") == list);
+    g_assert(FoilAuth::stringListRemove(list, "foo") != list);
+}
+
+/*==========================================================================*
  * Common
  *==========================================================================*/
 
@@ -368,6 +385,7 @@ int main(int argc, char* argv[])
     g_test_add_func(TEST_("toUri"), test_toUri);
     g_test_add_func(TEST_("parseUri"), test_parseUri);
     g_test_add_func(TEST_("parseMigrationUri"), test_parseMigrationUri);
+    g_test_add_func(TEST_("stringListRemove"), test_stringListRemove);
     return g_test_run();
 }
 
