@@ -167,6 +167,7 @@ Dialog {
                     })
                     scanPage.scanCompleted.connect(function(token) {
                         if (token.valid) {
+                            issuer = token.issuer
                             labelField.text = token.label
                             secretField.text = token.secret
                             digitsField.text = token.digits
