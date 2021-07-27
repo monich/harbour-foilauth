@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2020 Jolla Ltd.
- * Copyright (C) 2019-2020 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2021 Jolla Ltd.
+ * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -38,6 +38,7 @@
 
 class FoilAuthSettings : public QObject {
     Q_OBJECT
+    Q_PROPERTY(int qrCodeEcLevel READ qrCodeEcLevel WRITE setQrCodeEcLevel NOTIFY qrCodeEcLevelChanged)
     Q_PROPERTY(qreal scanZoom READ scanZoom WRITE setScanZoom NOTIFY scanZoomChanged)
     Q_PROPERTY(qreal maxZoom READ maxZoom WRITE setMaxZoom NOTIFY maxZoomChanged)
     Q_PROPERTY(bool scanWideMode READ scanWideMode WRITE setScanWideMode NOTIFY scanWideModeChanged)
@@ -52,6 +53,9 @@ public:
     ~FoilAuthSettings();
 
     static QObject* createSingleton(QQmlEngine* aEngine, QJSEngine* aScript);
+
+    int qrCodeEcLevel() const;
+    void setQrCodeEcLevel(int aValue);
 
     qreal scanZoom() const;
     void setScanZoom(qreal aValue);
@@ -74,6 +78,7 @@ public:
     void setAutoLockTime(int aValue);
 
 Q_SIGNALS:
+    void qrCodeEcLevelChanged();
     void maxZoomChanged();
     void scanZoomChanged();
     void scanWideModeChanged();

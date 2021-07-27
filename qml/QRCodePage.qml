@@ -30,6 +30,7 @@ Page {
         id: generatorComponent
 
         HarbourQrCodeGenerator {
+            ecLevel: FoilAuthSettings.qrCodeEcLevel
             onQrcodeChanged: qrcodeImage.qrcode = qrcode
         }
     }

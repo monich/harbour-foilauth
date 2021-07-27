@@ -24,6 +24,7 @@ Dialog {
     HarbourQrCodeGenerator {
         id: generator
 
+        ecLevel: FoilAuthSettings.qrCodeEcLevel
         text: FoilAuth.toUri(secretField.text, labelField.text, thisDialog.issuer,
             digitsField.text, timeShiftField.text, algorithm)
     }

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2020 Jolla Ltd.
- * Copyright (C) 2019-2020 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2021 Jolla Ltd.
+ * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -34,11 +34,13 @@
 #include "FoilAuthSettings.h"
 #include "FoilAuthDefs.h"
 
+#include "HarbourQrCodeGenerator.h"
 #include "HarbourDebug.h"
 
 #include <MGConfItem>
 
 #define DCONF_KEY(x)                FOILAUTH_DCONF_ROOT x
+#define KEY_QRCODE_ECLEVEL          DCONF_KEY("qrCodeEcLevel")
 #define KEY_MAX_ZOOM                DCONF_KEY("maxZoom")
 #define KEY_SCAN_ZOOM               DCONF_KEY("scanZoom")
 #define KEY_SCAN_WIDE_MODE          DCONF_KEY("scanWideMode")
@@ -47,6 +49,7 @@
 #define KEY_SHARED_KEY_WARNING2     DCONF_KEY("sharedKeyWarning2")
 #define KEY_AUTO_LOCK_TIME          DCONF_KEY("autoLockTime")
 
+#define DEFAULT_QRCODE_ECLEVEL      ((int)HarbourQrCodeGenerator::ECLevelLowest)
 #define DEFAULT_MAX_ZOOM            10.f
 #define DEFAULT_SCAN_ZOOM           3.f
 #define DEFAULT_SCAN_WIDE_MODE      false
@@ -62,7 +65,10 @@ class FoilAuthSettings::Private {
 public:
     Private(FoilAuthSettings* aParent);
 
+    static int validateQrCodeEcLevel(int aValue);
+
 public:
+    MGConfItem* iQrCodeEcLevel;
     MGConfItem* iMaxZoom;
     MGConfItem* iScanZoom;
     MGConfItem* iScanWideMode;
@@ -75,6 +81,7 @@ public:
 };
 
 FoilAuthSettings::Private::Private(FoilAuthSettings* aParent) :
+    iQrCodeEcLevel(new MGConfItem(KEY_QRCODE_ECLEVEL, aParent)),
     iMaxZoom(new MGConfItem(KEY_MAX_ZOOM, aParent)),
     iScanZoom(new MGConfItem(KEY_SCAN_ZOOM, aParent)),
     iScanWideMode(new MGConfItem(KEY_SCAN_WIDE_MODE, aParent)),
@@ -85,6 +92,8 @@ FoilAuthSettings::Private::Private(FoilAuthSettings* aParent) :
     iDefaultSharedKeyWarning(DEFAULT_SHARED_KEY_WARNING),
     iDefaultAutoLockTime(DEFAULT_AUTO_LOCK_TIME)
 {
+    QObject::connect(iQrCodeEcLevel, SIGNAL(valueChanged()),
+        aParent, SIGNAL(qrCodeEcLevelChanged()));
     QObject::connect(iMaxZoom, SIGNAL(valueChanged()),
         aParent, SIGNAL(maxZoomChanged()));
     QObject::connect(iScanZoom, SIGNAL(valueChanged()),
@@ -99,6 +108,15 @@ FoilAuthSettings::Private::Private(FoilAuthSettings* aParent) :
         aParent, SIGNAL(sharedKeyWarning2Changed()));
     QObject::connect(iAutoLockTime, SIGNAL(valueChanged()),
         aParent, SIGNAL(autoLockTimeChanged()));
+}
+
+inline int
+FoilAuthSettings::Private::validateQrCodeEcLevel(
+    int aValue)
+{
+    return (aValue >= (int)HarbourQrCodeGenerator::ECLevelLowest &&
+            aValue <= (int)HarbourQrCodeGenerator::ECLevelHighest) ?
+            aValue : DEFAULT_QRCODE_ECLEVEL;
 }
 
 // ==========================================================================
@@ -123,6 +141,23 @@ FoilAuthSettings::createSingleton(
     QJSEngine* aScript)
 {
     return new FoilAuthSettings;
+}
+
+// qrCodeEcLevel
+
+int
+FoilAuthSettings::qrCodeEcLevel() const
+{
+    return Private::validateQrCodeEcLevel(iPrivate->iQrCodeEcLevel->
+        value(DEFAULT_QRCODE_ECLEVEL).toInt());
+}
+
+void
+FoilAuthSettings::setQrCodeEcLevel(
+    int aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iQrCodeEcLevel->set(Private::validateQrCodeEcLevel(aValue));
 }
 
 // scanZoom
