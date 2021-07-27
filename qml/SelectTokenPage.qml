@@ -50,7 +50,7 @@ Page {
                     text: token.issuer
                     width: parent.width
                     truncationMode: TruncationMode.Fade
-                    font.pixelSize: Theme.fontSizeSmall
+                    font.pixelSize: Theme.fontSizeExtraSmall
                     color: delegate.highlighted ? Theme.secondaryHighlightColor : Theme.secondaryColor
                     visible: text !== ""
                 }
