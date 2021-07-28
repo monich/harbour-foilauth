@@ -38,8 +38,8 @@
 
 #include <QAbstractListModel>
 
-#include <QtQml>
-
+class QJSEngine;
+class QQmlEngine;
 class FoilAuthToken;
 
 class FoilAuthModel : public QAbstractListModel {
@@ -104,7 +104,7 @@ public:
     Q_INVOKABLE int millisecondsLeft();
 
     Q_INVOKABLE bool addToken(QString aTokenBase32, QString aLabel,
-        QString aIssuer, int aDigits, int aTimeShift);
+        QString aIssuer, int aDigits, int aTimeShift, int aAlgorithm);
     Q_INVOKABLE bool addTokenUri(QString aUri);
     Q_INVOKABLE void deleteToken(QString aId);
     Q_INVOKABLE void deleteTokens(QStringList aIds);
@@ -137,8 +137,6 @@ Q_SIGNALS:
 private:
     Private* iPrivate;
 };
-
-QML_DECLARE_TYPE(FoilAuthModel)
 
 // Inline wrappers
 inline bool FoilAuthModel::contains(const FoilAuthToken* aToken) const

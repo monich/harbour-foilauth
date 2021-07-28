@@ -43,9 +43,17 @@
 #include "foil_random.h"
 #include "foil_util.h"
 
+#include "foilmsg.h"
+
 #include "gutil_misc.h"
 
-#include "foilmsg.h"
+#include <QDir>
+#include <QFile>
+#include <QTimer>
+#include <QFileInfo>
+#include <QDateTime>
+#include <QThreadPool>
+#include <QSharedPointer>
 
 #include <unistd.h>
 #include <sys/stat.h>
@@ -2009,13 +2017,13 @@ int FoilAuthModel::millisecondsLeft()
 }
 
 bool FoilAuthModel::addToken(QString aSecretBase32, QString aLabel,
-    QString aIssuer, int aDigits, int aTimeShift)
+    QString aIssuer, int aDigits, int aTimeShift, int aAlgorithm)
 {
-    HDEBUG(aSecretBase32 << aLabel << aIssuer << aDigits << aTimeShift);
+    HDEBUG(aSecretBase32 << aLabel << aIssuer << aDigits << aTimeShift << aAlgorithm);
     QByteArray secretBytes = FoilAuth::fromBase32(aSecretBase32);
     if (secretBytes.size() > 0) {
-        FoilAuthToken token(secretBytes, aLabel, aIssuer, aDigits, aTimeShift);
-        iPrivate->addToken(token);
+        iPrivate->addToken(FoilAuthToken(secretBytes, aLabel, aIssuer,
+            aDigits, aTimeShift, (FoilAuthTypes::DigestAlgorithm) aAlgorithm));
         iPrivate->emitQueuedSignals();
         return true;
     }

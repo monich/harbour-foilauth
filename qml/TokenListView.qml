@@ -160,8 +160,8 @@ SilicaListView {
                 })
             }
             function tokenAccepted(dialog) {
-                FoilAuthModel.addToken(dialog.secret, dialog.label,
-                    dialog.issuer, dialog.digits, dialog.timeshift)
+                FoilAuthModel.addToken(dialog.secret, dialog.label, dialog.issuer,
+                    dialog.digits, dialog.timeshift, dialog.algorithm)
             }
         }
     }
