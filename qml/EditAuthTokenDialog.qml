@@ -41,7 +41,10 @@ Dialog {
         width: qrcodeImage.width
         height: qrcodeImage.height
         anchors.horizontalCenter: thisDialog.horizontalCenter
-        visible: qrCodeOnly
+        z: qrCodeOnly ? 1000 /* just above the dialog header overlay */ : 0
+        opacity: qrCodeOnly ? 1 : 0
+        visible: opacity > 0
+        Behavior on opacity { FadeAnimation { } }
     }
 
     SilicaFlickable {
