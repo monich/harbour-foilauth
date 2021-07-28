@@ -153,10 +153,15 @@ SilicaListView {
                     dialogTitle: qsTrId("foilauth-add_token-title"),
                     canScan: true
                 })
-                editPage.accepted.connect(function() {
-                    FoilAuthModel.addToken(editPage.secret, editPage.label,
-                        editPage.issuer, editPage.digits, editPage.timeshift)
+                editPage.tokenAccepted.connect(tokenAccepted)
+                editPage.replacedWith.connect(function(page) {
+                    // This happens after QR code is scanned
+                    page.tokenAccepted.connect(tokenAccepted)
                 })
+            }
+            function tokenAccepted(dialog) {
+                FoilAuthModel.addToken(dialog.secret, dialog.label,
+                    dialog.issuer, dialog.digits, dialog.timeshift)
             }
         }
     }
@@ -274,7 +279,7 @@ SilicaListView {
                     text: qsTrId("foilauth-menu-edit")
                     onClicked: {
                         var item  = tokenListDelegate
-                        var editPage = pageStack.push(Qt.resolvedUrl("EditAuthTokenDialog.qml"), {
+                        pageStack.push(Qt.resolvedUrl("EditAuthTokenDialog.qml"), {
                             //: Dialog button
                             //% "Save"
                             acceptText: qsTrId("foilauth-edit_token-save"),
@@ -287,9 +292,8 @@ SilicaListView {
                             algorithm: model.algorithm,
                             digits: model.digits,
                             timeShift: model.timeShift
-                        })
-                        editPage.accepted.connect(function() {
-                            item.updateToken(editPage)
+                        }).tokenAccepted.connect(function(dialog) {
+                            item.updateToken(dialog)
                         })
                     }
                 }

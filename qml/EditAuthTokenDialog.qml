@@ -21,6 +21,11 @@ Dialog {
     property alias digits: digitsField.text
     property alias timeShift: timeShiftField.text
 
+    signal tokenAccepted(var dialog)
+    signal replacedWith(var page)
+
+    onAccepted: tokenAccepted(thisDialog)
+
     HarbourQrCodeGenerator {
         id: generator
 
@@ -161,22 +166,9 @@ Dialog {
                 //% "Scan QR code"
                 text: qsTrId("foilauth-token-scan-button")
                 visible: canScan && !secretField.text.length
-                onClicked: {
-                    var scanPage = pageStack.push(Qt.resolvedUrl("ScanPage.qml"), {
-                        allowedOrientations: thisDialog.allowedOrientations,
-                        parentPage: thisDialog
-                    })
-                    scanPage.scanCompleted.connect(function(token) {
-                        if (token.valid) {
-                            issuer = token.issuer
-                            labelField.text = token.label
-                            secretField.text = token.secret
-                            digitsField.text = token.digits
-                            timeShiftField.text = token.timeshift
-                            algorithmComboBox.currentIndex = token.algorithm
-                        }
-                    })
-                }
+                onClicked: pageStack.push(Qt.resolvedUrl("ScanPage.qml"), {
+                    allowedOrientations: thisDialog.allowedOrientations
+                })
             }
 
             VerticalPadding { visible: scanButton.visible }

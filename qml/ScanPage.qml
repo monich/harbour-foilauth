@@ -9,14 +9,36 @@ import "harbour"
 Page {
     id: thisPage
 
-    property Page parentPage
     property Item viewFinder
     property Item hint
 
     readonly property bool canShowViewFinder: Qt.application.active && thisPage.status === PageStatus.Active
     readonly property bool canScan: viewFinder && viewFinder.source.cameraState === Camera.ActiveState
 
-    signal scanCompleted(var token)
+    function done(token) {
+        var parentPage = pageStack.previousPage(thisPage) // Must be EditAuthTokenDialog
+        if (token.valid) {
+            var existingPage = pageStack.previousPage(parentPage)
+            var newPage = pageStack.replaceAbove(existingPage, Qt.resolvedUrl("EditAuthTokenDialog.qml"), {
+                //: Dialog button
+                //% "Save"
+                acceptText: qsTrId("foilauth-edit_token-save"),
+                //: Dialog title
+                //% "Add token"
+                dialogTitle: qsTrId("foilauth-add_token-title"),
+                canScan: true,
+                label: token.label,
+                issuer: token.issuer,
+                secret: token.secret,
+                digits: token.digits,
+                timeShift: token.timeshift,
+                algorithm: token.algorithm
+            })
+            parentPage.replacedWith(newPage)
+        } else {
+            pageStack.pop(parentPage)
+        }
+    }
 
     onStatusChanged: {
         if (status === PageStatus.Active) {
@@ -101,7 +123,7 @@ Page {
                     markImageProvider.image = image
                     markImage.visible = true
                     unsupportedCodeNotification.close()
-                    scanCompleted(token)
+                    pageStackPopTimer.token = token
                     pageStackPopTimer.start()
                 } else {
                     var tokens = FoilAuth.parseMigrationUri(result.text)
@@ -109,7 +131,7 @@ Page {
                         markImageProvider.image = image
                         markImage.visible = true
                         unsupportedCodeNotification.close()
-                        scanCompleted(tokens[0])
+                        pageStackPopTimer.token = tokens[0]
                         pageStackPopTimer.start()
                     } else if (tokens.length > 1) {
                         markImageProvider.image = image
@@ -120,8 +142,7 @@ Page {
                             tokens: tokens
                         })
                         page.tokenSelected.connect(function(token) {
-                            thisPage.scanCompleted(token)
-                            pageStack.pop(parentPage)
+                            thisPage.done(token)
                         })
                     } else if (lastInvalidCode !== result.text) {
                         lastInvalidCode = result.text
@@ -144,8 +165,10 @@ Page {
     Timer {
         id: pageStackPopTimer
 
-        interval:  1000
-        onTriggered: pageStack.pop()
+        property var token
+
+        interval: 1000
+        onTriggered: thisPage.done(token)
     }
 
     Timer {
