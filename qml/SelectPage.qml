@@ -116,7 +116,6 @@ Page {
         onShowExportHint: thisPage.showHint(qsTrId("foilauth-select_page-hint_export_selected"))
         onDeleteSelectedItems: thisPage.deleteRows(selectionModel.selectedRows)
         onExportSelectedItems: {
-            console.log(exportList.length, exportList)
             pageStack.push(Qt.resolvedUrl("QRCodeExportPage.qml"), {
                 allowedOrientations: thisPage.allowedOrientations,
                 mainPage: pageStack.previousPage(thisPage),
