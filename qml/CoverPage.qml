@@ -10,7 +10,6 @@ CoverBackground {
     readonly property var foilModel: FoilAuthModel
     readonly property int coverActionHeight: Theme.itemSizeSmall
     readonly property string lockIconSource: Qt.resolvedUrl("images/" + (HarbourTheme.darkOnLight ? "cover-lock-dark.svg" :  "cover-lock.svg"))
-    readonly property bool jailed: HarbourProcessState.jailedApp
 
     Rectangle {
         width: parent.width
@@ -259,12 +258,15 @@ CoverBackground {
         }
     }
 
-    HarbourHighlightIcon {
+    Loader {
+        active: HarbourProcessState.jailedApp
         anchors.centerIn: backgroundCircle
-        sourceSize.height: backgroundCircle.height + 2 * Theme.paddingLarge
-        highlightColor: Theme.secondaryColor
-        visible: jailed
-        source: jailed ? "images/jail.svg" : ""
+        sourceComponent: Component {
+            JailDoor {
+                anchors.centerIn: parent
+                height: backgroundCircle.height + 2 * Theme.paddingLarge
+            }
+        }
     }
 
     CoverActionList {
