@@ -43,6 +43,7 @@
 #include "HarbourQrCodeGenerator.h"
 #include "HarbourQrCodeImageProvider.h"
 #include "HarbourOrganizeListModel.h"
+#include "HarbourProcessState.h"
 #include "HarbourSelectionListModel.h"
 #include "HarbourSingleImageProvider.h"
 
@@ -64,6 +65,7 @@
 
 static void register_types(const char* uri, int v1 = 1, int v2 = 0)
 {
+    qmlRegisterSingletonType<HarbourProcessState>(uri, v1, v2, "HarbourProcessState", HarbourProcessState::createSingleton);
     qmlRegisterSingletonType<HarbourSystemState>(uri, v1, v2, "HarbourSystemState", HarbourSystemState::createSingleton);
     qmlRegisterSingletonType<HarbourTheme>(uri, v1, v2, "HarbourTheme", HarbourTheme::createSingleton);
     qmlRegisterSingletonType<FoilAuthSettings>(uri, v1, v2, "FoilAuthSettings", FoilAuthSettings::createSingleton);

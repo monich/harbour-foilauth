@@ -362,5 +362,15 @@
         <extracomment>Page header</extracomment>
         <translation type="unfinished">代码 %1/%2</translation>
     </message>
+    <message id="jail-explanation">
+        <source>This application is not designed to function in a sandbox. Try installing the latest version from &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; or &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, it may implement some sort of a workaround. No guarantee, though.</source>
+        <extracomment>Label text explaining the sandbox situation</extracomment>
+        <translation type="unfinished">此应用程序并非设计为在沙箱中运行。 尝试从 &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; 或 &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt; 安装最新版本，它可能会实现某种解决方法。 不过不能保证。</translation>
+    </message>
+    <message id="jail-terminal_hint">
+        <source>If you have developer mode enabled, you may also try running &lt;b&gt;%1&lt;/b&gt; from the terminal. Sorry for the inconvenience!</source>
+        <extracomment>Hint suggesting to run the app from the terminal</extracomment>
+        <translation type="unfinished">如果您启用了开发者模式，您也可以尝试从终端运行 &lt;b&gt;%1&lt;/b&gt;。 带来不便敬请谅解！</translation>
+    </message>
 </context>
 </TS>

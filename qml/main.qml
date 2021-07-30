@@ -6,12 +6,29 @@ ApplicationWindow {
     id: appWindow
 
     allowedOrientations: appAllowedOrientations
-    initialPage: Component { MainPage { } }
+    initialPage: jailed ? jailPageComponent : mainPageComponent
     cover: Component {  CoverPage { } }
 
+    readonly property bool jailed: HarbourProcessState.jailedApp
     readonly property int appAllowedOrientations: Orientation.All
     readonly property bool appLandscapeMode: orientation === Qt.LandscapeOrientation ||
         orientation === Qt.InvertedLandscapeOrientation
+
+    Component {
+        id: mainPageComponent
+
+        MainPage {
+            allowedOrientations: appWindow.allowedOrientations
+        }
+    }
+
+    Component {
+        id: jailPageComponent
+
+        JailPage {
+            allowedOrientations: appWindow.allowedOrientations
+        }
+    }
 
     Timer {
         id: lockTimer

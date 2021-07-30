@@ -364,5 +364,15 @@
         <extracomment>Page header</extracomment>
         <translation type="unfinished">Kod %1/%2</translation>
     </message>
+    <message id="jail-explanation">
+        <source>This application is not designed to function in a sandbox. Try installing the latest version from &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; or &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, it may implement some sort of a workaround. No guarantee, though.</source>
+        <extracomment>Label text explaining the sandbox situation</extracomment>
+        <translation type="unfinished">Denna applikation är inte utformad för att fungera i en sandlåda. Prova att installera den senaste versionen från &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; eller &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, den kan implementera någon form av lösning. Ingen garanti, dock.</translation>
+    </message>
+    <message id="jail-terminal_hint">
+        <source>If you have developer mode enabled, you may also try running &lt;b&gt;%1&lt;/b&gt; from the terminal. Sorry for the inconvenience!</source>
+        <extracomment>Hint suggesting to run the app from the terminal</extracomment>
+        <translation type="unfinished">Om du har aktiverat utvecklarläge kan du också försöka köra &lt;b&gt;%1&lt;/b&gt; från terminalen. Beklagar olägenheten!</translation>
+    </message>
 </context>
 </TS>

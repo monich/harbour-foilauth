@@ -366,5 +366,15 @@
         <extracomment>Page header</extracomment>
         <translation>Код %1 из %2</translation>
     </message>
+    <message id="jail-explanation">
+        <source>This application is not designed to function in a sandbox. Try installing the latest version from &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; or &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, it may implement some sort of a workaround. No guarantee, though.</source>
+        <extracomment>Label text explaining the sandbox situation</extracomment>
+        <translation>Это приложение не предназначено для работы в песочнице. Попробуйте скачать свежую версию с &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; или &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, вдруг она умеет как-то решать эту проблему. Но увы, без гарантий.</translation>
+    </message>
+    <message id="jail-terminal_hint">
+        <source>If you have developer mode enabled, you may also try running &lt;b&gt;%1&lt;/b&gt; from the terminal. Sorry for the inconvenience!</source>
+        <extracomment>Hint suggesting to run the app from the terminal</extracomment>
+        <translation>А если у вас включен режим разработчика, то кажется вам повезло - вы можете запустить &lt;b&gt;%1&lt;/b&gt; из терминала. Это, конечно, неудобно, но таким вот способом система как бы защищает вашу безопасность.</translation>
+    </message>
 </context>
 </TS>
