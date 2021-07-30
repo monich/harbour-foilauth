@@ -334,4 +334,18 @@ QVariantList FoilAuth::parseMigrationUri(QString aUri)
     return result;
 }
 
+QString FoilAuth::migrationUri(QByteArray aData)
+{
+    QString uri;
+    if (!aData.isEmpty()) {
+        char* base64 = g_base64_encode((uchar*)aData.constData(), aData.size());
+        char* escaped = g_uri_escape_string(base64, NULL, FALSE);
+        uri = QString::fromLatin1(FOILAUTH_MIGRATION_PREFIX);
+        uri.append(QLatin1String(escaped));
+        g_free(escaped);
+        g_free(base64);
+    }
+    return uri;
+}
+
 #include "FoilAuth.moc"

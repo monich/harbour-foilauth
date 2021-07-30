@@ -356,5 +356,15 @@
         <extracomment>Hint text</extracomment>
         <translation type="unfinished">Usuń wybrane tokeny</translation>
     </message>
+    <message id="foilauth-select_page-hint_export_selected">
+        <source>Export selected tokens via QR code</source>
+        <extracomment>Hint text</extracomment>
+        <translation type="unfinished">Eksportuj wybrane tokeny za pomocą kodu QR</translation>
+    </message>
+    <message id="foilauth-export_page-title">
+        <source>Code %1 of %2</source>
+        <extracomment>Page header</extracomment>
+        <translation type="unfinished">Kod %1 z %2</translation>
+    </message>
 </context>
 </TS>

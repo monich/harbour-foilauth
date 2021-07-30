@@ -911,6 +911,7 @@ public:
     int rowCount() const;
     ModelData* dataAt(int aIndex) const;
     ModelData* findData(QString aId) const;
+    QList<FoilAuthToken> getTokens(const QList<int> aRows) const;
     int findDataPos(QString aId) const;
     void queueSignal(Signal aSignal);
     void emitQueuedSignals();
@@ -1127,6 +1128,20 @@ int FoilAuthModel::Private::findDataPos(QString aId) const
         }
     }
     return -1;
+}
+
+QList<FoilAuthToken> FoilAuthModel::Private::getTokens(const QList<int> aRows) const
+{
+    QList<FoilAuthToken> tokens;
+    const int n = aRows.count();
+    tokens.reserve(n);
+    for (int i = 0; i < n; i++) {
+        ModelData* data = dataAt(aRows.at(i));
+        if (data) {
+            tokens.append(data->iToken);
+        }
+    }
+    return tokens;
 }
 
 void FoilAuthModel::Private::setKeys(FoilPrivateKey* aPrivate, FoilKey* aPublic)
@@ -2072,7 +2087,7 @@ void FoilAuthModel::deleteAll()
     iPrivate->emitQueuedSignals();
 }
 
-QStringList FoilAuthModel::getIdsAt(QList<int> aRows)
+QStringList FoilAuthModel::getIdsAt(const QList<int> aRows) const
 {
     QStringList ids;
     const int n = aRows.count();
@@ -2097,6 +2112,18 @@ int FoilAuthModel::indexOf(const FoilAuthToken* aToken) const
         }
     }
     return -1;
+}
+
+QStringList FoilAuthModel::generateMigrationUris(const QList<int> aRows) const
+{
+    HDEBUG(aRows);
+    const QList<FoilAuthToken> tokens(iPrivate->getTokens(aRows));
+    const QList<QByteArray> batch(FoilAuthToken::toProtoBufs(tokens));
+    QStringList result;
+    for (int k = 0; k < batch.size(); k++) {
+        result.append(FoilAuth::migrationUri(batch.at(k)));
+    }
+    return result;
 }
 
 #include "FoilAuthModel.moc"

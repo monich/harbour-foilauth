@@ -356,5 +356,15 @@
         <extracomment>Hint text</extracomment>
         <translation>Удалить выбранные коды авторизации</translation>
     </message>
+    <message id="foilauth-select_page-hint_export_selected">
+        <source>Export selected tokens via QR code</source>
+        <extracomment>Hint text</extracomment>
+        <translation>Экспортировать выбранные коды авторизации при помощи QR-кода</translation>
+    </message>
+    <message id="foilauth-export_page-title">
+        <source>Code %1 of %2</source>
+        <extracomment>Page header</extracomment>
+        <translation>Код %1 из %2</translation>
+    </message>
 </context>
 </TS>

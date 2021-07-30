@@ -109,7 +109,8 @@ public:
     Q_INVOKABLE void deleteToken(QString aId);
     Q_INVOKABLE void deleteTokens(QStringList aIds);
     Q_INVOKABLE void deleteAll();
-    Q_INVOKABLE QStringList getIdsAt(QList<int> aRows);
+    Q_INVOKABLE QStringList getIdsAt(const QList<int> aRows) const;
+    Q_INVOKABLE QStringList generateMigrationUris(const QList<int> aRows) const;
 
     // QAbstractItemModel
     Qt::ItemFlags flags(const QModelIndex& aIndex) const Q_DECL_OVERRIDE;

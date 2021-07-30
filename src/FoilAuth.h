@@ -80,6 +80,7 @@ public:
     static QByteArray toByteArray(GBytes* aData);
     static FoilOutput* createFoilFile(QString aDestDir, GString* aOutPath);
     static QString createEmptyFoilFile(QString aDestDir);
+    static QString migrationUri(QByteArray aData);
     static uint TOTP(QByteArray aSecret, quint64 aTime, uint aMaxPass,
         DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM);
 

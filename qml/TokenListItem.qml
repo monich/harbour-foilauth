@@ -8,7 +8,7 @@ Rectangle {
 
     color: "transparent"
 
-    property alias interactive: favoriteButton.enabled
+    property alias interactive: favoriteButton.visible
     property alias description: descriptionLabel.text
     property string prevPassword
     property string nextPassword
@@ -36,8 +36,8 @@ Rectangle {
         id: descriptionLabel
 
         anchors {
-            left: favoriteButton.right
-            leftMargin: landscape ? Theme.paddingLarge : 0
+            left: interactive ? favoriteButton.right : parent.left
+            leftMargin: interactive ? (landscape ? Theme.paddingLarge : 0) : Theme.horizontalPageMargin
             rightMargin: Theme.paddingLarge
             verticalCenter: parent.verticalCenter
         }

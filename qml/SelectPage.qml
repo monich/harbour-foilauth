@@ -104,11 +104,26 @@ Page {
     SelectToolPanel {
         id: toolPanel
 
+        readonly property var exportList: sourceModel.generateMigrationUris(selectionModel.selectedRows)
+
         active: selectionModel.selectionCount > 0
+        canExport: exportList.length > 0
         //: Hint text
         //% "Delete selected tokens"
         onShowDeleteHint: thisPage.showHint(qsTrId("foilauth-select_page-hint_delete_selected"))
+        //: Hint text
+        //% "Export selected tokens via QR code"
+        onShowExportHint: thisPage.showHint(qsTrId("foilauth-select_page-hint_export_selected"))
         onDeleteSelectedItems: thisPage.deleteRows(selectionModel.selectedRows)
+        onExportSelectedItems: {
+            console.log(exportList.length, exportList)
+            pageStack.push(Qt.resolvedUrl("QRCodeExportPage.qml"), {
+                allowedOrientations: thisPage.allowedOrientations,
+                mainPage: pageStack.previousPage(thisPage),
+                exportList: toolPanel.exportList,
+                currentIndex: 0
+            })
+        }
         onHideHint: thisPage.hideHint()
     }
 

@@ -327,11 +327,6 @@
         <extracomment>Page title</extracomment>
         <translation type="unfinished">Jelölések kiválasztása</translation>
     </message>
-    <message id="foilauth-select_page-hint_delete_selected">
-        <source>Delete selected tokens</source>
-        <extracomment>Hint text</extracomment>
-        <translation type="unfinished">Törölje a kijelölt hitelesítési tokeneket</translation>
-    </message>
     <message id="foilauth-menu-select_none">
         <source>Deselect all</source>
         <extracomment>Pulley menu item</extracomment>
@@ -351,6 +346,21 @@
         <source>Deleting selected token</source>
         <extracomment>Remorse popup text (single token selected)</extracomment>
         <translation type="unfinished">A kijelölt token törlése</translation>
+    </message>
+    <message id="foilauth-select_page-hint_delete_selected">
+        <source>Delete selected tokens</source>
+        <extracomment>Hint text</extracomment>
+        <translation type="unfinished">Törölje a kijelölt hitelesítési tokeneket</translation>
+    </message>
+    <message id="foilauth-select_page-hint_export_selected">
+        <source>Export selected tokens via QR code</source>
+        <extracomment>Hint text</extracomment>
+        <translation type="unfinished">Kiválasztott tokenek exportálása QR-kódon keresztül</translation>
+    </message>
+    <message id="foilauth-export_page-title">
+        <source>Code %1 of %2</source>
+        <extracomment>Page header</extracomment>
+        <translation type="unfinished">Kód %1/%2</translation>
     </message>
 </context>
 </TS>

@@ -354,5 +354,15 @@
         <extracomment>Hint text</extracomment>
         <translation>Delete selected tokens</translation>
     </message>
+    <message id="foilauth-select_page-hint_export_selected">
+        <source>Export selected tokens via QR code</source>
+        <extracomment>Hint text</extracomment>
+        <translation>Export selected tokens via QR code</translation>
+    </message>
+    <message id="foilauth-export_page-title">
+        <source>Code %1 of %2</source>
+        <extracomment>Page header</extracomment>
+        <translation>Code %1 of %2</translation>
+    </message>
 </context>
 </TS>
