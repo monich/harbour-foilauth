@@ -34,6 +34,8 @@
 #include "FoilAuthToken.h"
 #include "FoilAuth.h"
 
+#include "HarbourDebug.h"
+
 #include "qrencode.h"
 
 #include <foil_util.h>
@@ -657,16 +659,22 @@ QByteArray FoilAuthToken::toProtoBuf(const QList<FoilAuthToken>& aTokens)
     return output;
 }
 
+//
 // Note that the actual amount of information which end up
-// in the QR code will be greater than aMaxBatchSize because
+// in the QR code will be greater than aPrefBatchSize because
 // of otpauth-migration://offline?data= prefix, BASE64 and URI
 // encoding. Meaning that it's not a big deal if we exceed
-// aMaxBatchSize by a few bytes.
-QList<QByteArray> FoilAuthToken::toProtoBufs(const QList<FoilAuthToken>& aTokens, int aMaxBatchSize)
+// aPrefBatchSize by a few bytes.
+//
+// Tokens exceeding aMaxBatchSize are skipped.
+//
+QList<QByteArray> FoilAuthToken::toProtoBufs(const QList<FoilAuthToken>& aTokens,
+    int aPrefBatchSize, int aMaxBatchSize)
 {
     QList<QByteArray> result;
     const int n = aTokens.count();
 
+    HDEBUG(n << "token(s)");
     if (n > 0) {
         // Generate batch id
         quint64 batchId;
@@ -681,17 +689,18 @@ QList<QByteArray> FoilAuthToken::toProtoBufs(const QList<FoilAuthToken>& aTokens
         buf.resize(0);
         for (i = 0; i < n; i++) {
             const QByteArray tokenBuf(aTokens.at(i).toProtoBuf());
-            if (buf.size() + tokenBuf.size() + maxTrailerSize < aMaxBatchSize) {
+            if (buf.size() + tokenBuf.size() + maxTrailerSize < aPrefBatchSize) {
                 buf.append(tokenBuf);
                 // Can't add the trailer just yet, the batch size is unknown
-            } else {
-                // This token doesn't fit
+            } else if (tokenBuf.size() + maxTrailerSize < aMaxBatchSize) {
+                // Start the next buffer
                 if (buf.size() > 0) {
                     result.append(buf);
                     buf = tokenBuf;
-                } else {
-                    // This token doesn't fit at all, skip it
                 }
+            } else {
+                // This token doesn't fit at all, skip it
+                HDEBUG("Skipping token" << aTokens.at(i).iLabel);
             }
         }
 
@@ -701,6 +710,7 @@ QList<QByteArray> FoilAuthToken::toProtoBufs(const QList<FoilAuthToken>& aTokens
 
         // Add the trailer
         const int batchSize = result.count();
+        HDEBUG("Batch size" << batchSize);
         for (i = 0; i < batchSize; i++) {
             Private::encodeTrailer(&result[i], i, batchSize, batchId);
         }
