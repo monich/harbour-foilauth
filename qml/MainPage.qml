@@ -9,8 +9,6 @@ import "harbour"
 Page {
     id: thisPage
 
-    allowedOrientations: appAllowedOrientations
-
     readonly property var foilModel: FoilAuthModel
     property var foilUi
 
