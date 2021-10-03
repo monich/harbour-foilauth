@@ -159,6 +159,8 @@ int main(int argc, char *argv[])
     context->setContextProperty("TorchSupported", torchSupported);
     context->setContextProperty("FoilAuthDefaultDigits",
         QVariant::fromValue((int)FoilAuthToken::DEFAULT_DIGITS));
+    context->setContextProperty("FoilAuthDefaultCounter",
+        QVariant::fromValue((int)FoilAuthToken::DEFAULT_COUNTER));
     context->setContextProperty("FoilAuthDefaultTimeShift",
         QVariant::fromValue((int)FoilAuthToken::DEFAULT_TIMESHIFT));
     if (res_4_3.isValid()) {

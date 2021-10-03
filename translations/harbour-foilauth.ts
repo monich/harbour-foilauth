@@ -141,6 +141,26 @@
         <extracomment>Text field placeholder (number of password digits)</extracomment>
         <translation>OTP time shift, in seconds</translation>
     </message>
+    <message id="foilauth-token-counter-text">
+        <source>Counter value</source>
+        <extracomment>Text field label (HOTP counter value)</extracomment>
+        <translation>Counter value</translation>
+    </message>
+    <message id="foilauth-token-type-label">
+        <source>Type</source>
+        <extracomment>Combo box label</extracomment>
+        <translation>Type</translation>
+    </message>
+    <message id="foilauth-token-type-totp">
+        <source>Time-based (TOTP)</source>
+        <extracomment>Menu item for time based token</extracomment>
+        <translation>Time-based (TOTP)</translation>
+    </message>
+    <message id="foilauth-token-type-hotp">
+        <source>Counter-based (HOTP)</source>
+        <extracomment>Menu item for counter based token</extracomment>
+        <translation>Counter-based (HOTP)</translation>
+    </message>
     <message id="foilauth-token-scan-button">
         <source>Scan QR code</source>
         <extracomment>Button label, opens QR code scan window</extracomment>

@@ -238,7 +238,12 @@ QString FoilAuth::createEmptyFoilFile(QString aDestDir)
 
 uint FoilAuth::TOTP(QByteArray aSecret, quint64 aTime, uint aMaxPass, DigestAlgorithm aAlgorithm)
 {
-    const guint64 msg = htobe64(aTime/PERIOD);
+    return FoilAuth::HOTP(aSecret, aTime/PERIOD, aMaxPass, aAlgorithm);
+}
+
+uint FoilAuth::HOTP(QByteArray aSecret, quint64 aCounter, uint aMaxPass, DigestAlgorithm aAlgorithm)
+{
+    const guint64 msg = htobe64(aCounter);
     GType (*digest_type)(void) = foil_impl_digest_sha1_get_type;
     switch (aAlgorithm) {
     case DigestAlgorithmMD5:
@@ -267,14 +272,17 @@ uint FoilAuth::TOTP(QByteArray aSecret, quint64 aTime, uint aMaxPass, DigestAlgo
     return mini_hash % aMaxPass;
 }
 
-QString FoilAuth::toUri(QString aSecretBase32, QString aLabel, QString aIssuer,
-    int aDigits, int aTimeShift, Algorithm aAlgorithm)
+QString FoilAuth::toUri(Type aType, QString aSecretBase32, QString aLabel,
+    QString aIssuer, int aDigits, quint64 aCounter, int aTimeShift,
+    Algorithm aAlgorithm)
 {
     QByteArray secret(fromBase32(aSecretBase32));
     if (!secret.isEmpty()) {
-        HDEBUG(aSecretBase32 << aLabel << aIssuer << aDigits << aTimeShift << aAlgorithm);
-        return FoilAuthToken(secret, aLabel, aIssuer, aDigits, aTimeShift,
-            (DigestAlgorithm) aAlgorithm).toUri();
+        QString uri = FoilAuthToken((AuthType)aType, secret, aLabel, aIssuer, aDigits,
+            aCounter, aTimeShift, (DigestAlgorithm) aAlgorithm).toUri();
+        HDEBUG(aType << aSecretBase32 << aLabel << aIssuer << aDigits <<
+            aCounter << aTimeShift << aAlgorithm << "=>" << uri);
+        return uri;
     }
     return QString();
 }

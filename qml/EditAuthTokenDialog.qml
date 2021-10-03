@@ -15,10 +15,12 @@ Dialog {
     property alias acceptText: header.acceptText
     property alias dialogTitle: header.title
     property string issuer
+    property int type: FoilAuth.DefaultType
     property int algorithm: FoilAuth.DefaultAlgorithm
     property alias label: labelField.text
     property alias secret: secretField.text
     property alias digits: digitsField.text
+    property alias counter: counterField.text
     property alias timeShift: timeShiftField.text
 
     signal tokenAccepted(var dialog)
@@ -30,8 +32,7 @@ Dialog {
         id: generator
 
         ecLevel: FoilAuthSettings.qrCodeEcLevel
-        text: FoilAuth.toUri(secretField.text, labelField.text, thisDialog.issuer,
-            digitsField.text, timeShiftField.text, algorithm)
+        text: FoilAuth.toUri(type, secret, label, issuer, digits, counter, timeShift, algorithm)
     }
 
     Item {
@@ -103,10 +104,12 @@ Dialog {
                 columns: isLandscape ? 2 : 1
                 width: parent.width
 
+                readonly property real columnWidth: width/columns
+
                 TextField {
                     id: digitsField
 
-                    width: parent.width/parent.columns
+                    width: parent.columnWidth
                     //: Text field label (number of password digits)
                     //% "Digits"
                     label: qsTrId("foilauth-token-digits-text")
@@ -122,9 +125,26 @@ Dialog {
                 }
 
                 TextField {
+                    id: counterField
+
+                    width: parent.columnWidth
+                    //: Text field label (HOTP counter value)
+                    //% "Counter value"
+                    label: qsTrId("foilauth-token-counter-text")
+                    placeholderText: label
+                    text: FoilAuthDefaultCounter
+                    validator: IntValidator {}
+                    enabled: !qrCodeOnly
+                    visible: type === FoilAuth.TypeHOTP
+
+                    EnterKey.iconSource: "image://theme/icon-m-enter-accept"
+                    EnterKey.onClicked: thisDialog.accept()
+                }
+
+                TextField {
                     id: timeShiftField
 
-                    width: parent.width/parent.columns
+                    width: parent.columnWidth
                     //: Text field label (number of password digits)
                     //% "Time shift (seconds)"
                     label: qsTrId("foilauth-token-timeshift-text")
@@ -134,31 +154,54 @@ Dialog {
                     text: FoilAuthDefaultTimeShift
                     validator: IntValidator {}
                     enabled: !qrCodeOnly
+                    visible: type === FoilAuth.TypeTOTP
 
                     EnterKey.iconSource: "image://theme/icon-m-enter-accept"
                     EnterKey.onClicked: thisDialog.accept()
                 }
-            }
 
-            ComboBox {
-                id: algorithmComboBox
+                ComboBox {
+                    id: algorithmComboBox
 
-                width: parent.width
-                //: Combo box label
-                //% "Digest algorithm"
-                label: qsTrId("foilauth-token-digest_algorithm-label")
-                menu: ContextMenu {
-                    MenuItem { text: "MD5" }
-                    //: Menu item for the default digest algorithm
-                    //% "%1 (default)"
-                    MenuItem { text: qsTrId("foilauth-token-digest_algorithm-default").arg("SHA1") }
-                    MenuItem { text: "SHA256" }
-                    MenuItem { text: "SHA512" }
+                    width: parent.columnWidth
+                    //: Combo box label
+                    //% "Digest algorithm"
+                    label: qsTrId("foilauth-token-digest_algorithm-label")
+                    menu: ContextMenu {
+                        x: 0
+                        width: algorithmComboBox.width
+                        MenuItem { text: "MD5" }
+                        //: Menu item for the default digest algorithm
+                        //% "%1 (default)"
+                        MenuItem { text: qsTrId("foilauth-token-digest_algorithm-default").arg("SHA1") }
+                        MenuItem { text: "SHA256" }
+                        MenuItem { text: "SHA512" }
+                    }
+                    Component.onCompleted: currentIndex = algorithm
+                    onCurrentIndexChanged: algorithm = currentIndex
                 }
-                Component.onCompleted: currentIndex = algorithm
-                onCurrentIndexChanged: algorithm = currentIndex
-            }
 
+                ComboBox {
+                    id: typeComboBox
+
+                    width: parent.columnWidth
+                    //: Combo box label
+                    //% "Type"
+                    label: qsTrId("foilauth-token-type-label")
+                    menu: ContextMenu {
+                        x: 0
+                        width: typeComboBox.width
+                        //: Menu item for time based token
+                        //% "Time-based (TOTP)"
+                        MenuItem { text: qsTrId("foilauth-token-type-totp") }
+                        //: Menu item for counter based token
+                        //% "Counter-based (HOTP)"
+                        MenuItem { text: qsTrId("foilauth-token-type-hotp") }
+                    }
+                    Component.onCompleted: currentIndex = type
+                    onCurrentIndexChanged: type = currentIndex
+                }
+            }
             VerticalPadding { }
 
             Button {

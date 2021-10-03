@@ -53,6 +53,7 @@ class FoilAuth : public QObject, public FoilAuthTypes {
     Q_PROPERTY(bool otherFoilAppsInstalled READ otherFoilAppsInstalled NOTIFY otherFoilAppsInstalledChanged)
     Q_DISABLE_COPY(FoilAuth)
     Q_ENUMS(Algorithm)
+    Q_ENUMS(Type)
 
 public:
     static const int PERIOD = 30;
@@ -64,6 +65,12 @@ public:
         AlgorithmSHA256 = DigestAlgorithmSHA256,
         AlgorithmSHA512 = DigestAlgorithmSHA512,
         DefaultAlgorithm = DEFAULT_ALGORITHM
+    };
+
+    enum Type {
+        TypeTOTP = AuthTypeTOTP,
+        TypeHOTP = AuthTypeHOTP,
+        DefaultType = DEFAULT_AUTH_TYPE
     };
 
     explicit FoilAuth(QObject* aParent = Q_NULLPTR);
@@ -83,10 +90,13 @@ public:
     static QString migrationUri(QByteArray aData);
     static uint TOTP(QByteArray aSecret, quint64 aTime, uint aMaxPass,
         DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM);
+    static uint HOTP(QByteArray aSecret, quint64 aCounter, uint aMaxPass,
+        DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM);
 
     // Invokable from QML
-    Q_INVOKABLE static QString toUri(QString aSecretBase32, QString aLabel,
-        QString aIssuer, int aDigits, int aTimeShift, Algorithm aAlgorithm);
+    Q_INVOKABLE static QString toUri(Type aType, QString aSecretBase32,
+        QString aLabel, QString aIssuer, int aDigits, quint64 aCounter,
+        int aTimeShift, Algorithm aAlgorithm);
     Q_INVOKABLE static QVariantMap parseUri(QString aUri);
     Q_INVOKABLE static QVariantList parseMigrationUri(QString aUri);
     Q_INVOKABLE static bool isValidBase32(QString aBase32);

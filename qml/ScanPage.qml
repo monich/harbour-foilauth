@@ -27,10 +27,12 @@ Page {
                 //% "Add token"
                 dialogTitle: qsTrId("foilauth-add_token-title"),
                 canScan: true,
+                type: token.type,
                 label: token.label,
                 issuer: token.issuer,
                 secret: token.secret,
                 digits: token.digits,
+                counter: token.counter,
                 timeShift: token.timeshift,
                 algorithm: token.algorithm
             })

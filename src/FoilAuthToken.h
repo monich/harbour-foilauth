@@ -58,16 +58,19 @@ public:
     static const QString KEY_SECRET;
     static const QString KEY_ISSUER;
     static const QString KEY_DIGITS;
-    static const QString KEY_ALGORITHM;
+    static const QString KEY_COUNTER;
     static const QString KEY_TIMESHIFT;
+    static const QString KEY_ALGORITHM;
 
     static const QString TYPE_TOTP;
     static const QString TYPE_HOTP;
 
     FoilAuthToken();
     FoilAuthToken(const FoilAuthToken& aToken);
-    FoilAuthToken(QByteArray aBytes, QString aLabel, QString aIssuer,
-        int aDigits = DEFAULT_DIGITS, int aTimeShift = DEFAULT_TIMESHIFT,
+    FoilAuthToken(AuthType aType, QByteArray aBytes, QString aLabel,
+        QString aIssuer, int aDigits = DEFAULT_DIGITS,
+        quint64 aCounter = DEFAULT_COUNTER,
+        int aTimeShift = DEFAULT_TIMESHIFT,
         DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM);
 
     FoilAuthToken& operator=(const FoilAuthToken& aToken);
@@ -76,6 +79,7 @@ public:
 
     bool isValid() const;
     bool setDigits(int aDigits);
+    bool setType(AuthType aType);
     bool setAlgorithm(DigestAlgorithm aAlgorithm);
     bool parseUri(QString aUri);
     uint password(quint64 aTime) const;
@@ -89,13 +93,16 @@ public:
 
     static QList<FoilAuthToken> fromProtoBuf(const QByteArray& aData);
     static QByteArray toProtoBuf(const QList<FoilAuthToken>& aTokens);
-    static QList<QByteArray> toProtoBufs(const QList<FoilAuthToken>& aTokens, int aPrefBatchSize = 1000, int aMaxBatchSize = 2000);
+    static QList<QByteArray> toProtoBufs(const QList<FoilAuthToken>& aTokens,
+        int aPrefBatchSize = 1000, int aMaxBatchSize = 2000);
 
 public:
+    AuthType iType;
     DigestAlgorithm iAlgorithm;
     QByteArray iBytes;
     QString iLabel;
     QString iIssuer;
+    quint64 iCounter;
     int iDigits;
     int iTimeShift; // Seconds
 };

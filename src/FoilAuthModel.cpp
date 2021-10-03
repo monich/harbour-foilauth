@@ -63,10 +63,13 @@
 
 #define HEADER_LABEL            "OTP-Label"
 #define HEADER_ISSUER           "OTP-Issuer"
+#define HEADER_TYPE             "OTP-Type"
 #define HEADER_ALGORITHM        "OTP-Algorithm"
 #define HEADER_DIGITS           "OTP-Digits"
-#define HEADER_TIMESHIFT        "OTP-TimeShift"
+#define HEADER_COUNTER          "OTP-Counter"    // HOTP specific
+#define HEADER_TIMESHIFT        "OTP-TimeShift"  // TOTP specific
 #define HEADER_FAVORITE         "OTP-Favorite"
+#define MAX_HEADERS             8
 
 // Directories relative to home
 #define FOIL_AUTH_DIR           "Documents/FoilAuth"
@@ -83,10 +86,12 @@
 #define FOILAUTH_ROLES_(first,role,last) \
     first(ModelId,modelId) \
     role(Favorite,favorite) \
+    role(Type,type) \
     role(Secret,secret) \
     role(Issuer,issuer) \
     role(Digits,digits) \
     role(Algorithm,algorithm) \
+    role(Counter,counter) \
     role(TimeShift,timeShift) \
     role(Label,label) \
     role(PrevPassword,prevPassword) \
@@ -134,8 +139,10 @@ public:
 
     typedef QList<ModelData*> List;
 
-    ModelData(QString aPath, QByteArray aSecret, QString aLabel, QString aIssuer,
+    ModelData(QString aPath, AuthType aType,
+        QByteArray aSecret, QString aLabel, QString aIssuer,
         int aDigits = FoilAuthToken::DEFAULT_DIGITS,
+        int aCounter = FoilAuthToken::DEFAULT_COUNTER,
         int aTimeShift = FoilAuthToken::DEFAULT_TIMESHIFT,
         DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM,
         bool aFavorite = true);
@@ -145,8 +152,10 @@ public:
     QString label() { return iToken.iLabel; }
     void setTokenPath(QString aPath);
 
+    static AuthType headerAuthType(const FoilMsg* aMsg);
     static DigestAlgorithm headerAlgorithm(const FoilMsg* aMsg);
     static QString headerString(const FoilMsg* aMsg, const char* aKey);
+    static quint64 headerUint64(const FoilMsg* aMsg, const char* aKey, quint64 aDefault);
     static int headerInt(const FoilMsg* aMsg, const char* aKey, int aDefault);
     static bool headerBool(const FoilMsg* aMsg, const char* aKey, bool aDefault);
 
@@ -161,13 +170,14 @@ public:
     QString iNextPassword;
 };
 
-FoilAuthModel::ModelData::ModelData(QString aPath, QByteArray aSecret,
-    QString aLabel, QString aIssuer, int aDigits, int aTimeShift,
-    DigestAlgorithm aAlgorithm, bool aFavorite) :
+FoilAuthModel::ModelData::ModelData(QString aPath, AuthType aType,
+    QByteArray aSecret, QString aLabel, QString aIssuer, int aDigits,
+    int aCounter, int aTimeShift, DigestAlgorithm aAlgorithm,
+    bool aFavorite) :
     iPath(aPath),
     iId(QFileInfo(aPath).fileName()),
     iFavorite(aFavorite),
-    iToken(aSecret, aLabel, aIssuer, aDigits, aTimeShift, aAlgorithm),
+    iToken(aType, aSecret, aLabel, aIssuer, aDigits, aCounter, aTimeShift, aAlgorithm),
     iSecretBase32(FoilAuth::toBase32(aSecret))
 {
     HDEBUG(iSecretBase32 << aLabel);
@@ -198,7 +208,9 @@ QVariant FoilAuthModel::ModelData::get(Role aRole) const
     case SecretRole: return iSecretBase32;
     case IssuerRole: return iToken.iIssuer;
     case DigitsRole: return iToken.iDigits;
-    case AlgorithmRole: return iToken.iAlgorithm;
+    case TypeRole: return (int)iToken.iType;
+    case AlgorithmRole: return (int)iToken.iAlgorithm;
+    case CounterRole: return iToken.iCounter;
     case TimeShiftRole: return iToken.iTimeShift;
     case LabelRole: return iToken.iLabel;
     case PrevPasswordRole: return iPrevPassword;
@@ -206,6 +218,19 @@ QVariant FoilAuthModel::ModelData::get(Role aRole) const
     case NextPasswordRole: return iNextPassword;
     }
     return QVariant();
+}
+
+FoilAuthTypes::AuthType FoilAuthModel::ModelData::headerAuthType(const FoilMsg* aMsg)
+{
+    const char* value = foilmsg_get_value(aMsg, HEADER_TYPE);
+    if (value) {
+        if (!g_ascii_strcasecmp(value, FOILAUTH_TYPE_TOTP)) {
+            return AuthTypeTOTP;
+        } else if (!g_ascii_strcasecmp(value, FOILAUTH_TYPE_HOTP)) {
+            return AuthTypeHOTP;
+        }
+    }
+    return DEFAULT_AUTH_TYPE;
 }
 
 FoilAuthTypes::DigestAlgorithm FoilAuthModel::ModelData::headerAlgorithm(const FoilMsg* aMsg)
@@ -229,6 +254,14 @@ QString FoilAuthModel::ModelData::headerString(const FoilMsg* aMsg, const char* 
 {
     const char* value = foilmsg_get_value(aMsg, aKey);
     return (value && value[0]) ? QString::fromLatin1(value) : QString();
+}
+
+quint64 FoilAuthModel::ModelData::headerUint64(const FoilMsg* aMsg, const char* aKey, quint64 aDefault)
+{
+    const char* str = foilmsg_get_value(aMsg, aKey);
+    guint64 value = aDefault;
+    gutil_parse_uint64(str, 10, &value);
+    return value;
 }
 
 int FoilAuthModel::ModelData::headerInt(const FoilMsg* aMsg, const char* aKey, int aDefault)
@@ -562,10 +595,24 @@ void FoilAuthModel::EncryptTask::performTask()
     FoilOutput* out = FoilAuth::createFoilFile(iDestDir, dest);
     if (out) {
         FoilMsgHeaders headers;
-        FoilMsgHeader header[6];
+        FoilMsgHeader header[MAX_HEADERS];
 
         headers.header = header;
         headers.count = 0;
+
+        if (iToken.iType != DEFAULT_AUTH_TYPE) {
+            header[headers.count].name = HEADER_TYPE;
+            header[headers.count].value = FOILAUTH_TYPE_DEFAULT;
+            switch (iToken.iType) {
+            case AuthTypeTOTP:
+                header[headers.count].value = FOILAUTH_TYPE_TOTP;
+                break;
+            case AuthTypeHOTP:
+                header[headers.count].value = FOILAUTH_TYPE_HOTP;
+                break;
+            }
+            headers.count++;
+        }
 
         const QByteArray label(iToken.iLabel.toUtf8());
         header[headers.count].name = HEADER_LABEL;
@@ -597,6 +644,14 @@ void FoilAuthModel::EncryptTask::performTask()
             snprintf(timeshift, sizeof(timeshift), "%d", iToken.iTimeShift);
             header[headers.count].name = HEADER_TIMESHIFT;
             header[headers.count].value = timeshift;
+            headers.count++;
+        }
+
+        char counter[16];
+        if (iToken.iCounter != FoilAuthToken::DEFAULT_COUNTER) {
+            snprintf(counter, sizeof(counter), "%llu", iToken.iCounter);
+            header[headers.count].name = HEADER_COUNTER;
+            header[headers.count].value = counter;
             headers.count++;
         }
 
@@ -638,10 +693,14 @@ void FoilAuthModel::EncryptTask::performTask()
             unlink(dest->str);
         }
 
-        if (iTime && !isCanceled()) {
+        if ((iTime || iToken.iType != FoilAuth::AuthTypeTOTP) && !isCanceled()) {
             iCurrentPassword = iToken.passwordString(iTime);
-            iPrevPassword = iToken.passwordString(iTime - FoilAuth::PERIOD);
-            iNextPassword = iToken.passwordString(iTime + FoilAuth::PERIOD);
+            if (iToken.iType == FoilAuth::AuthTypeTOTP) {
+                iPrevPassword = iToken.passwordString(iTime - FoilAuth::PERIOD);
+                iNextPassword = iToken.passwordString(iTime + FoilAuth::PERIOD);
+            } else {
+                iPrevPassword = iNextPassword = iCurrentPassword;
+            }
             HDEBUG(qPrintable(iPrevPassword) << qPrintable(iCurrentPassword) <<
                 qPrintable(iNextPassword));
         }
@@ -790,10 +849,12 @@ bool FoilAuthModel::DecryptAllTask::decryptToken(QString aPath)
     if (msg) {
         QByteArray bytes(FoilAuth::toByteArray(msg->data));
         if (bytes.length() > 0) {
-            ModelData* data = new ModelData(aPath, bytes,
+            ModelData* data = new ModelData(aPath,
+                ModelData::headerAuthType(msg), bytes,
                 ModelData::headerString(msg, HEADER_LABEL),
                 ModelData::headerString(msg, HEADER_ISSUER),
                 ModelData::headerInt(msg, HEADER_DIGITS, FoilAuthToken::DEFAULT_DIGITS),
+                ModelData::headerUint64(msg, HEADER_COUNTER, FoilAuthToken::DEFAULT_COUNTER),
                 ModelData::headerInt(msg, HEADER_TIMESHIFT, FoilAuthToken::DEFAULT_TIMESHIFT),
                 ModelData::headerAlgorithm(msg),
                 ModelData::headerBool(msg, HEADER_FAVORITE, false));
@@ -913,6 +974,7 @@ public:
     ModelData* findData(QString aId) const;
     QList<FoilAuthToken> getTokens(const QList<int> aRows) const;
     int findDataPos(QString aId) const;
+    bool needTimer() const;
     void queueSignal(Signal aSignal);
     void emitQueuedSignals();
     void checkTimer();
@@ -1242,9 +1304,22 @@ bool FoilAuthModel::Private::changePassword(QString aOldPassword,
     return false;
 }
 
+bool FoilAuthModel::Private::needTimer() const
+{
+    if (iFoilState == FoilModelReady) {
+        const int n = iData.count();
+        for (int i = 0; i < n; i++) {
+            if (iData.at(i)->iToken.iType == FoilAuthToken::AuthTypeTOTP) {
+                return true;
+            }
+        }
+    }
+    return false;
+}
+
 void FoilAuthModel::Private::checkTimer()
 {
-    if (iFoilState == FoilModelReady && !iData.isEmpty()) {
+    if (needTimer()) {
         onTimer();
     } else if (iTimer->isActive()){
         queueSignal(SignalTimerActiveChanged);
@@ -1879,6 +1954,24 @@ bool FoilAuthModel::setData(const QModelIndex& aIndex, const QVariant& aValue, i
                 }
             }
             break;
+        case ModelData::TypeRole:
+            {
+                bool ok;
+                const int type = aValue.toInt(&ok);
+                if (ok) {
+                    HDEBUG(row << "type" << type);
+                    if (data->iToken.iType == (FoilAuthTypes::AuthType)type) {
+                        return true;
+                    } else if (data->iToken.setType((FoilAuthTypes::AuthType)type)) {
+                        iPrivate->encrypt(data);
+                        iPrivate->emitQueuedSignals();
+                        roles.append(aRole);
+                        Q_EMIT dataChanged(aIndex, aIndex, roles);
+                        return true;
+                    }
+                }
+            }
+            break;
         case ModelData::AlgorithmRole:
             {
                 bool ok;
@@ -1894,6 +1987,23 @@ bool FoilAuthModel::setData(const QModelIndex& aIndex, const QVariant& aValue, i
                         Q_EMIT dataChanged(aIndex, aIndex, roles);
                         return true;
                     }
+                }
+            }
+            break;
+        case ModelData::CounterRole:
+            {
+                bool ok;
+                const quint64 counter = aValue.toULongLong(&ok);
+                HDEBUG(row << "counter" << counter);
+                if (ok) {
+                    if (data->iToken.iCounter != counter) {
+                        data->iToken.iCounter = counter;
+                        iPrivate->encrypt(data);
+                        iPrivate->emitQueuedSignals();
+                        roles.append(aRole);
+                        Q_EMIT dataChanged(aIndex, aIndex, roles);
+                    }
+                    return true;
                 }
             }
             break;
@@ -1913,7 +2023,7 @@ bool FoilAuthModel::setData(const QModelIndex& aIndex, const QVariant& aValue, i
                     return true;
                 }
             }
-        break;
+            break;
         // No default to make sure that we get "warning: enumeration value
         // not handled in switch" if we forget to handle a real role.
         case ModelData::ModelIdRole:
@@ -2031,14 +2141,16 @@ int FoilAuthModel::millisecondsLeft()
     }
 }
 
-bool FoilAuthModel::addToken(QString aSecretBase32, QString aLabel,
-    QString aIssuer, int aDigits, int aTimeShift, int aAlgorithm)
+bool FoilAuthModel::addToken(int aType, QString aSecretBase32,
+    QString aLabel, QString aIssuer, int aDigits, int aCounter,
+    int aTimeShift, int aAlgorithm)
 {
-    HDEBUG(aSecretBase32 << aLabel << aIssuer << aDigits << aTimeShift << aAlgorithm);
+    HDEBUG(aSecretBase32 << aLabel << aIssuer << aDigits << aCounter << aTimeShift << aAlgorithm);
     QByteArray secretBytes = FoilAuth::fromBase32(aSecretBase32);
     if (secretBytes.size() > 0) {
-        iPrivate->addToken(FoilAuthToken(secretBytes, aLabel, aIssuer,
-            aDigits, aTimeShift, (FoilAuthTypes::DigestAlgorithm) aAlgorithm));
+        iPrivate->addToken(FoilAuthToken((FoilAuthTypes::AuthType) aType,
+            secretBytes, aLabel, aIssuer, aDigits, aCounter, aTimeShift,
+            (FoilAuthTypes::DigestAlgorithm) aAlgorithm));
         iPrivate->emitQueuedSignals();
         return true;
     }

@@ -105,12 +105,12 @@
     <message id="foilauth-token-secret-text">
         <source>Secret</source>
         <extracomment>Text field label (OTP secret)</extracomment>
-        <translation>Код авторизации</translation>
+        <translation>Секретный ключ</translation>
     </message>
     <message id="foilauth-token-secret-placeholder">
         <source>Secret OTP key</source>
         <extracomment>Text field placeholder (OTP secret)</extracomment>
-        <translation>Код авторизации в кодировке Base32</translation>
+        <translation>Секретный ключ в кодировке Base32</translation>
     </message>
     <message id="foilauth-token-digest_algorithm-label">
         <source>Digest algorithm</source>
@@ -141,6 +141,26 @@
         <source>OTP time shift, in seconds</source>
         <extracomment>Text field placeholder (number of password digits)</extracomment>
         <translation>Сдвиг по времени, в секундах</translation>
+    </message>
+    <message id="foilauth-token-counter-text">
+        <source>Counter value</source>
+        <extracomment>Text field label (HOTP counter value)</extracomment>
+        <translation>Значение счетчика</translation>
+    </message>
+    <message id="foilauth-token-type-label">
+        <source>Type</source>
+        <extracomment>Combo box label</extracomment>
+        <translation>Генерация пароля</translation>
+    </message>
+    <message id="foilauth-token-type-totp">
+        <source>Time-based (TOTP)</source>
+        <extracomment>Menu item for time based token</extracomment>
+        <translation>По текущему времени (TOTP)</translation>
+    </message>
+    <message id="foilauth-token-type-hotp">
+        <source>Counter-based (HOTP)</source>
+        <extracomment>Menu item for counter based token</extracomment>
+        <translation>По счётчику (HOTP)</translation>
     </message>
     <message id="foilauth-token-scan-button">
         <source>Scan QR code</source>
@@ -191,9 +211,9 @@
         <source>FoilAuth has found %0 unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
         <extracomment>Text for import page</extracomment>
         <translation>
-            <numerusform>У вас тут нашлась база данных SailOTP, а там %0 незашифрованный код авторизации. Хотите его зашифровать и использовать в этой программе?</numerusform>
-            <numerusform>У вас тут нашлась база данных SailOTP, а там %0 незашифрованных кода авторизации. Хотите их зашифровать и использовать в этой программе?</numerusform>
-            <numerusform>У вас тут нашлась база данных SailOTP, а там %0 незашифрованных кодов авторизации. Хотите их зашифровать и использовать в этой программе?</numerusform>
+            <numerusform>У вас тут нашлась база данных SailOTP, а там %0 незашифрованный cекретный ключ. Хотите его зашифровать и использовать в этой программе?</numerusform>
+            <numerusform>У вас тут нашлась база данных SailOTP, а там %0 незашифрованных cекретных ключа. Хотите их зашифровать и использовать в этой программе?</numerusform>
+            <numerusform>У вас тут нашлась база данных SailOTP, а там %0 незашифрованных cекретных ключей. Хотите их зашифровать и использовать в этой программе?</numerusform>
         </translation>
     </message>
     <message id="foilauth-notification-copied_to_clipboard">

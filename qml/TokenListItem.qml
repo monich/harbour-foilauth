@@ -14,10 +14,13 @@ Rectangle {
     property string nextPassword
     property string currentPassword
     property bool favorite
+    property bool counter
     property bool landscape
     property bool selected
 
     signal favoriteToggled()
+    signal incrementCounter()
+    signal decrementCounter()
 
     HarbourIconTextButton {
         id: favoriteButton
@@ -57,7 +60,7 @@ Rectangle {
         }
         font.pixelSize: Theme.fontSizeTiny
         color: Theme.highlightColor
-        visible: landscape
+        visible: landscape && !counter
         transform: HarbourTextFlip {
             text: thisItem.prevPassword
             target: prevPasswordLabel
@@ -94,11 +97,39 @@ Rectangle {
         }
         font.pixelSize: Theme.fontSizeTiny
         color: Theme.highlightColor
-        visible: landscape
+        visible: landscape && !counter
         transform: HarbourTextFlip {
             text: thisItem.nextPassword
             target: nextPasswordLabel
         }
+    }
+
+    HarbourIconTextButton {
+        anchors {
+            horizontalCenter: prevPasswordLabel.horizontalCenter
+            verticalCenter: parent.verticalCenter
+        }
+        iconSource: counter ? (landscape ? "images/minus.svg" : "images/plus.svg" ) : ""
+        highlighted: down || thisItem.selected
+        visible: counter && currentPassword.length > 0
+        onClicked: {
+            if (landscape) {
+                thisItem.decrementCounter()
+            } else {
+                thisItem.incrementCounter()
+            }
+        }
+    }
+
+    HarbourIconTextButton {
+        anchors {
+            horizontalCenter: nextPasswordLabel.horizontalCenter
+            verticalCenter: parent.verticalCenter
+        }
+        iconSource: (landscape && counter) ? "images/plus.svg" : ""
+        highlighted: down || thisItem.selected
+        visible: landscape && counter && currentPassword.length > 0
+        onClicked: thisItem.incrementCounter()
     }
 
     states: [

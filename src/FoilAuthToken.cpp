@@ -48,8 +48,9 @@
 #define FOILAUTH_KEY_SECRET "secret"
 #define FOILAUTH_KEY_ISSUER "issuer"
 #define FOILAUTH_KEY_DIGITS "digits"
-#define FOILAUTH_KEY_ALGORITHM "algorithm"
+#define FOILAUTH_KEY_COUNTER "counter"
 #define FOILAUTH_KEY_TIMESHIFT "timeshift"
+#define FOILAUTH_KEY_ALGORITHM "algorithm"
 
 const QString FoilAuthToken::KEY_VALID("valid");
 const QString FoilAuthToken::KEY_TYPE(FOILAUTH_KEY_TYPE);
@@ -57,11 +58,9 @@ const QString FoilAuthToken::KEY_LABEL(FOILAUTH_KEY_LABEL);
 const QString FoilAuthToken::KEY_SECRET(FOILAUTH_KEY_SECRET);
 const QString FoilAuthToken::KEY_ISSUER(FOILAUTH_KEY_ISSUER);
 const QString FoilAuthToken::KEY_DIGITS(FOILAUTH_KEY_DIGITS);
-const QString FoilAuthToken::KEY_ALGORITHM(FOILAUTH_KEY_ALGORITHM);
+const QString FoilAuthToken::KEY_COUNTER(FOILAUTH_KEY_COUNTER);
 const QString FoilAuthToken::KEY_TIMESHIFT(FOILAUTH_KEY_TIMESHIFT);
-
-#define FOILAUTH_TYPE_TOTP "totp"
-#define FOILAUTH_TYPE_HOTP "hotp"
+const QString FoilAuthToken::KEY_ALGORITHM(FOILAUTH_KEY_ALGORITHM);
 
 const QString FoilAuthToken::TYPE_TOTP(FOILAUTH_TYPE_TOTP);
 const QString FoilAuthToken::TYPE_HOTP(FOILAUTH_TYPE_HOTP);
@@ -74,41 +73,51 @@ const QString FoilAuthToken::ALGORITHM_SHA512(FOILAUTH_ALGORITHM_SHA512);
 #define FOILAUTH_SCHEME "otpauth"
 
 FoilAuthToken::FoilAuthToken() :
+    iType(DEFAULT_AUTH_TYPE),
     iAlgorithm(DEFAULT_ALGORITHM),
+    iCounter(DEFAULT_COUNTER),
     iDigits(DEFAULT_DIGITS),
     iTimeShift(DEFAULT_TIMESHIFT)
 {
 }
 
 FoilAuthToken::FoilAuthToken(const FoilAuthToken& aToken) :
+    iType(aToken.iType),
     iAlgorithm(aToken.iAlgorithm),
     iBytes(aToken.iBytes),
     iLabel(aToken.iLabel),
     iIssuer(aToken.iIssuer),
+    iCounter(aToken.iCounter),
     iDigits(aToken.iDigits),
     iTimeShift(aToken.iTimeShift)
 {
 }
 
-FoilAuthToken::FoilAuthToken(QByteArray aBytes, QString aLabel,
-    QString aIssuer, int aDigits, int aTimeShift, DigestAlgorithm aAlgorithm) :
+FoilAuthToken::FoilAuthToken(AuthType aType, QByteArray aBytes, QString aLabel,
+    QString aIssuer, int aDigits, quint64 aCounter, int aTimeShift,
+    DigestAlgorithm aAlgorithm) :
+    iType(AuthTypeTOTP),
     iAlgorithm(DEFAULT_ALGORITHM),
     iBytes(aBytes),
     iLabel(aLabel),
     iIssuer(aIssuer),
+    iCounter(aCounter),
     iDigits(DEFAULT_DIGITS),
     iTimeShift(aTimeShift)
 {
+    setType(aType);
     setDigits(aDigits);
     setAlgorithm(aAlgorithm);
 }
 
 FoilAuthToken& FoilAuthToken::operator=(const FoilAuthToken& aToken)
 {
+    iType = aToken.iType;
     iAlgorithm = aToken.iAlgorithm;
     iBytes = aToken.iBytes;
     iLabel = aToken.iLabel;
     iIssuer = aToken.iIssuer;
+    iCounter = aToken.iCounter;
     iDigits = aToken.iDigits;
     iTimeShift = aToken.iTimeShift;
     return *this;
@@ -116,8 +125,10 @@ FoilAuthToken& FoilAuthToken::operator=(const FoilAuthToken& aToken)
 
 bool FoilAuthToken::equals(const FoilAuthToken& aToken) const
 {
-    return iAlgorithm == aToken.iAlgorithm &&
+    return iType == aToken.iType &&
+        iAlgorithm == aToken.iAlgorithm &&
         iDigits == aToken.iDigits &&
+        iCounter == aToken.iCounter &&
         iTimeShift == aToken.iTimeShift &&
         iBytes == aToken.iBytes &&
         iLabel == aToken.iLabel &&
@@ -130,7 +141,9 @@ uint FoilAuthToken::password(quint64 aTime) const
     for (int i = 1; i < iDigits; i++) {
         maxPass *= 10;
     }
-    return FoilAuth::TOTP(iBytes, aTime, maxPass, iAlgorithm);
+    return (iType == AuthTypeHOTP) ?
+        FoilAuth::HOTP(iBytes, iCounter, maxPass, iAlgorithm) :
+        FoilAuth::TOTP(iBytes, aTime, maxPass, iAlgorithm);
 }
 
 QString FoilAuthToken::passwordString(quint64 aTime) const
@@ -142,6 +155,17 @@ bool FoilAuthToken::setDigits(int aDigits)
 {
     if (aDigits >= 1 && aDigits <= MAX_DIGITS) {
         iDigits = aDigits;
+        return true;
+    }
+    return false;
+}
+
+bool FoilAuthToken::setType(AuthType aType)
+{
+    switch (aType) {
+    case AuthTypeTOTP:
+    case AuthTypeHOTP:
+        iType = aType;
         return true;
     }
     return false;
@@ -168,11 +192,21 @@ bool FoilAuthToken::parseUri(QString aUri)
     pos.ptr = (guint8*)uri.constData();
     pos.end = pos.ptr + uri.size();
 
+    // Check scheme + type prefix
     FoilBytes prefixBytes;
+    AuthType type = AuthTypeTOTP;
     foil_bytes_from_string(&prefixBytes, FOILAUTH_SCHEME "://"
         FOILAUTH_TYPE_TOTP "/");
-    if (foil_parse_skip_bytes(&pos, &prefixBytes)) {
-        QByteArray label, secret, issuer, algorithm, digits;
+    bool prefixOK = foil_parse_skip_bytes(&pos, &prefixBytes);
+    if (!prefixOK) {
+        type = AuthTypeHOTP;
+        foil_bytes_from_string(&prefixBytes, FOILAUTH_SCHEME "://"
+            FOILAUTH_TYPE_HOTP "/");
+        prefixOK = foil_parse_skip_bytes(&pos, &prefixBytes);
+    }
+
+    if (prefixOK) {
+        QByteArray label, secret, issuer, algorithm, digits, counter;
         while (pos.ptr < pos.end && pos.ptr[0] != '?') {
             label.append(*pos.ptr++);
         }
@@ -180,26 +214,25 @@ bool FoilAuthToken::parseUri(QString aUri)
         FoilBytes secretTag;
         FoilBytes issuerTag;
         FoilBytes digitsTag;
+        FoilBytes counterTag;
         FoilBytes algorithmTag;
         foil_bytes_from_string(&secretTag, FOILAUTH_KEY_SECRET "=");
         foil_bytes_from_string(&issuerTag, FOILAUTH_KEY_ISSUER "=");
         foil_bytes_from_string(&digitsTag, FOILAUTH_KEY_DIGITS "=");
+        foil_bytes_from_string(&counterTag, FOILAUTH_KEY_COUNTER "=");
         foil_bytes_from_string(&algorithmTag, FOILAUTH_KEY_ALGORITHM "=");
-        QByteArray* value;
 
         while (pos.ptr < pos.end) {
             pos.ptr++;
-            if (foil_parse_skip_bytes(&pos, &secretTag)) {
-                value = &secret;
-            } else if (foil_parse_skip_bytes(&pos, &issuerTag)) {
-                value = &issuer;
-            } else if (foil_parse_skip_bytes(&pos, &digitsTag)) {
-                value = &digits;
-            } else if (foil_parse_skip_bytes(&pos, &algorithmTag)) {
-                value = &algorithm;
-            } else {
-                value = Q_NULLPTR;
-            }
+
+            QByteArray* value =
+                foil_parse_skip_bytes(&pos, &secretTag) ? &secret :
+                foil_parse_skip_bytes(&pos, &issuerTag) ? &issuer :
+                foil_parse_skip_bytes(&pos, &digitsTag) ? &digits :
+                foil_parse_skip_bytes(&pos, &counterTag) ? &counter :
+                foil_parse_skip_bytes(&pos, &algorithmTag) ? &algorithm :
+                Q_NULLPTR;
+
             if (value) {
                 *value = QByteArray();
                 while (pos.ptr < pos.end && pos.ptr[0] != '&') {
@@ -215,17 +248,27 @@ bool FoilAuthToken::parseUri(QString aUri)
         if (!secret.isEmpty()) {
             QByteArray bytes = FoilAuth::fromBase32(QUrl::fromPercentEncoding(secret));
             if (!bytes.isEmpty()) {
+                iType = type;
                 iBytes = bytes;
                 iLabel = QUrl::fromPercentEncoding(label);
                 iIssuer = QUrl::fromPercentEncoding(issuer);
                 iDigits = DEFAULT_DIGITS;
+                iCounter = DEFAULT_COUNTER;
                 iAlgorithm = DEFAULT_ALGORITHM;
                 iTimeShift = DEFAULT_TIMESHIFT;
 
                 if (!digits.isEmpty()) {
-                    const int n = digits.toInt();
-                    if (n >=  MIN_DIGITS && n <= MAX_DIGITS) {
+                    bool ok;
+                    const int n = digits.toInt(&ok);
+                    if (ok && n >=  MIN_DIGITS && n <= MAX_DIGITS) {
                         iDigits = n;
+                    }
+                }
+                if (!counter.isEmpty()) {
+                    bool ok;
+                    const quint64 n = counter.toULongLong(&ok);
+                    if (ok) {
+                        iCounter = n;
                     }
                 }
                 if (!algorithm.isEmpty()) {
@@ -251,31 +294,41 @@ QString FoilAuthToken::toUri() const
 {
     if (isValid()) {
         QString buf(FOILAUTH_SCHEME "://");
-        buf.append(TYPE_TOTP);
+        buf.append(iType == AuthTypeHOTP ? TYPE_HOTP : TYPE_TOTP);
         buf.append(QChar('/'));
-        buf.append(QUrl::toPercentEncoding(iLabel, " @"));
+        buf.append(QUrl::toPercentEncoding(iLabel, "@"));
         buf.append("?" FOILAUTH_KEY_SECRET "=");
         buf.append(FoilAuth::toBase32(iBytes));
         if (!iIssuer.isEmpty()) {
             buf.append("&" FOILAUTH_KEY_ISSUER "=");
-            buf.append(QUrl::toPercentEncoding(iIssuer, " @"));
+            buf.append(QUrl::toPercentEncoding(iIssuer, "@"));
         }
         buf.append("&" FOILAUTH_KEY_DIGITS "=");
         buf.append(QString::number(iDigits));
-        if (iAlgorithm != DEFAULT_ALGORITHM) {
-            switch (iAlgorithm) {
-            case DigestAlgorithmMD5:
-                buf.append("&" FOILAUTH_KEY_ALGORITHM "=" FOILAUTH_ALGORITHM_MD5);
-                break;
-            case DigestAlgorithmSHA256:
-                buf.append("&" FOILAUTH_KEY_ALGORITHM "=" FOILAUTH_ALGORITHM_SHA256);
-                break;
-            case DigestAlgorithmSHA512:
-                buf.append("&" FOILAUTH_KEY_ALGORITHM "=" FOILAUTH_ALGORITHM_SHA512);
-                break;
-            case DEFAULT_ALGORITHM: // DigestAlgorithmSHA1
-                break;
+        switch (iAlgorithm) {
+        case DigestAlgorithmMD5:
+            buf.append("&" FOILAUTH_KEY_ALGORITHM "=" FOILAUTH_ALGORITHM_MD5);
+            break;
+        case DigestAlgorithmSHA256:
+            buf.append("&" FOILAUTH_KEY_ALGORITHM "=" FOILAUTH_ALGORITHM_SHA256);
+            break;
+        case DigestAlgorithmSHA512:
+            buf.append("&" FOILAUTH_KEY_ALGORITHM "=" FOILAUTH_ALGORITHM_SHA512);
+            break;
+        case DEFAULT_ALGORITHM: // DigestAlgorithmSHA1
+            break;
+        }
+        switch (iType) {
+        case AuthTypeTOTP:
+            if (iTimeShift != DEFAULT_TIMESHIFT) {
+                buf.append("&" FOILAUTH_KEY_TIMESHIFT "=");
+                buf.append(QString::number(iTimeShift));
             }
+            break;
+        case AuthTypeHOTP:
+            buf.append("&" FOILAUTH_KEY_COUNTER "=");
+            buf.append(QString::number(iCounter));
+            break;
         }
         return buf;
     }
@@ -288,11 +341,12 @@ QVariantMap FoilAuthToken::toVariantMap() const
     const bool valid = isValid();
     out.insert(KEY_VALID, valid);
     if (valid) {
-        out.insert(KEY_TYPE, TYPE_TOTP);
+        out.insert(KEY_TYPE, (int) iType);
         out.insert(KEY_LABEL, iLabel);
         out.insert(KEY_SECRET, FoilAuth::toBase32(iBytes));
         out.insert(KEY_ISSUER, iIssuer);
         out.insert(KEY_DIGITS, iDigits);
+        out.insert(KEY_COUNTER, iCounter);
         out.insert(KEY_TIMESHIFT, iTimeShift);
         out.insert(KEY_ALGORITHM, (int) iAlgorithm);
     }
@@ -409,7 +463,7 @@ public:
                 (algorithm == ALGORITHM_SHA1 || algorithm == ALGORITHM_SHA256 ||
                  algorithm == ALGORITHM_SHA512 || algorithm == ALGORITHM_MD5) &&
                 (digits == DIGIT_COUNT_SIX || digits == DIGIT_COUNT_EIGHT) &&
-                type == OTP_TYPE_TOTP;
+                (type == OTP_TYPE_TOTP || type == OTP_TYPE_HOTP);
         }
         static DigitCount encodeDigits(int aDigits) {
             switch (aDigits) {
@@ -440,6 +494,21 @@ public:
             case ALGORITHM_UNSPECIFIED: break;
             }
             return DEFAULT_ALGORITHM;
+        }
+        static OtpType encodeOtpType(AuthType aType) {
+            switch (aType) {
+            case AuthTypeHOTP: return OTP_TYPE_HOTP;
+            case AuthTypeTOTP: return OTP_TYPE_TOTP;
+            }
+            return OTP_TYPE_UNSPECIFIED;
+        }
+        AuthType authType() const {
+            switch (type) {
+            case OTP_TYPE_HOTP: return AuthTypeHOTP;
+            case OTP_TYPE_TOTP: return AuthTypeTOTP;
+            case DEFAULT_AUTH_TYPE: break;
+            }
+            return DEFAULT_AUTH_TYPE;
         }
     };
 
@@ -583,7 +652,9 @@ bool FoilAuthToken::Private::parseOtpParameters(FoilParsePos* aPos, OtpParameter
                 }
                 break;
             case COUNTER_TAG:
-                if (!parseVarInt(&pos, &value)) {
+                if (parseVarInt(&pos, &value)) {
+                    params.counter = value;
+                } else {
                     return false;
                 }
                 break;
@@ -612,8 +683,8 @@ QList<FoilAuthToken> FoilAuthToken::fromProtoBuf(const QByteArray& aData)
     Private::OtpParameters p;
     while (Private::parseOtpParameters(&pos, &p)) {
         if (p.isValid()) {
-            result.append(FoilAuthToken(p.secret, p.name, p.issuer, p.numDigits(),
-                DEFAULT_TIMESHIFT, p.digestAlgorithm()));
+            result.append(FoilAuthToken(p.authType(), p.secret, p.name, p.issuer,
+                p.numDigits(), p.counter, DEFAULT_TIMESHIFT, p.digestAlgorithm()));
         }
         p.clear();
     }
@@ -627,16 +698,20 @@ QByteArray FoilAuthToken::toProtoBuf() const
     payload.append(Private::encodeBytes(iBytes));
     payload.append(Private::NAME_TAG);
     payload.append(Private::encodeBytes(iLabel.toUtf8()));
-    payload.append(Private::ISSUER_TAG);
-    payload.append(Private::encodeBytes(iIssuer.toUtf8()));
+    if (!iIssuer.isEmpty()) {
+        payload.append(Private::ISSUER_TAG);
+        payload.append(Private::encodeBytes(iIssuer.toUtf8()));
+    }
     payload.append(Private::ALGORITHM_TAG);
     Private::encodeVarInt(&payload, Private::OtpParameters::encodeAlgorithm(iAlgorithm));
     payload.append(Private::DIGITS_TAG);
     Private::encodeVarInt(&payload, Private::OtpParameters::encodeDigits(iDigits));
     payload.append(Private::TYPE_TAG);
-    Private::encodeVarInt(&payload, Private::OTP_TYPE_TOTP);
-    payload.append(Private::COUNTER_TAG);
-    Private::encodeVarInt(&payload, 0);
+    Private::encodeVarInt(&payload, Private::OtpParameters::encodeOtpType(iType));
+    if (iType == AuthTypeHOTP) {
+        payload.append(Private::COUNTER_TAG);
+        Private::encodeVarInt(&payload, iCounter);
+    }
 
     QByteArray protobuf;
     protobuf.reserve(payload.size() + 2);

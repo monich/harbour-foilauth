@@ -138,8 +138,6 @@ SilicaListView {
             }
         }
         MenuItem {
-            id: newNoteMenuItem
-
             //: Pulley menu item, creates a new authentication token
             //% "Add token"
             text: qsTrId("foilauth-menu-new_auth_token")
@@ -160,8 +158,8 @@ SilicaListView {
                 })
             }
             function tokenAccepted(dialog) {
-                FoilAuthModel.addToken(dialog.secret, dialog.label, dialog.issuer,
-                    dialog.digits, dialog.timeshift, dialog.algorithm)
+                FoilAuthModel.addToken(dialog.type, dialog.secret, dialog.label, dialog.issuer,
+                    dialog.digits, dialog.counter, dialog.timeshift, dialog.algorithm)
             }
         }
     }
@@ -269,7 +267,8 @@ SilicaListView {
                     onClicked: {
                         pageStack.push(Qt.resolvedUrl("QRCodePage.qml"), {
                             allowedOrientations: mainPage.allowedOrientations,
-                            uri: FoilAuth.toUri(model.secret, model.label, model.issuer, model.digits, model.timeShift, model.algorithm)
+                            uri: FoilAuth.toUri(model.type, model.secret, model.label, model.issuer,
+                                model.digits, model.counter, model.timeShift, model.algorithm)
                         })
                     }
                 }
@@ -286,11 +285,13 @@ SilicaListView {
                             //: Dialog title
                             //% "Edit token"
                             dialogTitle: qsTrId("foilauth-edit_token-title"),
+                            type: model.type,
                             label: model.label,
                             secret: model.secret,
                             issuer: model.issuer,
                             algorithm: model.algorithm,
                             digits: model.digits,
+                            counter: model.counter,
                             timeShift: model.timeShift
                         }).tokenAccepted.connect(function(dialog) {
                             item.updateToken(dialog)
@@ -328,6 +329,7 @@ SilicaListView {
                 currentPassword: model.currentPassword
                 nextPassword: model.nextPassword
                 favorite: model.favorite
+                counter: model.type === FoilAuth.TypeHOTP
                 landscape: tokenList.isLandscape
                 color: dragging ? Theme.rgba(Theme.highlightBackgroundColor, 0.2) : "transparent"
                 selected: tokenListDelegate.down
@@ -335,6 +337,8 @@ SilicaListView {
                 opacity: enabled ? 1 : 0.2
 
                 onFavoriteToggled: model.favorite = !model.favorite
+                onIncrementCounter: model.counter++
+                onDecrementCounter: model.counter--
 
                 Behavior on color { ColorAnimation { duration: 150 } }
             }
@@ -407,12 +411,13 @@ SilicaListView {
         }
 
         function updateToken(token) {
+            model.type = token.type
             model.issuer = token.issuer
             model.secret = token.secret
             model.label = token.label
-            //model.issuer = token.issuer
             model.algorithm = token.algorithm
             model.digits = token.digits
+            model.counter = token.counter
             model.timeShift = token.timeShift
         }
 

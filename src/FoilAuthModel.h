@@ -103,8 +103,9 @@ public:
     Q_INVOKABLE bool unlock(QString aPassword);
     Q_INVOKABLE int millisecondsLeft();
 
-    Q_INVOKABLE bool addToken(QString aTokenBase32, QString aLabel,
-        QString aIssuer, int aDigits, int aTimeShift, int aAlgorithm);
+    Q_INVOKABLE bool addToken(int aType, QString aTokenBase32,
+        QString aLabel, QString aIssuer, int aDigits, int aCounter,
+        int aTimeShift, int aAlgorithm);
     Q_INVOKABLE bool addTokenUri(QString aUri);
     Q_INVOKABLE void deleteToken(QString aId);
     Q_INVOKABLE void deleteTokens(QStringList aIds);

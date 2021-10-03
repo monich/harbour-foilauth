@@ -140,6 +140,26 @@
         <extracomment>Text field placeholder (number of password digits)</extracomment>
         <translation>OTP időeltolódás másodpercben</translation>
     </message>
+    <message id="foilauth-token-counter-text">
+        <source>Counter value</source>
+        <extracomment>Text field label (HOTP counter value)</extracomment>
+        <translation type="unfinished">Számlálóérték</translation>
+    </message>
+    <message id="foilauth-token-type-label">
+        <source>Type</source>
+        <extracomment>Combo box label</extracomment>
+        <translation type="unfinished">Típus</translation>
+    </message>
+    <message id="foilauth-token-type-totp">
+        <source>Time-based (TOTP)</source>
+        <extracomment>Menu item for time based token</extracomment>
+        <translation type="unfinished">Idő-alapú (TOTP)</translation>
+    </message>
+    <message id="foilauth-token-type-hotp">
+        <source>Counter-based (HOTP)</source>
+        <extracomment>Menu item for counter based token</extracomment>
+        <translation type="unfinished">Számláló-alapú (HOTP)</translation>
+    </message>
     <message id="foilauth-token-scan-button">
         <source>Scan QR code</source>
         <extracomment>Button label, opens QR code scan window</extracomment>

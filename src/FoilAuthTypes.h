@@ -34,15 +34,23 @@
 #ifndef FOILAUTH_TYPES_H
 #define FOILAUTH_TYPES_H
 
-#define FOILAUTH_ALGORITHM_MD5    "MD5"
-#define FOILAUTH_ALGORITHM_SHA1   "SHA1"
-#define FOILAUTH_ALGORITHM_SHA256 "SHA256"
-#define FOILAUTH_ALGORITHM_SHA512 "SHA512"
+#define FOILAUTH_TYPE_TOTP          "totp"
+#define FOILAUTH_TYPE_HOTP          "hotp"
+#define FOILAUTH_TYPE_DEFAULT       FOILAUTH_TYPE_TOTP
 
-#define FOILAUTH_ALGORITHM_DEFAULT FOILAUTH_ALGORITHM_SHA1
+#define FOILAUTH_ALGORITHM_MD5      "MD5"
+#define FOILAUTH_ALGORITHM_SHA1     "SHA1"
+#define FOILAUTH_ALGORITHM_SHA256   "SHA256"
+#define FOILAUTH_ALGORITHM_SHA512   "SHA512"
+#define FOILAUTH_ALGORITHM_DEFAULT  FOILAUTH_ALGORITHM_SHA1
 
 class FoilAuthTypes {
 public:
+    enum AuthType {
+        AuthTypeTOTP,
+        AuthTypeHOTP
+    };
+
     enum DigestAlgorithm {
         DigestAlgorithmMD5,
         DigestAlgorithmSHA1,
@@ -50,8 +58,10 @@ public:
         DigestAlgorithmSHA512
     };
 
+    static const AuthType DEFAULT_AUTH_TYPE = AuthTypeTOTP;
     static const DigestAlgorithm DEFAULT_ALGORITHM = DigestAlgorithmSHA1;
     static const int DEFAULT_DIGITS = 6;
+    static const int DEFAULT_COUNTER = 0;
     static const int DEFAULT_TIMESHIFT = 0;
 };
 
