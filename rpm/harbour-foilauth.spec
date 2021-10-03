@@ -35,6 +35,9 @@ One-Time Password authentication mechanism.
 %qtc_qmake5 %{name}.pro
 %qtc_make %{?_smp_mflags}
 
+%check
+make %{?_smp_mflags} -C test test
+
 %install
 rm -rf %{buildroot}
 %qmake5_install
