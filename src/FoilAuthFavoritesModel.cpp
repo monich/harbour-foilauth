@@ -33,6 +33,7 @@
 
 #include "FoilAuthFavoritesModel.h"
 #include "FoilAuthModel.h"
+#include "FoilAuth.h"
 
 #include "HarbourDebug.h"
 
@@ -45,27 +46,50 @@ class FoilAuthFavoritesModel::Private : public QObject {
 public:
     Private(FoilAuthFavoritesModel* aParent);
 
-    FoilAuthFavoritesModel* parentModel();
+    FoilAuthFavoritesModel* parentModel() const;
+    bool needTimer() const;
+    void updateNeedTimer();
 
 public Q_SLOTS:
     void checkCount();
+    void onDataChanged(const QModelIndex& aTopLeft, const QModelIndex& aBottomRight,
+        const QVector<int>& aRoles);
 
 public:
     int iLastKnownCount;
+    bool iNeedTimer;
 };
 
 FoilAuthFavoritesModel::Private::Private(FoilAuthFavoritesModel* aParent) :
     QObject(aParent),
-    iLastKnownCount(0)
+    iLastKnownCount(0),
+    iNeedTimer(needTimer())
 {
     connect(aParent, SIGNAL(rowsInserted(QModelIndex,int,int)), SLOT(checkCount()));
     connect(aParent, SIGNAL(rowsRemoved(QModelIndex,int,int)), SLOT(checkCount()));
     connect(aParent, SIGNAL(modelReset()), SLOT(checkCount()));
+    connect(aParent, SIGNAL(dataChanged(QModelIndex,QModelIndex,QVector<int>)),
+        SLOT(onDataChanged(QModelIndex,QModelIndex,QVector<int>)));
 }
 
-inline FoilAuthFavoritesModel* FoilAuthFavoritesModel::Private::parentModel()
+inline FoilAuthFavoritesModel* FoilAuthFavoritesModel::Private::parentModel() const
 {
     return qobject_cast<FoilAuthFavoritesModel*>(parent());
+}
+
+bool FoilAuthFavoritesModel::Private::needTimer() const
+{
+    FoilAuthFavoritesModel* model = parentModel();
+    const int count = model->rowCount();
+    for (int row = 0; row < count; row++) {
+        bool ok;
+        const int type = model->data(model->index(row, 0),
+            FoilAuthModel::typeRole()).toInt(&ok);
+        if (ok && type == FoilAuth::TypeTOTP) {
+            return true;
+        }
+    }
+    return false;
 }
 
 void FoilAuthFavoritesModel::Private::checkCount()
@@ -75,6 +99,24 @@ void FoilAuthFavoritesModel::Private::checkCount()
     if (iLastKnownCount != count) {
         iLastKnownCount = count;
         Q_EMIT model->countChanged();
+    }
+    updateNeedTimer();
+}
+
+void FoilAuthFavoritesModel::Private::onDataChanged(const QModelIndex& aTopLeft,
+    const QModelIndex& aBottomRight, const QVector<int>& aRoles)
+{
+    if (aRoles.isEmpty() || aRoles.contains(FoilAuthModel::typeRole())) {
+        updateNeedTimer();
+    }
+}
+
+void FoilAuthFavoritesModel::Private::updateNeedTimer()
+{
+    const bool need = needTimer();
+    if (iNeedTimer != need) {
+        iNeedTimer = need;
+        Q_EMIT parentModel()->needTimerChanged();
     }
 }
 
@@ -94,6 +136,11 @@ FoilAuthFavoritesModel::FoilAuthFavoritesModel(QObject* aParent) :
 void FoilAuthFavoritesModel::setSourceModelObject(QObject* aModel)
 {
     setSourceModel(qobject_cast<QAbstractItemModel*>(aModel));
+}
+
+bool FoilAuthFavoritesModel::needTimer() const
+{
+    return iPrivate->iNeedTimer;
 }
 
 bool FoilAuthFavoritesModel::filterAcceptsRow(int aSourceRow,

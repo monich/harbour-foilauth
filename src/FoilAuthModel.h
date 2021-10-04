@@ -83,6 +83,7 @@ public:
 
     FoilAuthModel(QObject* aParent = NULL);
 
+    static int typeRole();
     static int favoriteRole();
 
     int period() const;

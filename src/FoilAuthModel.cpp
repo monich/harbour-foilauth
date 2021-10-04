@@ -1848,6 +1848,11 @@ QObject* FoilAuthModel::createSingleton(QQmlEngine* aEngine, QJSEngine* aScript)
     return new FoilAuthModel;
 }
 
+int FoilAuthModel::typeRole()
+{
+    return ModelData::TypeRole;
+}
+
 int FoilAuthModel::favoriteRole()
 {
     return ModelData::FavoriteRole;

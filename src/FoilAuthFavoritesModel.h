@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2020 Jolla Ltd.
- * Copyright (C) 2019-2020 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2021 Jolla Ltd.
+ * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -40,18 +40,21 @@
 class FoilAuthFavoritesModel : public QSortFilterProxyModel {
     Q_OBJECT
     Q_PROPERTY(QObject* sourceModel READ sourceModel WRITE setSourceModelObject NOTIFY sourceModelObjectChanged)
+    Q_PROPERTY(bool needTimer READ needTimer NOTIFY needTimerChanged)
     Q_PROPERTY(int count READ rowCount NOTIFY countChanged)
 
 public:
     FoilAuthFavoritesModel(QObject* aParent = Q_NULLPTR);
 
     void setSourceModelObject(QObject* aModel);
+    bool needTimer() const;
 
 protected:
     bool filterAcceptsRow(int aSourceRow, const QModelIndex& aParent) const Q_DECL_OVERRIDE;
 
 Q_SIGNALS:
     void sourceModelObjectChanged();
+    void needTimerChanged();
     void countChanged();
 
 private:

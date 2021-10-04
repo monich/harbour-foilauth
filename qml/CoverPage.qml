@@ -27,7 +27,7 @@ CoverBackground {
         color: Theme.primaryColor
         opacity: 0.1
 
-        readonly property bool active: foilModel.timerActive
+        readonly property bool active: list.model.needTimer && foilModel.timerActive
         property real value
 
         onActiveChanged: {
