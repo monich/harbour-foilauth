@@ -105,6 +105,8 @@ Rectangle {
     }
 
     HarbourIconTextButton {
+        id: leftCounterButton
+
         anchors {
             horizontalCenter: prevPasswordLabel.horizontalCenter
             verticalCenter: parent.verticalCenter
@@ -134,12 +136,26 @@ Rectangle {
 
     states: [
         State {
-            name: "portrait"
-            when: !landscape
+            name: "portrait-totp"
+            when: !landscape && !counter
             changes: [
                 AnchorChanges {
                     target: descriptionLabel
                     anchors.right: currentPasswordLabel.left
+                },
+                AnchorChanges {
+                    target: currentPasswordLabel
+                    anchors.right: parent.right
+                }
+            ]
+        },
+        State {
+            name: "portrait-hotp"
+            when: !landscape && counter
+            changes: [
+                AnchorChanges {
+                    target: descriptionLabel
+                    anchors.right: leftCounterButton.left
                 },
                 AnchorChanges {
                     target: currentPasswordLabel
