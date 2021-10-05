@@ -329,7 +329,8 @@ SilicaListView {
                 currentPassword: model.currentPassword
                 nextPassword: model.nextPassword
                 favorite: model.favorite
-                counter: model.type === FoilAuth.TypeHOTP
+                hotp: model.type === FoilAuth.TypeHOTP
+                hotpMinus: model.counter > 0
                 landscape: tokenList.isLandscape
                 color: dragging ? Theme.rgba(Theme.highlightBackgroundColor, 0.2) : "transparent"
                 selected: tokenListDelegate.down

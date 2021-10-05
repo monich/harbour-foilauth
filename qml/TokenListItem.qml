@@ -14,7 +14,8 @@ Rectangle {
     property string nextPassword
     property string currentPassword
     property bool favorite
-    property bool counter
+    property bool hotp
+    property bool hotpMinus
     property bool landscape
     property bool selected
 
@@ -60,7 +61,7 @@ Rectangle {
         }
         font.pixelSize: Theme.fontSizeTiny
         color: Theme.highlightColor
-        visible: landscape && !counter
+        visible: landscape && !hotp
         transform: HarbourTextFlip {
             text: thisItem.prevPassword
             target: prevPasswordLabel
@@ -97,7 +98,7 @@ Rectangle {
         }
         font.pixelSize: Theme.fontSizeTiny
         color: Theme.highlightColor
-        visible: landscape && !counter
+        visible: landscape && !hotp
         transform: HarbourTextFlip {
             text: thisItem.nextPassword
             target: nextPasswordLabel
@@ -111,14 +112,15 @@ Rectangle {
             horizontalCenter: prevPasswordLabel.horizontalCenter
             verticalCenter: parent.verticalCenter
         }
-        iconSource: counter ? (landscape ? "images/minus.svg" : "images/plus.svg" ) : ""
+        iconSource: hotp ? (landscape ? (hotpMinus ? "images/minus.svg" : "") : "images/plus.svg" ) : ""
+        enabled: parent.interactive
         highlighted: down || thisItem.selected
-        visible: counter && currentPassword.length > 0
+        visible: hotp && currentPassword.length > 0
         onClicked: {
-            if (landscape) {
-                thisItem.decrementCounter()
-            } else {
+            if (!landscape) {
                 thisItem.incrementCounter()
+            } else if (hotpMinus) {
+                thisItem.decrementCounter()
             }
         }
     }
@@ -128,52 +130,73 @@ Rectangle {
             horizontalCenter: nextPasswordLabel.horizontalCenter
             verticalCenter: parent.verticalCenter
         }
-        iconSource: (landscape && counter) ? "images/plus.svg" : ""
+        iconSource: (landscape && hotp) ? "images/plus.svg" : ""
+        enabled: parent.interactive
         highlighted: down || thisItem.selected
-        visible: landscape && counter && currentPassword.length > 0
+        visible: landscape && hotp && currentPassword.length > 0
         onClicked: thisItem.incrementCounter()
     }
 
     states: [
         State {
+            name: "portrait"
+            changes: [
+                AnchorChanges {
+                    target: currentPasswordLabel
+                    anchors.right: parent.right
+                }
+            ]
+        },
+        State {
             name: "portrait-totp"
-            when: !landscape && !counter
+            extend: "portrait"
+            when: !landscape && !hotp
             changes: [
                 AnchorChanges {
                     target: descriptionLabel
                     anchors.right: currentPasswordLabel.left
-                },
-                AnchorChanges {
-                    target: currentPasswordLabel
-                    anchors.right: parent.right
                 }
             ]
         },
         State {
             name: "portrait-hotp"
-            when: !landscape && counter
+            extend: "portrait"
+            when: !landscape && hotp
             changes: [
                 AnchorChanges {
                     target: descriptionLabel
                     anchors.right: leftCounterButton.left
-                },
-                AnchorChanges {
-                    target: currentPasswordLabel
-                    anchors.right: parent.right
                 }
             ]
         },
         State {
             name: "landscape"
-            when: landscape
+            changes: [
+                AnchorChanges {
+                    target: currentPasswordLabel
+                    anchors.right: nextPasswordLabel.left
+                }
+            ]
+        },
+        State {
+            name: "landscape-totp"
+            extend: "landscape"
+            when: landscape && !hotp
             changes: [
                 AnchorChanges {
                     target: descriptionLabel
                     anchors.right: prevPasswordLabel.left
-                },
+                }
+            ]
+        },
+        State {
+            name: "landscape-hotp"
+            extend: "landscape"
+            when: landscape && hotp
+            changes: [
                 AnchorChanges {
-                    target: currentPasswordLabel
-                    anchors.right: nextPasswordLabel.left
+                    target: descriptionLabel
+                    anchors.right: hotpMinus ? leftCounterButton.left : currentPasswordLabel.left
                 }
             ]
         }

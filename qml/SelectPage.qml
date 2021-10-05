@@ -80,6 +80,8 @@ Page {
                     currentPassword: model.currentPassword
                     nextPassword: model.nextPassword
                     favorite: model.favorite
+                    hotp: model.type === FoilAuth.TypeHOTP
+                    hotpMinus: model.counter > 0
                     landscape: thisPage.isLandscape
                     color: model.selected ? Theme.rgba(Theme.highlightBackgroundColor, 0.2) : "transparent"
                     selected: model.selected
