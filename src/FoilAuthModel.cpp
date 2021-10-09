@@ -1374,7 +1374,7 @@ void FoilAuthModel::Private::insertModelData(ModelData* aData)
     iData.append(aData);
     HDEBUG(aData->iId << aData->iSecretBase32 << aData->label());
     queueSignal(SignalCountChanged);
-    if (!pos) checkTimer();
+    checkTimer();
     model->endInsertRows();
 }
 
@@ -1589,7 +1589,7 @@ void FoilAuthModel::Private::destroyItemAt(int aIndex)
         delete iData.takeAt(aIndex);
         model->endRemoveRows();
         queueSignal(SignalCountChanged);
-        if (iData.isEmpty()) checkTimer();
+        checkTimer();
     }
 }
 
