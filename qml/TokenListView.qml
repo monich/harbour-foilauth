@@ -252,9 +252,9 @@ SilicaListView {
         menu: Component {
             ContextMenu {
                 MenuItem {
-                    //: Context menu item (copy to clipboard)
-                    //% "Copy"
-                    text: qsTrId("foilauth-menu-copy")
+                    //: Context menu item (copy password to clipboard)
+                    //% "Copy password"
+                    text: qsTrId("foilauth-menu-copy_password")
                     onClicked: {
                         Clipboard.text = model.currentPassword
                         clipboardNotification.publish()

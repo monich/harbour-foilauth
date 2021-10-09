@@ -232,10 +232,10 @@
         <extracomment>Pulley menu item, creates a new authentication token</extracomment>
         <translation>Token hozzáadása</translation>
     </message>
-    <message id="foilauth-menu-copy">
-        <source>Copy</source>
-        <extracomment>Context menu item (copy to clipboard)</extracomment>
-        <translation>Másolás</translation>
+    <message id="foilauth-menu-copy_password">
+        <source>Copy password</source>
+        <extracomment>Context menu item (copy password to clipboard)</extracomment>
+        <translation type="unfinished">Jelszó másolása</translation>
     </message>
     <message id="foilauth-menu-show_qr_code">
         <source>Show QR code</source>
