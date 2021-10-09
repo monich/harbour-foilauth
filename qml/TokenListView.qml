@@ -255,10 +255,7 @@ SilicaListView {
                     //: Context menu item (copy password to clipboard)
                     //% "Copy password"
                     text: qsTrId("foilauth-menu-copy_password")
-                    onClicked: {
-                        Clipboard.text = model.currentPassword
-                        clipboardNotification.publish()
-                    }
+                    onClicked: Clipboard.text = model.currentPassword
                 }
                 MenuItem {
                     //: Context menu item
@@ -432,7 +429,12 @@ SilicaListView {
             pressY = mouseY
         }
 
-        onClicked: cancelDrag()
+        onClicked: {
+            Clipboard.text = model.currentPassword
+            clipboardNotification.publish()
+            cancelDrag()
+        }
+
         onPressAndHold: cancelDrag()
         onReleased: stopDrag(tokenListDelegate)
         onCanceled: stopDrag(tokenListDelegate)
