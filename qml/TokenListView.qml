@@ -53,12 +53,14 @@ SilicaListView {
                 count: n
             })
             if (dialog) {
-                FoilAuthSettings.sailotpImportDone = true
                 dialog.accepted.connect(function() {
-                    SailOTP.importTokens(FoilAuthModel)
+                    FoilAuthSettings.sailotpImportDone = true
                     FoilAuthSettings.sailotpImportedTokens = SailOTP.importedTokens
+                    SailOTP.importTokens(FoilAuthModel)
                 })
                 dialog.rejected.connect(function() {
+                    FoilAuthSettings.sailotpImportDone = true
+                    FoilAuthSettings.sailotpImportedTokens = SailOTP.importedTokens
                     SailOTP.dropTokens()
                 })
             }

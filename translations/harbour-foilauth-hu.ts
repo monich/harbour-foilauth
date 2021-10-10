@@ -205,11 +205,28 @@
         <extracomment>Dialog button</extracomment>
         <translation>Nem</translation>
     </message>
-    <message id="foilauth-import-text" numerus="yes">
+    <message id="foilauth-import-first_one">
+        <source>FoilAuth has found 1 unencrypted SailOTP token on your device. Would you like to import and encrypt it?</source>
+        <extracomment>Text for SailOTP import page (first import, one token)</extracomment>
+        <translation type="unfinished">A FoilAuth titkosítatlan SailOTP token talál az eszközén. Szeretné importálni és titkosítani?</translation>
+    </message>
+    <message id="foilauth-import-first_many" numerus="yes">
         <source>FoilAuth has found %0 unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
-        <extracomment>Text for import page</extracomment>
-        <translation>
+        <extracomment>Text for SailOTP import page (first import, multiple tokens)</extracomment>
+        <translation type="unfinished">
             <numerusform>A FoilAuth %0 titkosítítlan SailOTP tokent talált a készülékeden. Szeretnéd importálni és titkosítani?</numerusform>
+        </translation>
+    </message>
+    <message id="foilauth-import-new_one">
+        <source>FoilAuth has found 1 new unencrypted SailOTP token on your device. Would you like to import and encrypt it?</source>
+        <extracomment>Text for SailOTP import page (one new token is found)</extracomment>
+        <translation type="unfinished">A FoilAuth új titkosítatlan SailOTP tokent talál az eszközén. Szeretné importálni és titkosítani?</translation>
+    </message>
+    <message id="foilauth-import-new_many" numerus="yes">
+        <source>FoilAuth has found %0 new unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
+        <extracomment>Text for SailOTP import page (multiple new tokens were found)</extracomment>
+        <translation type="unfinished">
+            <numerusform>A FoilAuth %0 új titkosítítlan SailOTP tokent talált a készülékeden. Szeretnéd importálni és titkosítani?</numerusform>
         </translation>
     </message>
     <message id="foilauth-notification-copied_to_clipboard">

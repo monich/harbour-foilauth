@@ -206,12 +206,30 @@
         <extracomment>Dialog button</extracomment>
         <translation>No</translation>
     </message>
-    <message id="foilauth-import-text" numerus="yes">
+    <message id="foilauth-import-first_one">
+        <source>FoilAuth has found 1 unencrypted SailOTP token on your device. Would you like to import and encrypt it?</source>
+        <extracomment>Text for SailOTP import page (first import, one token)</extracomment>
+        <translation>FoilAuth has found an unencrypted SailOTP token on your device. Would you like to import and encrypt it?</translation>
+    </message>
+    <message id="foilauth-import-first_many" numerus="yes">
         <source>FoilAuth has found %0 unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
-        <extracomment>Text for import page</extracomment>
+        <extracomment>Text for SailOTP import page (first import, multiple tokens)</extracomment>
         <translation>
-            <numerusform>FoilAuth has found %0 unencrypted SailOTP token on your device. Would you like to import and encrypt it?</numerusform>
+            <numerusform>FoilAuth has found %0 unencrypted SailOTP token on your device. Would you like to import and encrypt them?</numerusform>
             <numerusform>FoilAuth has found %0 unencrypted SailOTP tokens on your device. Would you like to import and encrypt them?</numerusform>
+        </translation>
+    </message>
+    <message id="foilauth-import-new_one">
+        <source>FoilAuth has found 1 new unencrypted SailOTP token on your device. Would you like to import and encrypt it?</source>
+        <extracomment>Text for SailOTP import page (one new token is found)</extracomment>
+        <translation>FoilAuth has found a new unencrypted SailOTP token on your device. Would you like to import and encrypt it?</translation>
+    </message>
+    <message id="foilauth-import-new_many" numerus="yes">
+        <source>FoilAuth has found %0 new unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
+        <extracomment>Text for SailOTP import page (multiple new tokens were found)</extracomment>
+        <translation>
+            <numerusform>FoilAuth has found %0 new unencrypted SailOTP token on your device. Would you like to import and encrypt them?</numerusform>
+            <numerusform>FoilAuth has found %0 new unencrypted SailOTP tokens on your device. Would you like to import and encrypt them?</numerusform>
         </translation>
     </message>
     <message id="foilauth-notification-copied_to_clipboard">

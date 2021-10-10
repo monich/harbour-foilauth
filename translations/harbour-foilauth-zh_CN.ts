@@ -206,11 +206,28 @@
         <extracomment>Dialog button</extracomment>
         <translation>取消</translation>
     </message>
-    <message id="foilauth-import-text" numerus="yes">
+    <message id="foilauth-import-first_one">
+        <source>FoilAuth has found 1 unencrypted SailOTP token on your device. Would you like to import and encrypt it?</source>
+        <extracomment>Text for SailOTP import page (first import, one token)</extracomment>
+        <translation type="unfinished">FoilAuth 在您的设备上发现了一个未加密的 SailOTP 令牌。 您想导入并加密它吗？</translation>
+    </message>
+    <message id="foilauth-import-first_many" numerus="yes">
         <source>FoilAuth has found %0 unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
-        <extracomment>Text for import page</extracomment>
-        <translation>
-            <numerusform>FoilAuth 已在你的设备上找到 %0 未加密的 SailOTP 令牌。 是否导入及加密？</numerusform>
+        <extracomment>Text for SailOTP import page (first import, multiple tokens)</extracomment>
+        <translation type="unfinished">
+            <numerusform>FoilAuth 在您的设备上发现了 %0 个未加密的 SailOTP 令牌。 您想导入并加密它们吗？</numerusform>
+        </translation>
+    </message>
+    <message id="foilauth-import-new_one">
+        <source>FoilAuth has found 1 new unencrypted SailOTP token on your device. Would you like to import and encrypt it?</source>
+        <extracomment>Text for SailOTP import page (one new token is found)</extracomment>
+        <translation type="unfinished">FoilAuth 在您的设备上发现了一个新的未加密的 SailOTP 令牌。 您想导入并加密它吗？</translation>
+    </message>
+    <message id="foilauth-import-new_many" numerus="yes">
+        <source>FoilAuth has found %0 new unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
+        <extracomment>Text for SailOTP import page (multiple new tokens were found)</extracomment>
+        <translation type="unfinished">
+            <numerusform>FoilAuth 在您的设备上发现了 %0 个新的未加密的 SailOTP 令牌。 您想导入并加密它们吗？</numerusform>
         </translation>
     </message>
     <message id="foilauth-notification-copied_to_clipboard">

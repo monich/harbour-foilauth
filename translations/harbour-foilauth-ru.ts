@@ -165,7 +165,7 @@
     <message id="foilauth-token-scan-button">
         <source>Scan QR code</source>
         <extracomment>Button label, opens QR code scan window</extracomment>
-        <translation>Сканировать QR-код</translation>
+        <translation>Отсканировать QR-код</translation>
     </message>
     <message id="foilauth-notification-unsupported_qrcode">
         <source>Invalid or unsupported QR code</source>
@@ -175,7 +175,7 @@
     <message id="foilauth-scan-title">
         <source>Scan QR code</source>
         <extracomment>Page title (suggestion to scan QR code)</extracomment>
-        <translation>Сосканируйте QR-код</translation>
+        <translation>Сканирование QR-кода</translation>
     </message>
     <message id="foilauth-scan-zoom_label">
         <source>Zoom</source>
@@ -185,7 +185,7 @@
     <message id="foilauth-scan-hint_toggle_flash">
         <source>Toggle flashlight</source>
         <extracomment>Hint label</extracomment>
-        <translation>Можно включать вспышку в качестве подсветки</translation>
+        <translation>Можно включать вспышку для подсветки</translation>
     </message>
     <message id="foilauth-scan-hint_aspect_ratio">
         <source>Switch the aspect ratio between 9:16 and 3:4</source>
@@ -207,13 +207,32 @@
         <extracomment>Dialog button</extracomment>
         <translation>Нет</translation>
     </message>
-    <message id="foilauth-import-text" numerus="yes">
+    <message id="foilauth-import-first_one">
+        <source>FoilAuth has found 1 unencrypted SailOTP token on your device. Would you like to import and encrypt it?</source>
+        <extracomment>Text for SailOTP import page (first import, one token)</extracomment>
+        <translation>Извините, но у вас тут нашлась база данных SailOTP, а там лежит незашифрованный cекретный ключ. Вы хотите его зашифровать и использовать в этой программе?</translation>
+    </message>
+    <message id="foilauth-import-first_many" numerus="yes">
         <source>FoilAuth has found %0 unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
-        <extracomment>Text for import page</extracomment>
+        <extracomment>Text for SailOTP import page (first import, multiple tokens)</extracomment>
         <translation>
-            <numerusform>У вас тут нашлась база данных SailOTP, а там %0 незашифрованный cекретный ключ. Хотите его зашифровать и использовать в этой программе?</numerusform>
-            <numerusform>У вас тут нашлась база данных SailOTP, а там %0 незашифрованных cекретных ключа. Хотите их зашифровать и использовать в этой программе?</numerusform>
-            <numerusform>У вас тут нашлась база данных SailOTP, а там %0 незашифрованных cекретных ключей. Хотите их зашифровать и использовать в этой программе?</numerusform>
+            <numerusform>Извините, но у вас тут нашлась база данных SailOTP, а там %0 незашифрованный cекретный ключ. Вы хотите их зашифровать и использовать в этой программе?</numerusform>
+            <numerusform>Извините, но у вас тут нашлась база данных SailOTP, а там %0 незашифрованных cекретных ключа. Вы хотите их зашифровать и использовать в этой программе?</numerusform>
+            <numerusform>Извините, но у вас тут нашлась база данных SailOTP, а там %0 незашифрованных cекретных ключей. Вы хотите их зашифровать и использовать в этой программе?</numerusform>
+        </translation>
+    </message>
+    <message id="foilauth-import-new_one">
+        <source>FoilAuth has found 1 new unencrypted SailOTP token on your device. Would you like to import and encrypt it?</source>
+        <extracomment>Text for SailOTP import page (one new token is found)</extracomment>
+        <translation>Извините, но в базе данных SailOTP нашёлся новый незашифрованный cекретный ключ. Вы хотите его зашифровать и использовать в этой программе?</translation>
+    </message>
+    <message id="foilauth-import-new_many" numerus="yes">
+        <source>FoilAuth has found %0 new unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
+        <extracomment>Text for SailOTP import page (multiple new tokens were found)</extracomment>
+        <translation>
+            <numerusform>Извините, но в базе данных SailOTP нашёлся %0 новый незашифрованный cекретный ключ. Вы хотите их зашифровать и использовать в этой программе?</numerusform>
+            <numerusform>Извините, но в базе данных SailOTP нашлось %0 новых незашифрованных cекретных ключа. Вы хотите их зашифровать и использовать в этой программе?</numerusform>
+            <numerusform>Извините, но в базе данных SailOTP нашлось %0 новых незашифрованных cекретных ключей. Вы хотите их зашифровать и использовать в этой программе?</numerusform>
         </translation>
     </message>
     <message id="foilauth-notification-copied_to_clipboard">
