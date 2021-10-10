@@ -4,6 +4,7 @@ import Sailfish.Silica 1.0
 Dialog {
     allowedOrientations: appAllowedOrientations
 
+    property bool firstTime: true
     property int count
 
     DialogHeader {

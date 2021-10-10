@@ -2231,6 +2231,17 @@ int FoilAuthModel::indexOf(const FoilAuthToken* aToken) const
     return -1;
 }
 
+bool FoilAuthModel::containsSecret(QByteArray aSecret) const
+{
+    const int n = iPrivate->rowCount();
+    for (int i = 0; i < n; i++) {
+        if (iPrivate->dataAt(i)->iToken.iBytes == aSecret) {
+            return true;
+        }
+    }
+    return false;
+}
+
 QStringList FoilAuthModel::generateMigrationUris(const QList<int> aRows) const
 {
     HDEBUG(aRows);

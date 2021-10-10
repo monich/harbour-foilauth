@@ -44,16 +44,16 @@
 #define KEY_MAX_ZOOM                DCONF_KEY("maxZoom")
 #define KEY_SCAN_ZOOM               DCONF_KEY("scanZoom")
 #define KEY_SCAN_WIDE_MODE          DCONF_KEY("scanWideMode")
-#define KEY_SAILOTP_IMPORT_DONE     DCONF_KEY("sailotpImportDone")
 #define KEY_SHARED_KEY_WARNING      DCONF_KEY("sharedKeyWarning")
 #define KEY_SHARED_KEY_WARNING2     DCONF_KEY("sharedKeyWarning2")
 #define KEY_AUTO_LOCK_TIME          DCONF_KEY("autoLockTime")
+#define KEY_SAILOTP_IMPORT_DONE     DCONF_KEY("sailotpImportDone")
+#define KEY_SAILOTP_IMPORTED_TOKENS DCONF_KEY("sailotpImportedTokens")
 
 #define DEFAULT_QRCODE_ECLEVEL      ((int)HarbourQrCodeGenerator::ECLevelLowest)
 #define DEFAULT_MAX_ZOOM            10.f
 #define DEFAULT_SCAN_ZOOM           3.f
 #define DEFAULT_SCAN_WIDE_MODE      false
-#define DEFAULT_SAILOTP_IMPORT_DONE false
 #define DEFAULT_SHARED_KEY_WARNING  true
 #define DEFAULT_AUTO_LOCK_TIME      15000
 
@@ -72,10 +72,11 @@ public:
     MGConfItem* iMaxZoom;
     MGConfItem* iScanZoom;
     MGConfItem* iScanWideMode;
-    MGConfItem* iSailotpImportDone;
     MGConfItem* iSharedKeyWarning;
     MGConfItem* iSharedKeyWarning2;
     MGConfItem* iAutoLockTime;
+    MGConfItem* iSailotpImportDone;
+    MGConfItem* iSailotpImportedTokens;
     QVariant iDefaultSharedKeyWarning;
     QVariant iDefaultAutoLockTime;
 };
@@ -85,10 +86,11 @@ FoilAuthSettings::Private::Private(FoilAuthSettings* aParent) :
     iMaxZoom(new MGConfItem(KEY_MAX_ZOOM, aParent)),
     iScanZoom(new MGConfItem(KEY_SCAN_ZOOM, aParent)),
     iScanWideMode(new MGConfItem(KEY_SCAN_WIDE_MODE, aParent)),
-    iSailotpImportDone(new MGConfItem(KEY_SAILOTP_IMPORT_DONE, aParent)),
     iSharedKeyWarning(new MGConfItem(KEY_SHARED_KEY_WARNING, aParent)),
     iSharedKeyWarning2(new MGConfItem(KEY_SHARED_KEY_WARNING2, aParent)),
     iAutoLockTime(new MGConfItem(KEY_AUTO_LOCK_TIME, aParent)),
+    iSailotpImportDone(new MGConfItem(KEY_SAILOTP_IMPORT_DONE, aParent)),
+    iSailotpImportedTokens(new MGConfItem(KEY_SAILOTP_IMPORTED_TOKENS, aParent)),
     iDefaultSharedKeyWarning(DEFAULT_SHARED_KEY_WARNING),
     iDefaultAutoLockTime(DEFAULT_AUTO_LOCK_TIME)
 {
@@ -100,14 +102,16 @@ FoilAuthSettings::Private::Private(FoilAuthSettings* aParent) :
         aParent, SIGNAL(scanZoomChanged()));
     QObject::connect(iScanWideMode, SIGNAL(valueChanged()),
         aParent, SIGNAL(scanWideModeChanged()));
-    QObject::connect(iSailotpImportDone, SIGNAL(valueChanged()),
-        aParent, SIGNAL(sailotpImportDoneChanged()));
     QObject::connect(iSharedKeyWarning, SIGNAL(valueChanged()),
         aParent, SIGNAL(sharedKeyWarningChanged()));
     QObject::connect(iSharedKeyWarning2, SIGNAL(valueChanged()),
         aParent, SIGNAL(sharedKeyWarning2Changed()));
     QObject::connect(iAutoLockTime, SIGNAL(valueChanged()),
         aParent, SIGNAL(autoLockTimeChanged()));
+    QObject::connect(iSailotpImportDone, SIGNAL(valueChanged()),
+        aParent, SIGNAL(sailotpImportDoneChanged()));
+    QObject::connect(iSailotpImportedTokens, SIGNAL(valueChanged()),
+        aParent, SIGNAL(sailotpImportedTokensChanged()));
 }
 
 inline int
@@ -208,22 +212,6 @@ FoilAuthSettings::setScanWideMode(
     iPrivate->iScanWideMode->set(aValue);
 }
 
-// sailotpImportDone
-
-bool
-FoilAuthSettings::sailotpImportDone() const
-{
-    return iPrivate->iSailotpImportDone->value(DEFAULT_SAILOTP_IMPORT_DONE).toBool();
-}
-
-void
-FoilAuthSettings::setSailotpImportDone(
-    bool aValue)
-{
-    HDEBUG(aValue);
-    iPrivate->iSailotpImportDone->set(aValue);
-}
-
 // sharedKeyWarning
 // sharedKeyWarning2
 
@@ -272,4 +260,36 @@ FoilAuthSettings::setAutoLockTime(
 {
     HDEBUG(aValue);
     iPrivate->iAutoLockTime->set(aValue);
+}
+
+// sailotpImportDone
+
+bool
+FoilAuthSettings::sailotpImportDone() const
+{
+    return iPrivate->iSailotpImportDone->value(false).toBool();
+}
+
+void
+FoilAuthSettings::setSailotpImportDone(
+    bool aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iSailotpImportDone->set(aValue);
+}
+
+// sailotpImportedTokens
+
+QStringList
+FoilAuthSettings::sailotpImportedTokens() const
+{
+    return iPrivate->iSailotpImportedTokens->value(QStringList()).toStringList();
+}
+
+void
+FoilAuthSettings::setSailotpImportedTokens(
+    QStringList aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iSailotpImportedTokens->set(aValue);
 }

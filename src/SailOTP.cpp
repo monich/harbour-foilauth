@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2020 Jolla Ltd.
- * Copyright (C) 2019-2020 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2021 Jolla Ltd.
+ * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -40,6 +40,7 @@
 #include "HarbourDebug.h"
 
 #include <QDir>
+#include <QFile>
 #include <QStandardPaths>
 #include <QCryptographicHash>
 
@@ -62,6 +63,8 @@ public:
         bool iFavorite;
     };
 
+    static const QString DB_PATH;
+
     static const QString DB_TYPE;
     static const QString DB_NAME;
     static const QString DB_TABLE;
@@ -75,20 +78,25 @@ public:
     static const QString COL_LEN;
     static const QString COL_DIFF;
 
+    Private(QStringList aImportedTokens, FoilAuthModel* aDestModel);
+
+private:
     static QString databaseDir();
     static QString databasePath();
 
-    Private();
-
-    void fetchTokens();
+    void fetchTokens(FoilAuthModel* aDestModel);
 
 public:
     QList<Token> iTokens;
+    QStringList iImportedTokens;
 };
 
+const QString SailOTP::Private::DB_PATH(SailOTP::Private::databasePath());
+
 #define TABLE_NAME "OTPStorage"
+#define DATABASE_NAME "harbour-sailotp"
 const QString SailOTP::Private::DB_TYPE("QSQLITE");
-const QString SailOTP::Private::DB_NAME("harbour-sailotp");
+const QString SailOTP::Private::DB_NAME(DATABASE_NAME);
 const QString SailOTP::Private::DB_TABLE(TABLE_NAME);
 
 #define SORT_COL "sort"
@@ -111,54 +119,67 @@ QString SailOTP::Private::databaseDir()
 QString SailOTP::Private::databasePath()
 {
     // This is how LocalStorage plugin generates database file name
-    QCryptographicHash md5(QCryptographicHash::Md5);
-    md5.addData(DB_NAME.toUtf8());
-    const QString dbId(QLatin1String(md5.result().toHex()));
-    return databaseDir() + "/" + dbId + ".sqlite";
+    return databaseDir() + QDir::separator() +
+        QLatin1String(QCryptographicHash::hash(DATABASE_NAME, QCryptographicHash::Md5).toHex()) +
+        ".sqlite";
 }
 
-SailOTP::Private::Private()
+SailOTP::Private::Private(QStringList aImportedTokens, FoilAuthModel* aDestModel) :
+    iImportedTokens(aImportedTokens)
 {
     // SqlDatabase object needs to go out of scope before we can
     // call QSqlDatabase::removeDatabase
-    fetchTokens();
+    fetchTokens(aDestModel);
     QSqlDatabase::removeDatabase(DB_NAME);
 }
 
-void SailOTP::Private::fetchTokens()
+void SailOTP::Private::fetchTokens(FoilAuthModel* aDestModel)
 {
     QSqlDatabase db(QSqlDatabase::database(Private::DB_NAME));
     if (!db.isValid()) {
         HDEBUG("adding database" << DB_NAME);
         db = QSqlDatabase::addDatabase(DB_TYPE, DB_NAME);
     }
-    const QString path(databasePath());
-    db.setDatabaseName(path);
+    db.setDatabaseName(DB_PATH);
     if (db.open()) {
-        HDEBUG("Opened " << qPrintable(path));
+        HDEBUG("Opened " << qPrintable(DB_PATH));
         QSqlQuery query(db);
         if (query.exec("SELECT * FROM " TABLE_NAME " ORDER BY " SORT_COL) ||
             query.exec("SELECT * FROM " TABLE_NAME)) {
             while (query.next()) {
                 const QString type(query.value(COL_TYPE).toString());
-                if (type.compare(FoilAuthToken::TYPE_TOTP, Qt::CaseInsensitive) == 0) {
+                const bool isTOTP = !type.compare(FoilAuthToken::TYPE_TOTP, Qt::CaseInsensitive);
+                const bool isHOTP = !type.compare(FoilAuthToken::TYPE_HOTP, Qt::CaseInsensitive);
+                if (isTOTP || isHOTP) {
                     const QString base32(query.value(COL_SECRET).toString());
                     const QByteArray secret(HarbourBase32::fromBase32(base32));
                     if (!secret.isEmpty()) {
-                        bool ok;
-                        int value;
+                        const QString title(query.value(COL_TITLE).toString());
+                        const QString secretHash(QString(QCryptographicHash::hash(secret,
+                            QCryptographicHash::Sha1).toHex()).toLower());
+                        if (iImportedTokens.contains(secretHash) ||
+                            (aDestModel && aDestModel->containsSecret(secret))) {
+                            HDEBUG("SailOTP token" << title << "is already imported");
+                        } else {
+                            bool ok;
+                            int value;
 
-                        Token token;
-                        token.iToken.iBytes = secret;
-                        token.iToken.iLabel = query.value(COL_TITLE).toString();
-                        value = query.value(COL_FAV).toInt(&ok);
-                        if (ok) token.iFavorite = value != 0;
-                        value = query.value(COL_LEN).toInt(&ok);
-                        if (ok && value > 0) token.iToken.iDigits = value;
-                        value = query.value(COL_DIFF).toInt(&ok);
-                        if (ok) token.iToken.iTimeShift = value;
-                        HDEBUG(token.iToken.iLabel << base32 << token.iToken.iDigits);
-                        iTokens.append(token);
+                            Token token;
+                            token.iToken.iBytes = secret;
+                            token.iToken.iLabel = title;
+                            token.iToken.setType(isHOTP ?
+                                FoilAuthToken::AuthTypeHOTP :
+                                FoilAuthToken::AuthTypeTOTP);
+                            value = query.value(COL_FAV).toInt(&ok);
+                            if (ok) token.iFavorite = value != 0;
+                            value = query.value(COL_LEN).toInt(&ok);
+                            if (ok && value > 0) token.iToken.setDigits(value);
+                            value = query.value(COL_DIFF).toInt(&ok);
+                            if (ok) token.iToken.iTimeShift = value;
+                            HDEBUG(token.iToken.iLabel << type << base32 << token.iToken.iDigits);
+                            iTokens.append(token);
+                            iImportedTokens.append(secretHash);
+                        }
                     }
                 }
             }
@@ -183,24 +204,40 @@ SailOTP::~SailOTP()
     delete iPrivate;
 }
 
+QStringList SailOTP::importedTokens() const
+{
+    return iImportedTokens;
+}
+
+void SailOTP::setImportedTokens(QStringList aList)
+{
+    if (iImportedTokens != aList) {
+        iImportedTokens = aList;
+        Q_EMIT importedTokensChanged();
+    }
+}
+
 // Callback for qmlRegisterSingletonType<SailOTP>
 QObject* SailOTP::createSingleton(QQmlEngine* aEngine, QJSEngine* aScript)
 {
     return new SailOTP;
 }
 
-int SailOTP::fetchTokens()
+int SailOTP::fetchNewTokens(QObject* aDestModel)
 {
     delete iPrivate;
-    iPrivate = new Private;
-    if (iPrivate->iTokens.isEmpty()) {
+    if (QFile(Private::DB_PATH).exists()) {
+        iPrivate = new Private(iImportedTokens, qobject_cast<FoilAuthModel*>(aDestModel));
+        if (!iPrivate->iTokens.isEmpty()) {
+            const int count = iPrivate->iTokens.count();
+            HDEBUG("Fetched" << count << "new token(s)");
+            setImportedTokens(iPrivate->iImportedTokens);
+            return count;
+        }
         delete iPrivate;
-        iPrivate = Q_NULLPTR;
-        return 0;
-    } else {
-        HDEBUG("Fetched" << iPrivate->iTokens.count() << "token(s)");
-        return iPrivate->iTokens.count();
     }
+    iPrivate = Q_NULLPTR;
+    return 0;
 }
 
 void SailOTP::importTokens(QObject* aDestModel)

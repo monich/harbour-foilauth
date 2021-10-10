@@ -36,16 +36,21 @@
 
 #include <QtQml>
 
+// Note that sailotpImportedTokens stores SHA1 hash of the secrets
+// imported from SailOTP, not the actual secrets. In other words,
+// it's not much of a security flaw.
+
 class FoilAuthSettings : public QObject {
     Q_OBJECT
     Q_PROPERTY(int qrCodeEcLevel READ qrCodeEcLevel WRITE setQrCodeEcLevel NOTIFY qrCodeEcLevelChanged)
     Q_PROPERTY(qreal scanZoom READ scanZoom WRITE setScanZoom NOTIFY scanZoomChanged)
     Q_PROPERTY(qreal maxZoom READ maxZoom WRITE setMaxZoom NOTIFY maxZoomChanged)
     Q_PROPERTY(bool scanWideMode READ scanWideMode WRITE setScanWideMode NOTIFY scanWideModeChanged)
-    Q_PROPERTY(bool sailotpImportDone READ sailotpImportDone WRITE setSailotpImportDone NOTIFY sailotpImportDoneChanged)
     Q_PROPERTY(bool sharedKeyWarning READ sharedKeyWarning WRITE setSharedKeyWarning NOTIFY sharedKeyWarningChanged)
     Q_PROPERTY(bool sharedKeyWarning2 READ sharedKeyWarning2 WRITE setSharedKeyWarning2 NOTIFY sharedKeyWarning2Changed)
     Q_PROPERTY(int autoLockTime READ autoLockTime WRITE setAutoLockTime NOTIFY autoLockTimeChanged)
+    Q_PROPERTY(bool sailotpImportDone READ sailotpImportDone WRITE setSailotpImportDone NOTIFY sailotpImportDoneChanged)
+    Q_PROPERTY(QStringList sailotpImportedTokens READ sailotpImportedTokens WRITE setSailotpImportedTokens NOTIFY sailotpImportedTokensChanged)
     Q_DISABLE_COPY(FoilAuthSettings)
 
 public:
@@ -66,9 +71,6 @@ public:
     bool scanWideMode() const;
     void setScanWideMode(bool aValue);
 
-    bool sailotpImportDone() const;
-    void setSailotpImportDone(bool aValue);
-
     bool sharedKeyWarning() const;
     bool sharedKeyWarning2() const;
     void setSharedKeyWarning(bool aValue);
@@ -77,15 +79,22 @@ public:
     int autoLockTime() const;
     void setAutoLockTime(int aValue);
 
+    bool sailotpImportDone() const;
+    void setSailotpImportDone(bool aValue);
+
+    QStringList sailotpImportedTokens() const;
+    void setSailotpImportedTokens(QStringList aValue);
+
 Q_SIGNALS:
     void qrCodeEcLevelChanged();
     void maxZoomChanged();
     void scanZoomChanged();
     void scanWideModeChanged();
-    void sailotpImportDoneChanged();
     void sharedKeyWarningChanged();
     void sharedKeyWarning2Changed();
     void autoLockTimeChanged();
+    void sailotpImportDoneChanged();
+    void sailotpImportedTokensChanged();
 
 private:
     class Private;

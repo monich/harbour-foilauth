@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2021 Jolla Ltd.
+ * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -39,21 +39,29 @@
 class SailOTP : public QObject {
     Q_OBJECT
     Q_DISABLE_COPY(SailOTP)
+    Q_PROPERTY(QStringList importedTokens READ importedTokens WRITE setImportedTokens NOTIFY importedTokensChanged)
 
 public:
     explicit SailOTP(QObject* aParent = Q_NULLPTR);
     ~SailOTP();
 
+    QStringList importedTokens() const;
+    void setImportedTokens(QStringList aList);
+
     // Callback for qmlRegisterSingletonType<SailOTP>
     static QObject* createSingleton(QQmlEngine* aEngine, QJSEngine* aScript);
 
-    Q_INVOKABLE int fetchTokens();
+    Q_INVOKABLE int fetchNewTokens(QObject* aDestModel);
     Q_INVOKABLE void importTokens(QObject* aDestModel);
     Q_INVOKABLE void dropTokens();
+
+Q_SIGNALS:
+    void importedTokensChanged();
 
 private:
     class Private;
     Private* iPrivate;
+    QStringList iImportedTokens;
 };
 
 QML_DECLARE_TYPE(SailOTP)

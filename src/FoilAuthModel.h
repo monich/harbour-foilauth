@@ -95,6 +95,7 @@ public:
 
     int indexOf(const FoilAuthToken* aToken) const;
     bool contains(const FoilAuthToken* aToken) const;
+    bool containsSecret(QByteArray aToken) const;
     void addToken(const FoilAuthToken* aToken, bool aFavorite);
 
     Q_INVOKABLE void generateKey(int aBits, QString aPassword);

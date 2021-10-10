@@ -45,21 +45,22 @@ SilicaListView {
     }
 
     Component.onCompleted: {
-        if (!FoilAuthSettings.sailotpImportDone) {
-            var n = SailOTP.fetchTokens()
-            if (n > 0) {
+        SailOTP.importedTokens = FoilAuthSettings.sailotpImportedTokens
+        var n = SailOTP.fetchNewTokens(FoilAuthModel)
+        if (n > 0) {
+            var dialog = pageStack.push(Qt.resolvedUrl("ImportTokensDialog.qml"), {
+                firstTime: !FoilAuthSettings.sailotpImportDone,
+                count: n
+            })
+            if (dialog) {
                 FoilAuthSettings.sailotpImportDone = true
-                var dialog = pageStack.push(Qt.resolvedUrl("ImportTokensDialog.qml"), {
-                    count: n
+                dialog.accepted.connect(function() {
+                    SailOTP.importTokens(FoilAuthModel)
+                    FoilAuthSettings.sailotpImportedTokens = SailOTP.importedTokens
                 })
-                if (dialog) {
-                    dialog.accepted.connect(function() {
-                        SailOTP.importTokens(FoilAuthModel)
-                    })
-                    dialog.rejected.connect(function() {
-                        SailOTP.dropTokens()
-                    })
-                }
+                dialog.rejected.connect(function() {
+                    SailOTP.dropTokens()
+                })
             }
         }
     }
