@@ -115,12 +115,12 @@
     <message id="foilauth-token-digest_algorithm-label">
         <source>Digest algorithm</source>
         <extracomment>Combo box label</extracomment>
-        <translation type="unfinished">Algorytm Digest</translation>
+        <translation>Digest algorithm</translation>
     </message>
     <message id="foilauth-token-digest_algorithm-default">
         <source>%1 (default)</source>
         <extracomment>Menu item for the default digest algorithm</extracomment>
-        <translation type="unfinished">%1 (domyślna)</translation>
+        <translation>%1 (domyślna)</translation>
     </message>
     <message id="foilauth-token-digits-text">
         <source>Digits</source>
@@ -145,22 +145,22 @@
     <message id="foilauth-token-counter-text">
         <source>Counter value</source>
         <extracomment>Text field label (HOTP counter value)</extracomment>
-        <translation type="unfinished">Wartość licznika</translation>
+        <translation>Wartość licznika</translation>
     </message>
     <message id="foilauth-token-type-label">
         <source>Type</source>
         <extracomment>Combo box label</extracomment>
-        <translation type="unfinished">Typ</translation>
+        <translation>Typ</translation>
     </message>
     <message id="foilauth-token-type-totp">
         <source>Time-based (TOTP)</source>
         <extracomment>Menu item for time based token</extracomment>
-        <translation type="unfinished">Na podstawie czasu (TOTP)</translation>
+        <translation>Na podstawie czasu (TOTP)</translation>
     </message>
     <message id="foilauth-token-type-hotp">
         <source>Counter-based (HOTP)</source>
         <extracomment>Menu item for counter based token</extracomment>
-        <translation type="unfinished">Na podstawie licznika (HOTP)</translation>
+        <translation>Na podstawie licznika (HOTP)</translation>
     </message>
     <message id="foilauth-token-scan-button">
         <source>Scan QR code</source>
@@ -210,13 +210,13 @@
     <message id="foilauth-import-first_one">
         <source>FoilAuth has found 1 unencrypted SailOTP token on your device. Would you like to import and encrypt it?</source>
         <extracomment>Text for SailOTP import page (first import, one token)</extracomment>
-        <translation type="unfinished">FoilAuth znalazł na twoim urządzeniu 1 niezaszyfrowany token SailOTP. Czy chcesz go zaimportować i zaszyfrować?</translation>
+        <translation>FoilAuth znalazł na twoim urządzeniu 1 niezaszyfrowany token SailOTP. Czy chcesz go zaimportować i zaszyfrować?</translation>
     </message>
     <message id="foilauth-import-first_many" numerus="yes">
         <source>FoilAuth has found %0 unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
         <extracomment>Text for SailOTP import page (first import, multiple tokens)</extracomment>
-        <translation type="unfinished">
-            <numerusform>FoilAuth znalazł na twoim urządzeniu %0 niezaszyfrowanego tokena SailOTP. Czy chcesz je zaimportować i zaszyfrować?</numerusform>
+        <translation>
+            <numerusform>FoilAuth znalazł na twoim urządzeniu %0 niezaszyfrowany token SailOTP. Czy chcesz go zaimportować i zaszyfrować?</numerusform>
             <numerusform>FoilAuth znalazł na twoim urządzeniu %0 niezaszyfrowane tokeny SailOTP. Czy chcesz je zaimportować i zaszyfrować?</numerusform>
             <numerusform>FoilAuth znalazł na twoim urządzeniu %0 niezaszyfrowanych tokenów SailOTP. Czy chcesz je zaimportować i zaszyfrować?</numerusform>
         </translation>
@@ -224,13 +224,13 @@
     <message id="foilauth-import-new_one">
         <source>FoilAuth has found 1 new unencrypted SailOTP token on your device. Would you like to import and encrypt it?</source>
         <extracomment>Text for SailOTP import page (one new token is found)</extracomment>
-        <translation type="unfinished">FoilAuth znalazł na twoim urządzeniu 1 nowy niezaszyfrowany token SailOTP. Czy chcesz go zaimportować i zaszyfrować?</translation>
+        <translation>FoilAuth znalazł na twoim urządzeniu 1 nowy niezaszyfrowany token SailOTP. Czy chcesz go zaimportować i zaszyfrować?</translation>
     </message>
     <message id="foilauth-import-new_many" numerus="yes">
         <source>FoilAuth has found %0 new unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
         <extracomment>Text for SailOTP import page (multiple new tokens were found)</extracomment>
-        <translation type="unfinished">
-            <numerusform>FoilAuth znalazł na twoim urządzeniu %0 nowego niezaszyfrowanego tokena SailOTP. Czy chcesz je zaimportować i zaszyfrować?</numerusform>
+        <translation>
+            <numerusform>FoilAuth znalazł na twoim urządzeniu %0 nowy niezaszyfrowany token SailOTP. Czy chcesz go zaimportować i zaszyfrować?</numerusform>
             <numerusform>FoilAuth znalazł na twoim urządzeniu %0 nowe niezaszyfrowane tokeny SailOTP. Czy chcesz je zaimportować i zaszyfrować?</numerusform>
             <numerusform>FoilAuth znalazł na twoim urządzeniu %0 nowych niezaszyfrowanych tokenów SailOTP. Czy chcesz je zaimportować i zaszyfrować?</numerusform>
         </translation>
@@ -253,17 +253,17 @@
     <message id="foilauth-menu-select_tokens">
         <source>Select</source>
         <extracomment>Pulley menu item, opens selection page</extracomment>
-        <translation type="unfinished">Wybierz</translation>
+        <translation>Wybierz</translation>
     </message>
     <message id="foilauth-menu-select_none">
         <source>Deselect all</source>
         <extracomment>Pulley menu item</extracomment>
-        <translation type="unfinished">Odznacz wszystko</translation>
+        <translation>Odznacz wszystko</translation>
     </message>
     <message id="foilauth-menu-select_all">
         <source>Select all</source>
         <extracomment>Pulley menu item, selects all tokens</extracomment>
-        <translation type="unfinished">Zaznacz wszystko</translation>
+        <translation>Zaznacz wszystko</translation>
     </message>
     <message id="foilauth-menu-new_auth_token">
         <source>Add token</source>
@@ -273,7 +273,7 @@
     <message id="foilauth-menu-copy_password">
         <source>Copy password</source>
         <extracomment>Context menu item (copy password to clipboard)</extracomment>
-        <translation type="unfinished">Kopiuj hasło</translation>
+        <translation>Kopiuj hasło</translation>
     </message>
     <message id="foilauth-menu-show_qr_code">
         <source>Show QR code</source>
@@ -378,32 +378,32 @@
     <message id="foilauth-remorse-deleting_selected_tokens">
         <source>Deleting selected tokens</source>
         <extracomment>Remorse popup text (multiple tokens selected)</extracomment>
-        <translation type="unfinished">Usuwanie wybranych tokenów</translation>
+        <translation>Usuwanie wybranych tokenów</translation>
     </message>
     <message id="foilauth-remorse-deleting_selected_token">
         <source>Deleting selected token</source>
         <extracomment>Remorse popup text (single token selected)</extracomment>
-        <translation type="unfinished">Usuwanie wybranego tokena</translation>
+        <translation>Usuwanie wybranego tokena</translation>
     </message>
     <message id="foilauth-select_page-header">
         <source>Select tokens</source>
         <extracomment>Page title</extracomment>
-        <translation type="unfinished">Wybierz tokeny</translation>
+        <translation>Wybierz tokeny</translation>
     </message>
     <message id="foilauth-select_page-hint_delete_selected">
         <source>Delete selected tokens</source>
         <extracomment>Hint text</extracomment>
-        <translation type="unfinished">Usuń wybrane tokeny</translation>
+        <translation>Usuń wybrane tokeny</translation>
     </message>
     <message id="foilauth-select_page-hint_export_selected">
         <source>Export selected tokens via QR code</source>
         <extracomment>Hint text</extracomment>
-        <translation type="unfinished">Eksportuj wybrane tokeny za pomocą kodu QR</translation>
+        <translation>Eksportuj wybrane tokeny za pomocą kodu QR</translation>
     </message>
     <message id="foilauth-export_page-title">
         <source>Code %1 of %2</source>
         <extracomment>Page header</extracomment>
-        <translation type="unfinished">Kod %1 z %2</translation>
+        <translation>Kod %1 z %2</translation>
     </message>
     <message id="jail-explanation">
         <source>This application is not designed to function in a sandbox. Try installing the latest version from &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; or &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, it may implement some sort of a workaround. No guarantee, though.</source>
