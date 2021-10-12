@@ -8,7 +8,7 @@ Rectangle {
 
     color: "transparent"
 
-    property alias interactive: favoriteButton.visible
+    property bool interactive: true
     property alias description: descriptionLabel.text
     property string prevPassword
     property string nextPassword
@@ -32,6 +32,7 @@ Rectangle {
             verticalCenter: parent.verticalCenter
         }
         iconSource: favorite ? "image://theme/icon-m-favorite-selected" : "image://theme/icon-m-favorite"
+        enabled: parent.interactive
         highlighted: down || thisItem.selected
         onClicked: thisItem.favoriteToggled()
     }
@@ -40,8 +41,8 @@ Rectangle {
         id: descriptionLabel
 
         anchors {
-            left: interactive ? favoriteButton.right : parent.left
-            leftMargin: interactive ? (landscape ? Theme.paddingLarge : 0) : Theme.horizontalPageMargin
+            left: favoriteButton.right
+            leftMargin: landscape ? Theme.paddingLarge : 0
             rightMargin: Theme.paddingLarge
             verticalCenter: parent.verticalCenter
         }
