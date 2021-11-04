@@ -12,7 +12,7 @@ CONFIG += sailfishapp link_pkgconfig
 PKGCONFIG += sailfishapp mlite5 glib-2.0 gobject-2.0
 QT += qml sql quick dbus multimedia concurrent
 
-QMAKE_CXXFLAGS += -Wno-unused-parameter -Wno-psabi
+QMAKE_CXXFLAGS += -Wno-unused-parameter
 QMAKE_CFLAGS += -Wno-unused-parameter
 
 app_settings {
@@ -22,11 +22,13 @@ app_settings {
     TRANSLATIONS_PATH = /usr/share/$${TARGET}/translations
 }
 
-openssl_static {
-  LIBS += $$[QT_INSTALL_LIBS]/libcrypto.a $$[QT_INSTALL_LIBS]/libssl.a
-  PKGCONFIG += zlib
+system("pkg-config openssl --atleast-version=1.1") {
+    message("Linking OpenSSL dynamically")
+    PKGCONFIG += libcrypto
 } else {
-  PKGCONFIG += libcrypto
+    message("Linking OpenSSL statically")
+    LIBS += $$[QT_INSTALL_LIBS]/libcrypto.a $$[QT_INSTALL_LIBS]/libssl.a
+    PKGCONFIG += zlib
 }
 
 CONFIG(debug, debug|release) {
