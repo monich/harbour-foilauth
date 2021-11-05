@@ -27,7 +27,7 @@ system("pkg-config openssl --atleast-version=1.1") {
     PKGCONFIG += libcrypto
 } else {
     message("Linking OpenSSL statically")
-    LIBS += $$[QT_INSTALL_LIBS]/libcrypto.a $$[QT_INSTALL_LIBS]/libssl.a
+    LIBS += $$[QT_INSTALL_LIBS]/libcrypto.a
     PKGCONFIG += zlib
 }
 
