@@ -22,17 +22,13 @@ app_settings {
     TRANSLATIONS_PATH = /usr/share/$${TARGET}/translations
 }
 
-system("pkg-config openssl --atleast-version=1.1") {
-    message("Linking OpenSSL dynamically")
-    PKGCONFIG += libcrypto
-} else {
-    message("Linking OpenSSL statically")
-    LIBS += $$[QT_INSTALL_LIBS]/libcrypto.a
-    PKGCONFIG += zlib
-}
-
 CONFIG(debug, debug|release) {
     DEFINES += DEBUG HARBOUR_DEBUG
+}
+
+equals(QT_ARCH, arm64){
+    message(Linking with OpenSSL)
+    PKGCONFIG += libcrypto
 }
 
 # Directories
@@ -190,6 +186,12 @@ OTHER_FILES += $${HARBOUR_QML_COMPONENTS}
 qml_components.files = $${HARBOUR_QML_COMPONENTS}
 qml_components.path = /usr/share/$${TARGET}/qml/harbour
 INSTALLS += qml_components
+
+# openssl
+!equals(QT_ARCH, arm64){
+SOURCES += \
+    $${HARBOUR_LIB_SRC}/libcrypto.c
+}
 
 # Icons
 ICON_SIZES = 86 108 128 172 256
