@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2022 Jolla Ltd.
+ * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -40,6 +40,7 @@
 
 class QrCodeImageSource : public zxing::LuminanceSource {
     Q_DISABLE_COPY(QrCodeImageSource)
+    class Private;
 
 public:
     QrCodeImageSource(QImage aImage);
@@ -55,8 +56,6 @@ private:
 
 private:
     QImage iImage;
-    mutable zxing::byte** iGrayRows;
-    mutable zxing::ArrayRef<zxing::byte> iGrayImage;
 };
 
 #endif // QRCODE_IMAGESOURCE_H
