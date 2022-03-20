@@ -5,6 +5,9 @@ X-Nemo-Application-Type=silica-qt5
 Icon=harbour-foilauth
 Exec=harbour-foilauth
 
+[X-Sailjail]
+Sandboxing=Disabled
+
 [X-HarbourBackup]
 BackupPathList=.local/share/foil/:Documents/FoilAuth/
 BackupConfigList=/apps/harbour-foilauth/
