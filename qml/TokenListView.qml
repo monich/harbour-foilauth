@@ -16,6 +16,7 @@ SilicaListView {
     property var disabledItems: []
 
     readonly property bool isLandscape: mainPage && mainPage.isLandscape
+    readonly property real dragEdge: Theme.horizontalPageMargin
     readonly property real dragThresholdX: Theme.itemSizeSmall/2
     readonly property real dragThresholdY: Theme.itemSizeSmall/5
     readonly property real maxContentY: Math.max(originY + contentHeight - height, originY)
@@ -442,12 +443,18 @@ SilicaListView {
         onReleased: stopDrag(tokenListDelegate)
         onCanceled: stopDrag(tokenListDelegate)
         onMouseXChanged: {
-            if (!dragging && pressed && !menuOpen && !dragTimer.running && Math.abs(mouseX - pressX) > tokenList.dragThresholdX) {
+            // Don't start drag if the initial touch was too close to the edge
+            if (!dragging && pressed && !menuOpen && !dragTimer.running &&
+                    pressX > tokenList.dragEdge && pressX < (width - tokenList.dragEdge) &&
+                    Math.abs(mouseX - pressX) > tokenList.dragThresholdX) {
                 startDrag()
             }
         }
         onMouseYChanged: {
-            if (!dragging && pressed && !menuOpen && !dragTimer.running && Math.abs(mouseY - pressY) > tokenList.dragThresholdY) {
+            // Don't start drag if the initial touch was too close to the edge
+            if (!dragging && pressed && !menuOpen && !dragTimer.running &&
+                    pressX > tokenList.dragEdge && pressX < (width - tokenList.dragEdge) &&
+                    Math.abs(mouseY - pressY) > tokenList.dragThresholdY) {
                 startDrag()
             }
         }
