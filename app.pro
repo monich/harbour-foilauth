@@ -153,9 +153,7 @@ HEADERS += \
     $${HARBOUR_LIB_INCLUDE}/HarbourSelectionListModel.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourSingleImageProvider.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourSystemState.h \
-    $${HARBOUR_LIB_INCLUDE}/HarbourSystem.h \
     $${HARBOUR_LIB_INCLUDE}/HarbourTask.h \
-    $${HARBOUR_LIB_INCLUDE}/HarbourTheme.h \
     $${HARBOUR_LIB_SRC}/HarbourMce.h
 
 SOURCES += \
@@ -168,9 +166,7 @@ SOURCES += \
     $${HARBOUR_LIB_SRC}/HarbourSelectionListModel.cpp \
     $${HARBOUR_LIB_SRC}/HarbourSingleImageProvider.cpp \
     $${HARBOUR_LIB_SRC}/HarbourSystemState.cpp \
-    $${HARBOUR_LIB_SRC}/HarbourSystem.cpp \
-    $${HARBOUR_LIB_SRC}/HarbourTask.cpp \
-    $${HARBOUR_LIB_SRC}/HarbourTheme.cpp
+    $${HARBOUR_LIB_SRC}/HarbourTask.cpp
 
 HARBOUR_QML_COMPONENTS = \
     $${HARBOUR_LIB_QML}/HarbourFitLabel.qml \

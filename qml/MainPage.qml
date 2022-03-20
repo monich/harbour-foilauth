@@ -26,10 +26,10 @@ Page {
         id: foilUiComponent
 
         QtObject {
-            readonly property real opacityFaint: HarbourTheme.opacityFaint
-            readonly property real opacityLow: HarbourTheme.opacityLow
-            readonly property real opacityHigh: HarbourTheme.opacityHigh
-            readonly property real opacityOverlay: HarbourTheme.opacityOverlay
+            readonly property real opacityFaint: 0.2
+            readonly property real opacityLow: 0.4
+            readonly property real opacityHigh: 0.6
+            readonly property real opacityOverlay: 0.8
 
             readonly property var settings: FoilAuthSettings
             readonly property bool otherFoilAppsInstalled: FoilAuth.otherFoilAppsInstalled

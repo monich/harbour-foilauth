@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2021 Jolla Ltd.
- * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2022 Jolla Ltd.
+ * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -49,7 +49,6 @@
 
 #include "HarbourDebug.h"
 #include "HarbourSystemState.h"
-#include "HarbourTheme.h"
 
 #include <sailfishapp.h>
 
@@ -67,7 +66,6 @@ static void register_types(const char* uri, int v1 = 1, int v2 = 0)
 {
     qmlRegisterSingletonType<HarbourProcessState>(uri, v1, v2, "HarbourProcessState", HarbourProcessState::createSingleton);
     qmlRegisterSingletonType<HarbourSystemState>(uri, v1, v2, "HarbourSystemState", HarbourSystemState::createSingleton);
-    qmlRegisterSingletonType<HarbourTheme>(uri, v1, v2, "HarbourTheme", HarbourTheme::createSingleton);
     qmlRegisterSingletonType<FoilAuthSettings>(uri, v1, v2, "FoilAuthSettings", FoilAuthSettings::createSingleton);
     qmlRegisterSingletonType<FoilAuthModel>(uri, v1, v2, "FoilAuthModel", FoilAuthModel::createSingleton);
     qmlRegisterSingletonType<FoilAuth>(uri, v1, v2, "FoilAuth", FoilAuth::createSingleton);

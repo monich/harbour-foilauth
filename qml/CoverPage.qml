@@ -9,7 +9,8 @@ CoverBackground {
 
     readonly property var foilModel: FoilAuthModel
     readonly property int coverActionHeight: Theme.itemSizeSmall
-    readonly property string lockIconSource: Qt.resolvedUrl("images/" + (HarbourTheme.darkOnLight ? "cover-lock-dark.svg" :  "cover-lock.svg"))
+    readonly property bool darkOnLight: ('colorScheme' in Theme) && Theme.colorScheme === 1
+    readonly property string lockIconSource: Qt.resolvedUrl("images/" + (darkOnLight ? "cover-lock-dark.svg" :  "cover-lock.svg"))
 
     Rectangle {
         width: parent.width
