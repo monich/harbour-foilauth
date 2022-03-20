@@ -28,6 +28,24 @@ BuildRequires:  qt5-qttools-linguist
 HMAC-Based One-Time Password generator compatible with Google
 One-Time Password authentication mechanism.
 
+%if "%{?vendor}" == "chum"
+Categories:
+ - Utility
+Icon: https://raw.githubusercontent.com/monich/harbour-foilauth/master/icons/harbour-foilauth.svg
+Screenshots:
+- https://home.monich.net/chum/harbour-foilauth/screenshots/screenshot-001.png
+- https://home.monich.net/chum/harbour-foilauth/screenshots/screenshot-002.png
+- https://home.monich.net/chum/harbour-foilauth/screenshots/screenshot-003.png
+- https://home.monich.net/chum/harbour-foilauth/screenshots/screenshot-004.png
+- https://home.monich.net/chum/harbour-foilauth/screenshots/screenshot-005.png
+- https://home.monich.net/chum/harbour-foilauth/screenshots/screenshot-006.png
+- https://home.monich.net/chum/harbour-foilauth/screenshots/screenshot-007.png
+- https://home.monich.net/chum/harbour-foilauth/screenshots/screenshot-008.png
+- https://home.monich.net/chum/harbour-foilauth/screenshots/screenshot-009.png
+Url:
+  Homepage: https://openrepos.net/content/slava/foil-auth
+%endif
+
 %prep
 %setup -q -n %{name}-%{version}
 
