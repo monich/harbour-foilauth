@@ -100,11 +100,10 @@ CoverBackground {
         width: backgroundCircle.size
         height: backgroundCircle.size
         anchors.centerIn: parent
-        transform: Rotation {
-            id: backgroundCircleRotation
+        transform: Scale {
+            id: backgroundCircleScale
 
-            origin { x: width / 2; y: height / 2 }
-            axis { x: 0; y: 1; z: 0 }
+            origin.x: width / 2
         }
 
         Rectangle {
@@ -136,13 +135,13 @@ CoverBackground {
         source: "images/foilauth.svg"
         height: backgroundCircle.size
         sourceSize.height: backgroundCircle.size
-        anchors.centerIn: parent
+        anchors.centerIn: backgroundCircle
         smooth: true
-        transform: Rotation {
-            id: lockedImageRotation
+        opacity: 0.8
+        Scale {
+            id: lockedImageScale
 
-            origin { x: width / 2; y: height / 2 }
-            axis { x: 0; y: 1; z: 0 }
+            origin.x: width / 2
         }
     }
 
@@ -152,10 +151,10 @@ CoverBackground {
             if (cover.foilModel.keyAvailable) {
                 // This transition is not visible, there's no reason to animate it
                 lockedImage.visible = false
-                backgroundCircleRotation.angle = 0
+                lockedImageScale.xScale = 0
+                backgroundCircleScale.xScale = 1
                 backgroundCircle.visible = true
             } else {
-                lockedImageRotation.angle = 90
                 lockFlipAnimation.start()
             }
         }
@@ -168,23 +167,24 @@ CoverBackground {
         alwaysRunToEnd: true
 
         function switchToImage() {
-            backgroundCircle.visible = false
             lockedImage.visible = true
+            backgroundCircle.visible = false
         }
         NumberAnimation {
             easing.type: Easing.InOutSine
-            target: backgroundCircleRotation
-            property: "angle"
-            from: 0
-            to: 90
+            target: backgroundCircleScale
+            property: "xScale"
+            from: 1
+            to: 0
             duration: 125
         }
         ScriptAction { script: lockFlipAnimation.switchToImage() }
         NumberAnimation {
             easing.type: Easing.InOutSine
-            target: lockedImageRotation
-            property: "angle"
-            to: 0
+            target: lockedImageScale
+            property: "xScale"
+            from: 0
+            to: 1
             duration: 125
         }
     }
