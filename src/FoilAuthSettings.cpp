@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2021 Jolla Ltd.
- * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2022 Jolla Ltd.
+ * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -46,6 +46,7 @@
 #define KEY_SCAN_WIDE_MODE          DCONF_KEY("scanWideMode")
 #define KEY_SHARED_KEY_WARNING      DCONF_KEY("sharedKeyWarning")
 #define KEY_SHARED_KEY_WARNING2     DCONF_KEY("sharedKeyWarning2")
+#define KEY_AUTO_LOCK               DCONF_KEY("autoLock")
 #define KEY_AUTO_LOCK_TIME          DCONF_KEY("autoLockTime")
 #define KEY_SAILOTP_IMPORT_DONE     DCONF_KEY("sailotpImportDone")
 #define KEY_SAILOTP_IMPORTED_TOKENS DCONF_KEY("sailotpImportedTokens")
@@ -55,6 +56,7 @@
 #define DEFAULT_SCAN_ZOOM           3.f
 #define DEFAULT_SCAN_WIDE_MODE      false
 #define DEFAULT_SHARED_KEY_WARNING  true
+#define DEFAULT_AUTO_LOCK           true
 #define DEFAULT_AUTO_LOCK_TIME      15000
 
 // ==========================================================================
@@ -74,11 +76,10 @@ public:
     MGConfItem* iScanWideMode;
     MGConfItem* iSharedKeyWarning;
     MGConfItem* iSharedKeyWarning2;
+    MGConfItem* iAutoLock;
     MGConfItem* iAutoLockTime;
     MGConfItem* iSailotpImportDone;
     MGConfItem* iSailotpImportedTokens;
-    QVariant iDefaultSharedKeyWarning;
-    QVariant iDefaultAutoLockTime;
 };
 
 FoilAuthSettings::Private::Private(FoilAuthSettings* aParent) :
@@ -88,11 +89,10 @@ FoilAuthSettings::Private::Private(FoilAuthSettings* aParent) :
     iScanWideMode(new MGConfItem(KEY_SCAN_WIDE_MODE, aParent)),
     iSharedKeyWarning(new MGConfItem(KEY_SHARED_KEY_WARNING, aParent)),
     iSharedKeyWarning2(new MGConfItem(KEY_SHARED_KEY_WARNING2, aParent)),
+    iAutoLock(new MGConfItem(KEY_AUTO_LOCK, aParent)),
     iAutoLockTime(new MGConfItem(KEY_AUTO_LOCK_TIME, aParent)),
     iSailotpImportDone(new MGConfItem(KEY_SAILOTP_IMPORT_DONE, aParent)),
-    iSailotpImportedTokens(new MGConfItem(KEY_SAILOTP_IMPORTED_TOKENS, aParent)),
-    iDefaultSharedKeyWarning(DEFAULT_SHARED_KEY_WARNING),
-    iDefaultAutoLockTime(DEFAULT_AUTO_LOCK_TIME)
+    iSailotpImportedTokens(new MGConfItem(KEY_SAILOTP_IMPORTED_TOKENS, aParent))
 {
     QObject::connect(iQrCodeEcLevel, SIGNAL(valueChanged()),
         aParent, SIGNAL(qrCodeEcLevelChanged()));
@@ -106,6 +106,8 @@ FoilAuthSettings::Private::Private(FoilAuthSettings* aParent) :
         aParent, SIGNAL(sharedKeyWarningChanged()));
     QObject::connect(iSharedKeyWarning2, SIGNAL(valueChanged()),
         aParent, SIGNAL(sharedKeyWarning2Changed()));
+    QObject::connect(iAutoLock, SIGNAL(valueChanged()),
+        aParent, SIGNAL(autoLockChanged()));
     QObject::connect(iAutoLockTime, SIGNAL(valueChanged()),
         aParent, SIGNAL(autoLockTimeChanged()));
     QObject::connect(iSailotpImportDone, SIGNAL(valueChanged()),
@@ -218,13 +220,13 @@ FoilAuthSettings::setScanWideMode(
 bool
 FoilAuthSettings::sharedKeyWarning() const
 {
-    return iPrivate->iSharedKeyWarning->value(iPrivate->iDefaultSharedKeyWarning).toBool();
+    return iPrivate->iSharedKeyWarning->value(DEFAULT_SHARED_KEY_WARNING).toBool();
 }
 
 bool
 FoilAuthSettings::sharedKeyWarning2() const
 {
-    return iPrivate->iSharedKeyWarning2->value(iPrivate->iDefaultSharedKeyWarning).toBool();
+    return iPrivate->iSharedKeyWarning2->value(DEFAULT_SHARED_KEY_WARNING).toBool();
 }
 
 void
@@ -243,12 +245,28 @@ FoilAuthSettings::setSharedKeyWarning2(
     iPrivate->iSharedKeyWarning2->set(aValue);
 }
 
+// autoLock
+
+bool
+FoilAuthSettings::autoLock() const
+{
+    return iPrivate->iAutoLock->value(DEFAULT_AUTO_LOCK).toBool();
+}
+
+void
+FoilAuthSettings::setAutoLock(
+    bool aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iAutoLock->set(aValue);
+}
+
 // autoLockTime
 
 int
 FoilAuthSettings::autoLockTime() const
 {
-    QVariant val(iPrivate->iAutoLockTime->value(iPrivate->iDefaultAutoLockTime));
+    QVariant val(iPrivate->iAutoLockTime->value(DEFAULT_AUTO_LOCK_TIME));
     bool ok;
     const int ival(val.toInt(&ok));
     return (ok && ival >= 0) ? ival : DEFAULT_AUTO_LOCK_TIME;

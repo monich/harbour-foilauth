@@ -6,13 +6,10 @@ ApplicationWindow {
     id: appWindow
 
     allowedOrientations: appAllowedOrientations
-    initialPage: jailed ? jailPageComponent : mainPageComponent
+    initialPage: HarbourProcessState.jailedApp ? jailPageComponent : mainPageComponent
     cover: Component {  CoverPage { } }
 
-    readonly property bool jailed: HarbourProcessState.jailedApp
     readonly property int appAllowedOrientations: Orientation.All
-    readonly property bool appLandscapeMode: orientation === Qt.LandscapeOrientation ||
-        orientation === Qt.InvertedLandscapeOrientation
 
     Component {
         id: mainPageComponent
@@ -51,7 +48,7 @@ ApplicationWindow {
         }
         onLockedChanged: {
             lockTimer.stop()
-            if (target.locked) {
+            if (FoilAuthSettings.autoLock && target.locked) {
                 if (wasDimmed) {
                     // Give the user some time to wake up the screen and
                     // avoid re-entering the password.
@@ -59,6 +56,19 @@ ApplicationWindow {
                 } else {
                     FoilAuthModel.lock(false);
                 }
+            }
+        }
+    }
+
+    Connections {
+        target: FoilAuthSettings
+
+        onAutoLockChanged: {
+            lockTimer.stop()
+            // It's so unlikely that settings change when the device is locked
+            // But it's possible!
+            if (target.autoLock && HarbourSystemState.locked) {
+                FoilAuthModel.lock(false);
             }
         }
     }

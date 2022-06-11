@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2021 Jolla Ltd.
- * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2022 Jolla Ltd.
+ * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -48,6 +48,7 @@ class FoilAuthSettings : public QObject {
     Q_PROPERTY(bool scanWideMode READ scanWideMode WRITE setScanWideMode NOTIFY scanWideModeChanged)
     Q_PROPERTY(bool sharedKeyWarning READ sharedKeyWarning WRITE setSharedKeyWarning NOTIFY sharedKeyWarningChanged)
     Q_PROPERTY(bool sharedKeyWarning2 READ sharedKeyWarning2 WRITE setSharedKeyWarning2 NOTIFY sharedKeyWarning2Changed)
+    Q_PROPERTY(bool autoLock READ autoLock WRITE setAutoLock NOTIFY autoLockChanged)
     Q_PROPERTY(int autoLockTime READ autoLockTime WRITE setAutoLockTime NOTIFY autoLockTimeChanged)
     Q_PROPERTY(bool sailotpImportDone READ sailotpImportDone WRITE setSailotpImportDone NOTIFY sailotpImportDoneChanged)
     Q_PROPERTY(QStringList sailotpImportedTokens READ sailotpImportedTokens WRITE setSailotpImportedTokens NOTIFY sailotpImportedTokensChanged)
@@ -76,6 +77,9 @@ public:
     void setSharedKeyWarning(bool aValue);
     void setSharedKeyWarning2(bool aValue);
 
+    bool autoLock() const;
+    void setAutoLock(bool aValue);
+
     int autoLockTime() const;
     void setAutoLockTime(int aValue);
 
@@ -92,6 +96,7 @@ Q_SIGNALS:
     void scanWideModeChanged();
     void sharedKeyWarningChanged();
     void sharedKeyWarning2Changed();
+    void autoLockChanged();
     void autoLockTimeChanged();
     void sailotpImportDoneChanged();
     void sailotpImportedTokensChanged();
