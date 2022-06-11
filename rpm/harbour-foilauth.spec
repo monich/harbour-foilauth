@@ -50,7 +50,7 @@ Url:
 %setup -q -n %{name}-%{version}
 
 %build
-%qtc_qmake5 %{name}.pro
+%qtc_qmake5 CONFIG+=openrepos %{name}.pro
 %qtc_make %{?_smp_mflags}
 
 %check
@@ -70,3 +70,5 @@ desktop-file-install --delete-original \
 %{_datadir}/%{name}
 %{_datadir}/applications/%{name}.desktop
 %{_datadir}/icons/hicolor/*/apps/%{name}.png
+%{_datadir}/jolla-settings/entries/%{name}.json
+%{_datadir}/translations/%{name}*.qm

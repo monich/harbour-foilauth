@@ -402,6 +402,21 @@
         <extracomment>Page header</extracomment>
         <translation type="unfinished">Code %1/%2</translation>
     </message>
+    <message id="foilauth-settings_page-header-version">
+        <source>Version %1</source>
+        <extracomment>Settings page header description (app version)</extracomment>
+        <translation type="unfinished">Version %1</translation>
+    </message>
+    <message id="foilauth-settings_page-autolock-text">
+        <source>Automatic locking</source>
+        <extracomment>Text switch label</extracomment>
+        <translation type="unfinished">Verrouillage automatique</translation>
+    </message>
+    <message id="foilauth-settings_page-autolock-description">
+        <source>Require to enter Foil password after unlocking the screen.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation type="unfinished">Nécessite d&apos;entrer le mot de passe Foil après avoir déverrouillé l&apos;écran.</translation>
+    </message>
     <message id="jail-explanation">
         <source>This application is not designed to function in a sandbox. Try installing the latest version from &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; or &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, it may implement some sort of a workaround. No guarantee, though.</source>
         <extracomment>Label text explaining the sandbox situation</extracomment>
