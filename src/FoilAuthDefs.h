@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2022 Jolla Ltd.
+ * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -36,12 +36,7 @@
 
 #include <qnamespace.h>
 
-#ifdef OPENREPOS
-#  define FOILAUTH_APP_NAME        "openrepos-foilauth"
-#else
-#  define FOILAUTH_APP_NAME        "harbour-foilauth"
-#endif
-
+#define FOILAUTH_APP_NAME          "harbour-foilauth"
 #define FOILAUTH_QML_IMPORT        "harbour.foilauth"
 #define FOILAUTH_DCONF_ROOT        "/apps/" FOILAUTH_APP_NAME "/"
 
