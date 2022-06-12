@@ -50,6 +50,7 @@ SilicaListView {
         var n = SailOTP.fetchNewTokens(FoilAuthModel)
         if (n > 0) {
             var dialog = pageStack.push(Qt.resolvedUrl("ImportTokensDialog.qml"), {
+                allowedOrientations: mainPage.allowedOrientations,
                 firstTime: !FoilAuthSettings.sailotpImportDone,
                 count: n
             })
@@ -147,6 +148,7 @@ SilicaListView {
             text: qsTrId("foilauth-menu-new_auth_token")
             onClicked: {
                 var editPage = pageStack.push(Qt.resolvedUrl("EditAuthTokenDialog.qml"), {
+                    allowedOrientations: mainPage.allowedOrientations,
                     //: Dialog button
                     //% "Save"
                     acceptText: qsTrId("foilauth-edit_token-save"),
@@ -280,6 +282,7 @@ SilicaListView {
                     onClicked: {
                         var item  = tokenListDelegate
                         pageStack.push(Qt.resolvedUrl("EditAuthTokenDialog.qml"), {
+                            allowedOrientations: mainPage.allowedOrientations,
                             //: Dialog button
                             //% "Save"
                             acceptText: qsTrId("foilauth-edit_token-save"),

@@ -5,7 +5,6 @@ import harbour.foilauth 1.0
 Dialog {
     id: thisDialog
 
-    allowedOrientations: appAllowedOrientations
     forwardNavigation: !qrCodeOnly
     backNavigation: !qrCodeOnly
     canAccept: generator.text !== ""

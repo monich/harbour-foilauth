@@ -5,11 +5,9 @@ import harbour.foilauth 1.0
 ApplicationWindow {
     id: appWindow
 
-    allowedOrientations: appAllowedOrientations
+    allowedOrientations: Orientation.All
     initialPage: HarbourProcessState.jailedApp ? jailPageComponent : mainPageComponent
     cover: Component {  CoverPage { } }
-
-    readonly property int appAllowedOrientations: Orientation.All
 
     Component {
         id: mainPageComponent

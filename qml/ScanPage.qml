@@ -20,6 +20,7 @@ Page {
         if (token.valid) {
             var existingPage = pageStack.previousPage(parentPage)
             var newPage = pageStack.replaceAbove(existingPage, Qt.resolvedUrl("EditAuthTokenDialog.qml"), {
+                allowedOrientations: thisPage.allowedOrientations,
                 //: Dialog button
                 //% "Save"
                 acceptText: qsTrId("foilauth-edit_token-save"),
