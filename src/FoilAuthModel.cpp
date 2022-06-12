@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2021 Jolla Ltd.
- * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2022 Jolla Ltd.
+ * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -977,6 +977,7 @@ public:
     bool needTimer() const;
     void queueSignal(Signal aSignal);
     void emitQueuedSignals();
+    void updateTimer();
     void checkTimer();
     bool checkPassword(QString aPassword);
     bool changePassword(QString aOldPassword, QString aNewPassword);
@@ -1019,8 +1020,7 @@ public:
     QList<EncryptTask*> iEncryptTasks;
     QList<PasswordTask*> iPasswordTasks;
     QTimer* iTimer;
-    quint64 iLastTime;
-    quint64 iLastPeriod;
+    qint64 iLastPeriod;
     uint iTimeLeft;
 };
 
@@ -1039,9 +1039,8 @@ FoilAuthModel::Private::Private(FoilAuthModel* aParent) :
     iGenerateKeyTask(NULL),
     iDecryptAllTask(NULL),
     iTimer(new QTimer(this)),
-    iLastTime(QDateTime::currentDateTime().toTime_t()),
-    iLastPeriod(iLastTime/FoilAuth::PERIOD),
-    iTimeLeft(FoilAuth::PERIOD - (iLastTime % FoilAuth::PERIOD))
+    iLastPeriod(0),
+    iTimeLeft(0)
 {
     // Serialize the tasks:
     iThreadPool->setMaxThreadCount(1);
@@ -1088,6 +1087,10 @@ FoilAuthModel::Private::Private(FoilAuthModel* aParent) :
 
     iTimer->setSingleShot(true);
     connect(iTimer, SIGNAL(timeout()), SLOT(onTimer()));
+    updateTimer();
+
+    // Clear queued signals
+    iFirstQueuedSignal = SignalCount;
 }
 
 FoilAuthModel::Private::~Private()
@@ -1320,7 +1323,7 @@ bool FoilAuthModel::Private::needTimer() const
 void FoilAuthModel::Private::checkTimer()
 {
     if (needTimer()) {
-        onTimer();
+        updateTimer();
     } else if (iTimer->isActive()){
         queueSignal(SignalTimerActiveChanged);
         iTimer->stop();
@@ -1420,7 +1423,8 @@ void FoilAuthModel::Private::encrypt(const ModelData* aData)
 {
     const bool wasBusy = busy();
     EncryptTask* task = new EncryptTask(iThreadPool, aData,
-        iPrivateKey, iPublicKey, iLastTime, iFoilDataDir);
+        iPrivateKey, iPublicKey, iLastPeriod * FoilAuth::PERIOD,
+        iFoilDataDir);
     iEncryptTasks.append(task);
     task->submit(this, SLOT(onEncryptTaskDone()));
     if (!wasBusy) {
@@ -1474,7 +1478,8 @@ void FoilAuthModel::Private::onEncryptTaskDone()
 void FoilAuthModel::Private::updatePasswords(const ModelData* aData)
 {
     const bool wasBusy = busy();
-    PasswordTask* task = new PasswordTask(iThreadPool, aData, iLastTime);
+    PasswordTask* task = new PasswordTask(iThreadPool, aData,
+        iLastPeriod * FoilAuth::PERIOD);
     iPasswordTasks.append(task);
     task->submit(this, SLOT(onPasswordTaskDone()));
     if (!wasBusy) {
@@ -1798,18 +1803,18 @@ bool FoilAuthModel::Private::busy() const
     }
 }
 
-void FoilAuthModel::Private::onTimer()
+void FoilAuthModel::Private::updateTimer()
 {
-    const QDateTime now(QDateTime::currentDateTime());
-    int msec = 1000 - now.time().msec();
-    if (msec < 5) msec += 1000;
+    const qint64 msecsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
+    const qint64 secsSinceEpoch = msecsSinceEpoch / 1000;
+    const qint64 thisPeriod = secsSinceEpoch / FoilAuth::PERIOD;
+    const qint64 nextSecond = (secsSinceEpoch + 1) * 1000;
+    const uint lastTimeLeft = iTimeLeft;
+
     if (!iTimer->isActive()) {
         queueSignal(SignalTimerActiveChanged);
     }
-    iTimer->start(msec);
-    iLastTime = now.toTime_t();
-    const quint64 thisPeriod = iLastTime / FoilAuth::PERIOD;
-    const uint timeLeft = FoilAuth::PERIOD - (iLastTime % FoilAuth::PERIOD);
+    iTimer->start((int)(nextSecond - msecsSinceEpoch));
     if (iLastPeriod != thisPeriod) {
         iLastPeriod = thisPeriod;
         iTimeLeft = FoilAuth::PERIOD;
@@ -1819,15 +1824,20 @@ void FoilAuthModel::Private::onTimer()
             updatePasswords(iData.at(i));
         }
         Q_EMIT parentModel()->timerRestarted();
-    } else if (iTimeLeft != timeLeft) {
-        iTimeLeft = timeLeft;
+    } else {
+        const qint64 endOfThisPeriod = (thisPeriod + 1) * FoilAuth::PERIOD;
+        iTimeLeft = (int)(endOfThisPeriod - secsSinceEpoch);
+    }
+
+    if (lastTimeLeft != iTimeLeft) {
         queueSignal(SignalTimeLeftChanged);
     }
+}
+
+void FoilAuthModel::Private::onTimer()
+{
+    updateTimer();
     emitQueuedSignals();
-    if (iTimeLeft != timeLeft) {
-        iTimeLeft = timeLeft;
-        Q_EMIT parentModel()->timeLeftChanged();
-    }
 }
 
 // ==========================================================================
