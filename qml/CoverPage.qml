@@ -11,6 +11,7 @@ CoverBackground {
     readonly property int coverActionHeight: Theme.itemSizeSmall
     readonly property bool darkOnLight: ('colorScheme' in Theme) && Theme.colorScheme === 1
     readonly property string lockIconSource: Qt.resolvedUrl("images/" + (darkOnLight ? "cover-lock-dark.svg" :  "cover-lock.svg"))
+    readonly property string displayOn: HarbourSystemState.displayStatus !== HarbourSystemState.MCE_DISPLAY_OFF
 
     Rectangle {
         width: parent.width
@@ -21,61 +22,17 @@ CoverBackground {
     }
 
     Rectangle {
-        id: countdown
-
         height: appTitle.height
-        width: active ? Math.round(value) : cover.width
+        width: Math.round(parent.width * (active ? value : 1))
         color: Theme.primaryColor
         opacity: 0.1
 
-        readonly property bool active: list.model.needTimer && foilModel.timerActive
-        property real value
+        readonly property bool active: list.model.needTimer && foilModel.timerActive && displayOn
+        readonly property real value: (foilModel.timeLeft - 1)/(foilModel.period - 1)
 
-        onActiveChanged: {
-            countdownRepeatAnimation.stop()
-            countdownInitialAnimation.stop()
-            value = cover.width
-            if (active) {
-                var ms = foilModel.millisecondsLeft()
-                if (ms > 1000) {
-                    countdownInitialAnimation.duration = ms - 1000
-                    countdownInitialAnimation.start()
-                }
-            }
-        }
-
-        Connections {
-            target: countdown.active ? foilModel : null
-            onTimerRestarted: {
-                countdownInitialAnimation.stop()
-                countdownRepeatAnimation.restart()
-            }
-        }
-
-        NumberAnimation on value {
-            id: countdownInitialAnimation
-
-            to: 0
-            easing.type: Easing.Linear
-        }
-
-        SequentialAnimation {
-            id: countdownRepeatAnimation
-
-            NumberAnimation {
-                target: countdown
-                property: "value"
-                to: cover.width
-                easing.type: Easing.Linear
-                duration: 1000
-            }
-            NumberAnimation {
-                target: countdown
-                property: "value"
-                to: 0
-                easing.type: Easing.Linear
-                duration: (foilModel.period - 2) * 1000
-            }
+        Behavior on width {
+            enabled: displayOn
+            NumberAnimation { duration: 500 }
         }
     }
 
@@ -192,7 +149,7 @@ CoverBackground {
     Timer {
         id: currentIndexTimer
 
-        running: list.count > 1
+        running: list.count > 1 && displayOn
         interval: 5000
         repeat: true
         onTriggered: list.incrementCurrentIndex()

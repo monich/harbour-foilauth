@@ -186,62 +186,16 @@ SilicaListView {
             anchors.verticalCenter: header.extraContent.verticalCenter
             leftMargin: Theme.horizontalPageMargin + Theme.paddingMedium
             rightMargin: header.rightMargin
-            minimumValue: 0
+            minimumValue: 1
             maximumValue: foilModel.period
+            value: foilModel.timeLeft
             visible: opacity > 0
-            opacity: active ? 1 : 0
-
-            readonly property bool active: foilModel.timerActive
+            opacity: foilModel.timerActive ? 1 : 0
 
             Behavior on opacity { FadeAnimation { } }
-
-            onActiveChanged: {
-                countdownRepeatAnimation.stop()
-                countdownInitialAnimation.stop()
-                if (active) {
-                    var ms = foilModel.millisecondsLeft()
-                    if (ms > 1000) {
-                        value = ms / 1000
-                        countdownInitialAnimation.duration = ms - 1000
-                        countdownInitialAnimation.start()
-                        return
-                    }
-                }
-                value = 0
-            }
-
-            Connections {
-                target: countdown.active ? foilModel : null
-                onTimerRestarted: {
-                    countdownInitialAnimation.stop()
-                    countdownRepeatAnimation.restart()
-                }
-            }
-
-            NumberAnimation on value {
-                id: countdownInitialAnimation
-
-                to: 0
-                easing.type: Easing.Linear
-            }
-
-            SequentialAnimation {
-                id: countdownRepeatAnimation
-
-                NumberAnimation {
-                    target: countdown
-                    property: "value"
-                    to: foilModel.period
-                    easing.type: Easing.Linear
-                    duration: 1000
-                }
-                NumberAnimation {
-                    target: countdown
-                    property: "value"
-                    to: 0
-                    easing.type: Easing.Linear
-                    duration: (foilModel.period - 2) * 1000
-                }
+            Behavior on value {
+                enabled: foilModel.timerActive && Qt.application.active
+                NumberAnimation { duration: 500 }
             }
         }
     }
