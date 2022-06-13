@@ -1,6 +1,6 @@
 Name:           harbour-foilauth
 Summary:        HMAC-Based One-Time Password generator
-Version:        1.1.0
+Version:        1.1.1
 Release:        1
 License:        BSD
 Group:          Applications/Internet
@@ -42,6 +42,8 @@ Screenshots:
 - https://home.monich.net/chum/harbour-foilauth/screenshots/screenshot-007.png
 - https://home.monich.net/chum/harbour-foilauth/screenshots/screenshot-008.png
 - https://home.monich.net/chum/harbour-foilauth/screenshots/screenshot-009.png
+- https://home.monich.net/chum/harbour-foilauth/screenshots/screenshot-010.png
+- https://home.monich.net/chum/harbour-foilauth/screenshots/screenshot-011.png
 Url:
   Homepage: https://openrepos.net/content/slava/foil-auth
 %endif
