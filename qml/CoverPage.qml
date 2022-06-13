@@ -209,6 +209,7 @@ CoverBackground {
                     bold: true
                 }
                 transform: HarbourTextFlip {
+                    enabled: displayOn
                     text: model.currentPassword
                     target: passwordLabel
                 }

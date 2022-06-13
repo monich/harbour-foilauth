@@ -64,6 +64,7 @@ Rectangle {
         color: Theme.highlightColor
         visible: landscape && !hotp
         transform: HarbourTextFlip {
+            enabled: Qt.application.active
             text: thisItem.prevPassword
             target: prevPasswordLabel
         }
@@ -84,6 +85,7 @@ Rectangle {
             bold: true
         }
         transform: HarbourTextFlip {
+            enabled: Qt.application.active
             text: thisItem.currentPassword
             target: currentPasswordLabel
         }
@@ -101,6 +103,7 @@ Rectangle {
         color: Theme.highlightColor
         visible: landscape && !hotp
         transform: HarbourTextFlip {
+            enabled: Qt.application.active
             text: thisItem.nextPassword
             target: nextPasswordLabel
         }
