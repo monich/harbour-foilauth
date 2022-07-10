@@ -56,7 +56,11 @@
 #include <QSharedPointer>
 
 #include <unistd.h>
+#include <string.h>
+#include <errno.h>
 #include <sys/stat.h>
+
+#define ENCRYPT_FILE_MODE       0600
 
 #define ENCRYPT_KEY_TYPE        FOILMSG_KEY_AES_256
 #define SIGNATURE_TYPE          FOILMSG_SIGNATURE_SHA256_RSA
@@ -688,6 +692,9 @@ void FoilAuthModel::EncryptTask::performTask()
             iNewFile = QString::fromLocal8Bit(dest->str, dest->len);
             removeFile(iRemoveFile);
             foil_output_unref(out);
+            if (chmod(dest->str, ENCRYPT_FILE_MODE) < 0) {
+                HWARN("Failed to chmod" << dest->str << strerror(errno));
+            }
         } else {
             foil_output_unref(out);
             unlink(dest->str);
