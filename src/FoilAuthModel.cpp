@@ -257,7 +257,7 @@ FoilAuthTypes::DigestAlgorithm FoilAuthModel::ModelData::headerAlgorithm(const F
 QString FoilAuthModel::ModelData::headerString(const FoilMsg* aMsg, const char* aKey)
 {
     const char* value = foilmsg_get_value(aMsg, aKey);
-    return (value && value[0]) ? QString::fromLatin1(value) : QString();
+    return (value && value[0]) ? QString::fromUtf8(value) : QString();
 }
 
 quint64 FoilAuthModel::ModelData::headerUint64(const FoilMsg* aMsg, const char* aKey, quint64 aDefault)
