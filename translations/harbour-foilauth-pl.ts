@@ -192,6 +192,11 @@
         <extracomment>Hint label</extracomment>
         <translation>Przełącz współczynnik proporcji między 9:16 a 3:4</translation>
     </message>
+    <message id="foilauth-scan-skip_button">
+        <source>Skip</source>
+        <extracomment>Button label (skip scanning)</extracomment>
+        <translation type="unfinished">Pomiń</translation>
+    </message>
     <message id="foilauth-foil_apps_warning">
         <source>Note that all Foil apps use the same encryption key and password.</source>
         <extracomment>Warning text, small size label below the password prompt</extracomment>

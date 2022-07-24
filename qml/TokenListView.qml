@@ -75,6 +75,14 @@ SilicaListView {
         RemorsePopup { }
     }
 
+    Component {
+        id: editAuthTokenDialogComponent
+
+        EditAuthTokenDialog {
+            allowedOrientations: mainPage.allowedOrientations
+        }
+    }
+
     PullDownMenu {
         MenuItem {
             //: Pulley menu item, changes Foil password
@@ -147,25 +155,32 @@ SilicaListView {
             //% "Add token"
             text: qsTrId("foilauth-menu-new_auth_token")
             onClicked: {
-                var editPage = pageStack.push(Qt.resolvedUrl("EditAuthTokenDialog.qml"), {
-                    allowedOrientations: mainPage.allowedOrientations,
-                    //: Dialog button
-                    //% "Save"
-                    acceptText: qsTrId("foilauth-edit_token-save"),
-                    //: Dialog title
-                    //% "Add token"
-                    dialogTitle: qsTrId("foilauth-add_token-title"),
-                    canScan: true
+                pageStack.push("ScanPage.qml", {
+                    "allowedOrientations": allowedOrientations
+                }).done.connect(function(token) {
+                    var props = {
+                        //: Dialog button
+                        //% "Save"
+                        acceptText: qsTrId("foilauth-edit_token-save"),
+                        //: Dialog title
+                        //% "Add token"
+                        dialogTitle: qsTrId("foilauth-add_token-title")
+                    }
+                    if (token.valid) {
+                        props["type"] = token.type
+                        props["label"] = token.label
+                        props["issuer"] = token.issuer
+                        props["secret"] = token.secret
+                        props["digits"] = token.digits
+                        props["counter"] = token.counter
+                        props["timeShift"] = token.timeshift
+                        props["algorithm"] = token.algorithm
+                    }
+                    pageStack.replace(editAuthTokenDialogComponent, props).tokenAccepted.connect(function(dialog) {
+                        FoilAuthModel.addToken(dialog.type, dialog.secret, dialog.label, dialog.issuer,
+                            dialog.digits, dialog.counter, dialog.timeshift, dialog.algorithm)
+                    })
                 })
-                editPage.tokenAccepted.connect(tokenAccepted)
-                editPage.replacedWith.connect(function(page) {
-                    // This happens after QR code is scanned
-                    page.tokenAccepted.connect(tokenAccepted)
-                })
-            }
-            function tokenAccepted(dialog) {
-                FoilAuthModel.addToken(dialog.type, dialog.secret, dialog.label, dialog.issuer,
-                    dialog.digits, dialog.counter, dialog.timeshift, dialog.algorithm)
             }
         }
     }
@@ -235,8 +250,7 @@ SilicaListView {
                     text: qsTrId("foilauth-menu-edit")
                     onClicked: {
                         var item  = tokenListDelegate
-                        pageStack.push(Qt.resolvedUrl("EditAuthTokenDialog.qml"), {
-                            allowedOrientations: mainPage.allowedOrientations,
+                        pageStack.push(editAuthTokenDialogComponent, {
                             //: Dialog button
                             //% "Save"
                             acceptText: qsTrId("foilauth-edit_token-save"),

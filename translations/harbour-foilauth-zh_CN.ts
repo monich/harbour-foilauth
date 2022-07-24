@@ -191,6 +191,11 @@
         <extracomment>Hint label</extracomment>
         <translation>在9:16和3：4之间切换屏幕比例</translation>
     </message>
+    <message id="foilauth-scan-skip_button">
+        <source>Skip</source>
+        <extracomment>Button label (skip scanning)</extracomment>
+        <translation type="unfinished">跳过</translation>
+    </message>
     <message id="foilauth-foil_apps_warning">
         <source>Note that all Foil apps use the same encryption key and password.</source>
         <extracomment>Warning text, small size label below the password prompt</extracomment>

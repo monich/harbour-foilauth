@@ -12,36 +12,11 @@ Page {
     property Item viewFinder
     property Item hint
 
-    readonly property bool canShowViewFinder: Qt.application.active && thisPage.status === PageStatus.Active
     readonly property bool canScan: viewFinder && viewFinder.source.cameraState === Camera.ActiveState
+    readonly property bool canShowViewFinder: Qt.application.active &&
+        (status === PageStatus.Active || status === PageStatus.Deactivating)
 
-    function done(token) {
-        var parentPage = pageStack.previousPage(thisPage) // Must be EditAuthTokenDialog
-        if (token.valid) {
-            var existingPage = pageStack.previousPage(parentPage)
-            var newPage = pageStack.replaceAbove(existingPage, Qt.resolvedUrl("EditAuthTokenDialog.qml"), {
-                allowedOrientations: thisPage.allowedOrientations,
-                //: Dialog button
-                //% "Save"
-                acceptText: qsTrId("foilauth-edit_token-save"),
-                //: Dialog title
-                //% "Add token"
-                dialogTitle: qsTrId("foilauth-add_token-title"),
-                canScan: true,
-                type: token.type,
-                label: token.label,
-                issuer: token.issuer,
-                secret: token.secret,
-                digits: token.digits,
-                counter: token.counter,
-                timeShift: token.timeshift,
-                algorithm: token.algorithm
-            })
-            parentPage.replacedWith(newPage)
-        } else {
-            pageStack.pop(parentPage)
-        }
-    }
+    signal done(var token)
 
     onStatusChanged: {
         if (status === PageStatus.Active) {
@@ -147,17 +122,17 @@ Page {
                         page.tokenSelected.connect(function(token) {
                             thisPage.done(token)
                         })
-                    } else if (lastInvalidCode !== result.text) {
-                        lastInvalidCode = result.text
-                        markImageProvider.image = image
-                        markImage.visible = true
-                        unsupportedCodeNotification.publish()
-                        restartScanTimer.start()
-                    } else {
-                        if (thisPage.canScan) {
-                            scanner.start()
-                        }
+                } else if (lastInvalidCode !== result.text) {
+                    lastInvalidCode = result.text
+                    markImageProvider.image = image
+                    markImage.visible = true
+                    unsupportedCodeNotification.publish()
+                    restartScanTimer.start()
+                } else {
+                    if (thisPage.canScan) {
+                        scanner.start()
                     }
+                }
                 }
             } else if (thisPage.canScan) {
                 scanner.start()
@@ -225,7 +200,7 @@ Page {
         anchors {
             top: titleLabel.bottom
             topMargin: Theme.paddingMedium
-            bottom: toooBar.top
+            bottom: toolBar.top
             bottomMargin: Theme.paddingLarge
             left: parent.left
             leftMargin: Theme.horizontalPageMargin
@@ -279,13 +254,13 @@ Page {
     }
 
     Item {
-        id: toooBar
+        id: toolBar
 
         height: Math.max(flashButton.height, zoomSlider.height, aspectButton.height)
         width: parent.width
 
         anchors {
-            bottom: parent.bottom
+            left: parent.left
             bottomMargin: Theme.paddingLarge
         }
 
@@ -360,6 +335,16 @@ Page {
         }
     }
 
+    Button {
+        id: skipButton
+
+        anchors.margins: Theme.paddingLarge
+        //: Button label (skip scanning)
+        //% "Skip"
+        text: qsTrId("foilauth-scan-skip_button")
+        onClicked: thisPage.done({ "valid" : false })
+    }
+
     Image {
         id: markImage
 
@@ -376,4 +361,51 @@ Page {
     HarbourSingleImageProvider {
         id: markImageProvider
     }
+
+    states: [
+        State {
+            name: "portrait"
+            when: !isLandscape
+            changes: [
+                AnchorChanges {
+                    target: toolBar
+                    anchors {
+                        right: parent.right
+                        bottom: skipButton.top
+                    }
+                },
+                AnchorChanges {
+                    target: skipButton
+                    anchors {
+                        right: undefined
+                        bottom: parent.bottom
+                        horizontalCenter: parent.horizontalCenter
+                        verticalCenter: undefined
+                    }
+                }
+            ]
+        },
+        State {
+            name: "landscape"
+            when: isLandscape
+            changes: [
+                AnchorChanges {
+                    target: toolBar
+                    anchors {
+                        right: skipButton.left
+                        bottom: parent.bottom
+                    }
+                },
+                AnchorChanges {
+                    target: skipButton
+                    anchors {
+                        right: parent.right
+                        bottom: undefined
+                        horizontalCenter: undefined
+                        verticalCenter: toolBar.verticalCenter
+                    }
+                }
+            ]
+        }
+    ]
 }
