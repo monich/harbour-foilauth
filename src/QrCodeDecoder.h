@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2022 Jolla Ltd.
+ * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -34,15 +34,14 @@
 #ifndef QRCODE_DECODER_H
 #define QRCODE_DECODER_H
 
+#include <QList>
 #include <QImage>
 #include <QPoint>
 #include <QString>
 #include <QMetaType>
 
-#include <zxing/BarcodeFormat.h>
-#include <zxing/LuminanceSource.h>
-
-class QrCodeDecoder {
+class QrCodeDecoder
+{
     Q_DISABLE_COPY(QrCodeDecoder)
 
 public:
@@ -51,30 +50,29 @@ public:
     QrCodeDecoder();
     ~QrCodeDecoder();
 
-    Result decode(QImage aImage);
-    Result decode(zxing::Ref<zxing::LuminanceSource> aSource);
+    Result decode(const QImage);
 
 private:
     class Private;
     Private* iPrivate;
 };
 
-class QrCodeDecoder::Result {
-    friend class QrCodeDecoder;
+class QrCodeDecoder::Result
+{
+friend class QrCodeDecoder;
 
 public:
-    Result(QString aText, QList<QPointF> aPoints, zxing::BarcodeFormat aFormat);
-    Result(const Result& aResult);
+    Result(const QString, const QList<QPointF>, const QString);
+    Result(const Result&);
     Result();
     ~Result();
 
-    Result& operator = (const Result& aResult);
+    Result& operator=(const Result&);
 
     bool isValid() const;
-    QString getText() const;
-    QList<QPointF> getPoints() const;
-    zxing::BarcodeFormat::Value getFormat() const;
-    QString getFormatName() const;
+    const QString getText() const;
+    const QList<QPointF> getPoints() const;
+    const QString getFormatName() const;
 
 private:
     class Private;

@@ -1,13 +1,13 @@
 TEMPLATE = subdirs
-SUBDIRS = app qrencode zxing
+SUBDIRS = app qrencode zbar
 
 app.file = app.pro
-app.depends = qrencode-target zxing-target
+app.depends = qrencode-target zbar-target
 
 qrencode.file = qrencode.pro
 qrencode.target = qrencode-target
 
-zxing.file = zxing.pro
-zxing.target = zxing-target
+zbar.file = zbar/zbar.pro
+zbar.target = zbar-target
 
-OTHER_FILES += README.md LICENSE *.desktop rpm/*.spec
+OTHER_FILES += README.md LICENSE rpm/*.spec

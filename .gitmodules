@@ -13,3 +13,6 @@
 [submodule "foil-ui"]
 	path = foil-ui
 	url = https://github.com/monich/foil-ui.git
+[submodule "zbar/zbar"]
+	path = zbar/zbar
+	url = https://github.com/mchehab/zbar

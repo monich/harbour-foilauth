@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019 Jolla Ltd.
- * Copyright (C) 2019 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2022 Jolla Ltd.
+ * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -32,7 +32,6 @@
  */
 
 #include "QrCodeScanner.h"
-#include "QrCodeImageSource.h"
 #include "QrCodeDecoder.h"
 
 #include "HarbourDebug.h"
@@ -276,14 +275,9 @@ void QrCodeScanner::Private::scanThread(uint aScanId)
                 scale = 1;
             }
 
-            QrCodeImageSource* source = new QrCodeImageSource(scaledImage);
-            saveDebugImage(source->grayscaleImage(), "debug_grayscale.bmp");
-
-            // Ref takes ownership of ImageSource:
-            zxing::Ref<zxing::LuminanceSource> sourceRef(source);
-
             HDEBUG("decoding screenshot ...");
-            result = iDecoder->decode(sourceRef);
+            scaledImage = scaledImage.convertToFormat(QImage::Format_ARGB32_Premultiplied);
+            result = iDecoder->decode(scaledImage);
 
             if (!result.isValid() && tryRotated) {
                 // try the other orientation for 1D bar code
@@ -323,7 +317,7 @@ void QrCodeScanner::Private::scanThread(uint aScanId)
                 HDEBUG(points[i] << "=>" << p);
                 points[i] = p;
             }
-            result = QrCodeDecoder::Result(result.getText(), points, result.getFormat());
+            result = QrCodeDecoder::Result(result.getText(), points, result.getFormatName());
         }
     } else {
         HDEBUG("nothing was decoded");
@@ -334,7 +328,7 @@ void QrCodeScanner::Private::scanThread(uint aScanId)
         const QList<QPointF> points(result.getPoints());
         HDEBUG("image:" << image);
         HDEBUG("points:" << points);
-        HDEBUG("format:" << result.getFormat() << result.getFormatName());
+        HDEBUG("format:" << result.getFormatName());
         if (!points.isEmpty()) {
             QPainter painter(&image);
             painter.setPen(iMarkerColor);

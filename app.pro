@@ -55,10 +55,10 @@ LIBFOILMSG_SRC = $${LIBFOILMSG_DIR}/src
 
 LIBQRENCODE_DIR = $${_PRO_FILE_PWD_}/libqrencode
 
-ZXING_DIR = $${_PRO_FILE_PWD_}/zxing
+ZBAR_DIR = $${_PRO_FILE_PWD_}/zbar/zbar
 
 # Libraries
-LIBS +=  libqrencode.a libzxing.a -ldl
+LIBS +=  libqrencode.a -ldl
 
 OTHER_FILES += \
     *.desktop \
@@ -74,8 +74,7 @@ INCLUDEPATH += \
     $${LIBFOIL_INCLUDE} \
     $${LIBFOILMSG_INCLUDE} \
     $${LIBGLIBUTIL_INCLUDE} \
-    $${LIBQRENCODE_DIR} \
-    $${ZXING_DIR}
+    $${LIBQRENCODE_DIR}
 
 HEADERS += \
     src/FoilAuth.h \
@@ -86,7 +85,6 @@ HEADERS += \
     src/FoilAuthToken.h \
     src/FoilAuthTypes.h \
     src/QrCodeDecoder.h \
-    src/QrCodeImageSource.h \
     src/QrCodeScanner.h \
     src/SailOTP.h
 
@@ -98,7 +96,6 @@ SOURCES += \
     src/FoilAuthToken.cpp \
     src/main.cpp \
     src/QrCodeDecoder.cpp \
-    src/QrCodeImageSource.cpp \
     src/QrCodeScanner.cpp \
     src/SailOTP.cpp
 
@@ -183,12 +180,22 @@ qml_components.path = /usr/share/$${TARGET}/qml/harbour
 INSTALLS += qml_components
 
 # openssl
+
 !equals(QT_ARCH, arm64){
 SOURCES += \
     $${HARBOUR_LIB_SRC}/libcrypto.c
 }
 
+# zbar
+
+INCLUDEPATH += \
+    $${ZBAR_DIR}/include \
+    $${ZBAR_DIR}/zbar
+
+LIBS += zbar/libzbar.a
+
 # Icons
+
 ICON_SIZES = 86 108 128 172 256
 for(s, ICON_SIZES) {
     icon_target = icon$${s}
@@ -199,6 +206,7 @@ for(s, ICON_SIZES) {
 }
 
 # Settings
+
 app_settings {
     settings_json.files = settings/$${TARGET}.json
     settings_json.path = /usr/share/jolla-settings/entries/
@@ -211,6 +219,7 @@ OTHER_FILES += \
     settings/*.json
 
 # Translations
+
 TRANSLATION_IDBASED=-idbased
 TRANSLATION_SOURCES = \
     $${_PRO_FILE_PWD_}/qml \

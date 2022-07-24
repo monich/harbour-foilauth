@@ -1,0 +1,10 @@
+#define ZBAR_VERSION_MAJOR 0
+#define ZBAR_VERSION_MINOR 23
+#define ZBAR_VERSION_PATCH 92
+
+#define HAVE_SYS_TIME_H 1
+#define HAVE_ERRNO_H 1
+#define _POSIX_TIMERS 1
+#define ENABLE_QRCODE 1
+#define STDC_HEADERS 1
+#define PRIx32 "x"
