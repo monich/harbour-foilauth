@@ -50,99 +50,176 @@ CoverBackground {
         text: showAppTitle ? qsTrId("foilauth-app_name") : " "
     }
 
-    Item {
-        id: backgroundCircle
+    Flipable {
+        id: flipable
 
-        readonly property real size: Math.floor(parent.width * 0.8)
-        width: backgroundCircle.size
-        height: backgroundCircle.size
-        anchors.centerIn: parent
-        transform: Scale {
-            id: backgroundCircleScale
+        readonly property real circleSize: Math.floor(parent.width * 0.8)
+        readonly property bool flipped: cover.foilModel.keyAvailable
+        property bool flipping
+        property real targetAngle
 
-            origin.x: width / 2
-        }
+        anchors.fill: parent
 
-        Rectangle {
+        front: Item {
             anchors.fill: parent
-            color: "white"
-            radius: height/2
-            opacity: 0.2
-        }
 
-        HarbourFitLabel {
-            id: noPasswordLabel
-
-            width: Math.round(parent.width - 2 * parent.x)
-            height: width
-            anchors.centerIn: parent
-            maxFontSize: Theme.fontSizeHuge
-            font {
-                family: Theme.fontFamilyHeading
-                bold: true
-            }
-            text: "\u2022\u2022\u2022\u2022\u2022\u2022"
-            visible: list.count == 0 && foilModel.keyAvailable
-        }
-    }
-
-    Image {
-        id: lockedImage
-
-        source: "images/foilauth.svg"
-        height: backgroundCircle.size
-        sourceSize.height: backgroundCircle.size
-        anchors.centerIn: backgroundCircle
-        smooth: true
-        opacity: 0.8
-        Scale {
-            id: lockedImageScale
-
-            origin.x: width / 2
-        }
-    }
-
-    Connections {
-        target: cover.foilModel
-        onKeyAvailableChanged: {
-            if (cover.foilModel.keyAvailable) {
-                // This transition is not visible, there's no reason to animate it
-                lockedImage.visible = false
-                lockedImageScale.xScale = 0
-                backgroundCircleScale.xScale = 1
-                backgroundCircle.visible = true
-            } else {
-                lockFlipAnimation.start()
+            Image {
+                source: "images/foilauth.svg"
+                height: flipable.circleSize
+                sourceSize.height: flipable.circleSize
+                anchors.centerIn: parent
+                smooth: true
+                opacity: 0.8
             }
         }
-    }
 
-    // Flip animation
-    SequentialAnimation {
-        id: lockFlipAnimation
+        back: Item {
+            anchors.fill: parent
 
-        alwaysRunToEnd: true
+            Rectangle {
+                id: backgroundCircle
 
-        function switchToImage() {
-            lockedImage.visible = true
-            backgroundCircle.visible = false
+                width: flipable.circleSize
+                height: flipable.circleSize
+                anchors.centerIn: parent
+                color: "white"
+                radius: flipable.circleSize/2
+                opacity: 0.2
+            }
+
+            HarbourFitLabel {
+                width: Math.round(backgroundCircle.width - 2 * parent.x)
+                height: width
+                anchors.centerIn: parent
+                maxFontSize: Theme.fontSizeHuge
+                font {
+                    family: Theme.fontFamilyHeading
+                    bold: true
+                }
+                text: "\u2022\u2022\u2022\u2022\u2022\u2022"
+                visible: list.count == 0 && foilModel.keyAvailable
+            }
+
+            SlideshowView {
+                id: list
+
+                property string currentLabel
+
+                interactive: false
+                anchors.fill: parent
+                model: FoilAuthFavoritesModel {
+                    sourceModel: foilModel
+                }
+                delegate: Item {
+                    id: passwordDelegate
+                    width: parent.width
+                    height: list.height
+
+                    readonly property string modelLabel: model.label
+                    readonly property bool currentItem: passwordDelegate.PathView.isCurrentItem
+
+                    function updateCurrentLabel() {
+                        if (currentItem) {
+                            list.currentLabel = modelLabel
+                        }
+                    }
+
+                    Component.onCompleted: updateCurrentLabel()
+                    onCurrentItemChanged: updateCurrentLabel()
+                    onModelLabelChanged: updateCurrentLabel()
+
+                    Label {
+                        readonly property real maxWidth: parent.width - 2 * Theme.paddingMedium
+                        width: Math.min(paintedWidth, maxWidth)
+                        anchors {
+                            top: parent.top
+                            horizontalCenter: parent.horizontalCenter
+                        }
+                        height: implicitHeight + Theme.paddingLarge
+                        horizontalAlignment: Text.AlignLeft
+                        verticalAlignment: Text.AlignVCenter
+                        truncationMode: TruncationMode.Fade
+                        text: modelLabel
+                    }
+
+                    HarbourFitLabel {
+                        id: passwordLabel
+
+                        y: Math.round(backgroundCircle.y - list.y + (backgroundCircle.height - height)/2)
+                        width: Math.round(backgroundCircle.width - 2 * backgroundCircle.x)
+                        height: width
+                        anchors.horizontalCenter: parent.horizontalCenter
+                        maxFontSize: Theme.fontSizeHuge
+                        font {
+                            family: Theme.fontFamilyHeading
+                            bold: true
+                        }
+                        transform: HarbourTextFlip {
+                            enabled: displayOn
+                            text: model.currentPassword
+                            target: passwordLabel
+                        }
+                    }
+                }
+            }
         }
-        NumberAnimation {
-            easing.type: Easing.InOutSine
-            target: backgroundCircleScale
-            property: "xScale"
-            from: 1
-            to: 0
-            duration: 125
+
+        transform: Rotation {
+            id: rotation
+
+            origin {
+                x: flipable.width/2
+                y: flipable.height/2
+            }
+            axis {
+                x: 0
+                y: 1
+                z: 0
+            }
         }
-        ScriptAction { script: lockFlipAnimation.switchToImage() }
-        NumberAnimation {
-            easing.type: Easing.InOutSine
-            target: lockedImageScale
-            property: "xScale"
-            from: 0
-            to: 1
-            duration: 125
+
+        states: [
+            State {
+                name: "front"
+                when: !flipable.flipped
+                PropertyChanges {
+                    target: rotation
+                    angle: flipable.targetAngle
+                }
+            },
+            State {
+                name: "back"
+                when: flipable.flipped
+                PropertyChanges {
+                    target: rotation
+                    angle: 180
+                }
+            }
+        ]
+
+        transitions: Transition {
+            SequentialAnimation {
+                ScriptAction { script: flipable.flipping = true; }
+                NumberAnimation {
+                    target: rotation
+                    property: "angle"
+                    duration: 500
+                }
+                ScriptAction { script: flipable.completeFlip() }
+            }
+        }
+
+        onFlippedChanged: {
+            if (!flipped) {
+                targetAngle = 360
+            }
+        }
+
+        function completeFlip() {
+            flipping = false
+            if (!flipped) {
+                targetAngle = 0
+            }
         }
     }
 
@@ -155,75 +232,13 @@ CoverBackground {
         onTriggered: list.incrementCurrentIndex()
     }
 
-    SlideshowView {
-        id: list
-
-        property string currentLabel
-        interactive: false
-        anchors.fill: parent
-        model: FoilAuthFavoritesModel {
-            sourceModel: foilModel
-        }
-        delegate: Item {
-            id: passwordDelegate
-            width: parent.width
-            height: list.height
-
-            readonly property string modelLabel: model.label
-            readonly property bool currentItem: passwordDelegate.PathView.isCurrentItem
-
-            function updateCurrentLabel() {
-                if (currentItem) {
-                    list.currentLabel = modelLabel
-                }
-            }
-
-            onCurrentItemChanged: updateCurrentLabel()
-            onModelLabelChanged: updateCurrentLabel()
-            Component.onCompleted: updateCurrentLabel()
-
-            Label {
-                readonly property real maxWidth: parent.width - 2 * Theme.paddingMedium
-                width: Math.min(paintedWidth, maxWidth)
-                anchors {
-                    top: parent.top
-                    horizontalCenter: parent.horizontalCenter
-                }
-                height: implicitHeight + Theme.paddingLarge
-                horizontalAlignment: Text.AlignLeft
-                verticalAlignment: Text.AlignVCenter
-                truncationMode: TruncationMode.Fade
-                text: modelLabel
-            }
-
-            HarbourFitLabel {
-                id: passwordLabel
-
-                y: Math.round(backgroundCircle.y - list.y + (backgroundCircle.height - height)/2)
-                width: Math.round(backgroundCircle.width - 2 * backgroundCircle.x)
-                height: width
-                anchors.horizontalCenter: parent.horizontalCenter
-                maxFontSize: Theme.fontSizeHuge
-                font {
-                    family: Theme.fontFamilyHeading
-                    bold: true
-                }
-                transform: HarbourTextFlip {
-                    enabled: displayOn
-                    text: model.currentPassword
-                    target: passwordLabel
-                }
-            }
-        }
-    }
-
     Loader {
         active: HarbourProcessState.jailedApp
-        anchors.centerIn: backgroundCircle
+        anchors.centerIn: flipable
         sourceComponent: Component {
             JailDoor {
                 anchors.centerIn: parent
-                height: backgroundCircle.height + 2 * Theme.paddingLarge
+                height: flipable.height + 2 * Theme.paddingLarge
             }
         }
     }
