@@ -6,7 +6,8 @@ MOC_CPP = FoilAuth.cpp
 MOC_H = FoilAuth.h
 
 HARBOUR_SRC = \
-  HarbourBase32.cpp
+  HarbourBase32.cpp \
+  HarbourProtoBuf.cpp
 
 QRENCODE_SRC = \
   bitstream.c \
