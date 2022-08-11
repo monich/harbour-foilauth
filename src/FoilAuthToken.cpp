@@ -39,8 +39,9 @@
 
 #include "qrencode.h"
 
-#include <foil_util.h>
 #include <foil_random.h>
+
+#include <gutil_misc.h>
 
 #include <QUrl>
 
@@ -217,44 +218,41 @@ FoilAuthToken::parseUri(
     pos.end = pos.ptr + uri.size();
 
     // Check scheme + type prefix
-    FoilBytes prefixBytes;
+    GUtilData prefixBytes;
     AuthType type = AuthTypeTOTP;
-    foil_bytes_from_string(&prefixBytes, FOILAUTH_SCHEME "://"
+    gutil_data_from_string(&prefixBytes, FOILAUTH_SCHEME "://"
         FOILAUTH_TYPE_TOTP "/");
-    bool prefixOK = foil_parse_skip_bytes(&pos, &prefixBytes);
+    bool prefixOK = gutil_range_skip_prefix(&pos, &prefixBytes);
     if (!prefixOK) {
         type = AuthTypeHOTP;
-        foil_bytes_from_string(&prefixBytes, FOILAUTH_SCHEME "://"
+        gutil_data_from_string(&prefixBytes, FOILAUTH_SCHEME "://"
             FOILAUTH_TYPE_HOTP "/");
-        prefixOK = foil_parse_skip_bytes(&pos, &prefixBytes);
+        prefixOK = gutil_range_skip_prefix(&pos, &prefixBytes);
     }
 
     if (prefixOK) {
         QByteArray label, secret, issuer, algorithm, digits, counter;
+        GUtilData secretTag, issuerTag, digitsTag, counterTag, algorithmTag;
+
         while (pos.ptr < pos.end && pos.ptr[0] != '?') {
             label.append(*pos.ptr++);
         }
 
-        FoilBytes secretTag;
-        FoilBytes issuerTag;
-        FoilBytes digitsTag;
-        FoilBytes counterTag;
-        FoilBytes algorithmTag;
-        foil_bytes_from_string(&secretTag, FOILAUTH_KEY_SECRET "=");
-        foil_bytes_from_string(&issuerTag, FOILAUTH_KEY_ISSUER "=");
-        foil_bytes_from_string(&digitsTag, FOILAUTH_KEY_DIGITS "=");
-        foil_bytes_from_string(&counterTag, FOILAUTH_KEY_COUNTER "=");
-        foil_bytes_from_string(&algorithmTag, FOILAUTH_KEY_ALGORITHM "=");
+        gutil_data_from_string(&secretTag, FOILAUTH_KEY_SECRET "=");
+        gutil_data_from_string(&issuerTag, FOILAUTH_KEY_ISSUER "=");
+        gutil_data_from_string(&digitsTag, FOILAUTH_KEY_DIGITS "=");
+        gutil_data_from_string(&counterTag, FOILAUTH_KEY_COUNTER "=");
+        gutil_data_from_string(&algorithmTag, FOILAUTH_KEY_ALGORITHM "=");
 
         while (pos.ptr < pos.end) {
             pos.ptr++;
 
             QByteArray* value =
-                foil_parse_skip_bytes(&pos, &secretTag) ? &secret :
-                foil_parse_skip_bytes(&pos, &issuerTag) ? &issuer :
-                foil_parse_skip_bytes(&pos, &digitsTag) ? &digits :
-                foil_parse_skip_bytes(&pos, &counterTag) ? &counter :
-                foil_parse_skip_bytes(&pos, &algorithmTag) ? &algorithm :
+                gutil_range_skip_prefix(&pos, &secretTag) ? &secret :
+                gutil_range_skip_prefix(&pos, &issuerTag) ? &issuer :
+                gutil_range_skip_prefix(&pos, &digitsTag) ? &digits :
+                gutil_range_skip_prefix(&pos, &counterTag) ? &counter :
+                gutil_range_skip_prefix(&pos, &algorithmTag) ? &algorithm :
                 Q_NULLPTR;
 
             if (value) {
