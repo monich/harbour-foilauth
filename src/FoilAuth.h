@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2021 Jolla Ltd.
- * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2022 Jolla Ltd.
+ * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -48,7 +48,10 @@ class QQmlEngine;
 class QJSEngine;
 
 // Static utilities
-class FoilAuth : public QObject, public FoilAuthTypes {
+class FoilAuth :
+    public QObject,
+    public FoilAuthTypes
+{
     Q_OBJECT
     Q_PROPERTY(bool otherFoilAppsInstalled READ otherFoilAppsInstalled NOTIFY otherFoilAppsInstalledChanged)
     Q_DISABLE_COPY(FoilAuth)
@@ -76,31 +79,30 @@ public:
     explicit FoilAuth(QObject* aParent = Q_NULLPTR);
 
     // Callback for qmlRegisterSingletonType<FoilAuth>
-    static QObject* createSingleton(QQmlEngine* aEngine, QJSEngine* aScript);
+    static QObject* createSingleton(QQmlEngine*, QJSEngine*);
 
     bool otherFoilAppsInstalled() const;
 
     // Static utilities
-    static QSize toSize(QVariant aVariant);
-    static QByteArray fromBase32(QString aBase32);
-    static QString toBase32(QByteArray aBinary, bool aLowerCase = true);
-    static QByteArray toByteArray(GBytes* aData);
-    static FoilOutput* createFoilFile(QString aDestDir, GString* aOutPath);
-    static QString createEmptyFoilFile(QString aDestDir);
-    static QString migrationUri(QByteArray aData);
-    static uint TOTP(QByteArray aSecret, quint64 aTime, uint aMaxPass,
+    static QSize toSize(QVariant);
+    static QString toBase32(QByteArray, bool aLowerCase = true);
+    static QByteArray toByteArray(GBytes*);
+    static FoilOutput* createFoilFile(const QString, GString*);
+    static QString createEmptyFoilFile(const QString);
+    static QString migrationUri(const QByteArray);
+    static uint TOTP(const QByteArray, quint64 aTime, uint aMaxPass,
         DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM);
-    static uint HOTP(QByteArray aSecret, quint64 aCounter, uint aMaxPass,
+    static uint HOTP(const QByteArray, quint64 aCounter, uint aMaxPass,
         DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM);
 
     // Invokable from QML
-    Q_INVOKABLE static QString toUri(Type aType, QString aSecretBase32,
-        QString aLabel, QString aIssuer, int aDigits, quint64 aCounter,
-        int aTimeShift, Algorithm aAlgorithm);
-    Q_INVOKABLE static QVariantMap parseUri(QString aUri);
-    Q_INVOKABLE static QVariantList parseMigrationUri(QString aUri);
-    Q_INVOKABLE static bool isValidBase32(QString aBase32);
-    Q_INVOKABLE static QStringList stringListRemove(QStringList aList, QString aString);
+    Q_INVOKABLE static QString toUri(Type aType, const QString aSecretBase32,
+        const QString aLabel, const QString aIssuer, int aDigits,
+        quint64 aCounter, int aTimeShift, Algorithm);
+    Q_INVOKABLE static QVariantMap parseUri(const QString);
+    Q_INVOKABLE static QVariantList parseMigrationUri(const QString);
+    Q_INVOKABLE static bool isValidBase32(const QString);
+    Q_INVOKABLE static QStringList stringListRemove(QStringList, const QString);
 
 Q_SIGNALS:
     void otherFoilAppsInstalledChanged();

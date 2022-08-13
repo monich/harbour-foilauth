@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2021 Jolla Ltd.
- * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2022 Jolla Ltd.
+ * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -34,6 +34,7 @@
 #include "FoilAuth.h"
 #include "FoilAuthToken.h"
 
+#include "HarbourBase32.h"
 #include "HarbourDebug.h"
 
 #include <QCoreApplication>
@@ -108,68 +109,6 @@ test_isValidBase32(
 }
 
 /*==========================================================================*
- * fromBase32
- *==========================================================================*/
-
-static
-void
-test_fromBase32(
-    void)
-{
-    static const char out[] = {
-        0x01, 0x02, 0x03, 0x04, 0x05, 0x06, 0x07, 0x08, 0x09, 0x0A,
-        0x0B, 0x0C, 0x0D, 0x0E, 0x0F, 0x10, 0x11, 0x12, 0x13, 0x14,
-        0x15, 0x16, 0x17, 0x19, 0x1A, 0x1B, 0x1C, 0x1D, 0x1E, 0x1F
-    };
-    QString in1("AEBAGBAFAYDQQCIKBMGA2DQPCAIREEYUCULBOGI2DMOB2HQ7");
-    QString in2("aebagbaf aydqqcik bmga2dqp caireeyu culbogi2 dmob2hq7");
-    QByteArray out1(FoilAuth::fromBase32(in1));
-    QByteArray out2(FoilAuth::fromBase32(in2));
-    g_assert(out1 == out2);
-    g_assert(out1 == QByteArray(out, sizeof(out)));
-    g_assert(FoilAuth::fromBase32("ae") == QByteArray(out, 1));
-    g_assert(FoilAuth::fromBase32("aeb").isEmpty());
-    g_assert(FoilAuth::fromBase32("aeba") == QByteArray(out, 2));
-    g_assert(FoilAuth::fromBase32("aebag") == QByteArray(out, 3));
-    g_assert(FoilAuth::fromBase32("aebagb").isEmpty());
-    g_assert(FoilAuth::fromBase32("aebagba") == QByteArray(out, 4));
-    g_assert(FoilAuth::fromBase32("aebagbaf") == QByteArray(out, 5));
-    g_assert(FoilAuth::fromBase32("aebagbafa") == QByteArray(out, 5));
-    g_assert(FoilAuth::fromBase32("aebagbafay") == QByteArray(out, 6));
-    g_assert(FoilAuth::fromBase32(QString()).isEmpty());
-    g_assert(FoilAuth::fromBase32(" ").isEmpty());
-    g_assert(FoilAuth::fromBase32("01234567").isEmpty());
-    g_assert(FoilAuth::fromBase32("88888888").isEmpty());
-    g_assert(FoilAuth::fromBase32("{}").isEmpty());
-    g_assert(FoilAuth::fromBase32("[]").isEmpty());
-}
-
-/*==========================================================================*
- * base32pad
- *==========================================================================*/
-
-static
-void
-test_base32pad(
-    void)
-{
-    static const char out[] = {
-        0x1B, 0x1C, 0x1D, 0x1E, 0x1F, 0x20, 0x21, 0x22, 0x23
-    };
-    QString in1("DMOB2HQ7EA=====");   // One pad character missing
-    QString in2("DMOB2HQ7EAQQ====="); // One extra pagging character
-    QString in3("DMOB2HQ7EAQSE== ="); // Space is ignored
-    QString in4("DMOB2HQ7EAQSEIY=");
-    g_assert(FoilAuth::fromBase32(in1) == QByteArray(out, sizeof(out) - 3));
-    g_assert(FoilAuth::fromBase32(in2) == QByteArray(out, sizeof(out) - 2));
-    g_assert(FoilAuth::fromBase32(in3) == QByteArray(out, sizeof(out) - 1));
-    g_assert(FoilAuth::fromBase32(in4) == QByteArray(out, sizeof(out)));
-    g_assert(FoilAuth::fromBase32(QString("=================")).isEmpty());
-    g_assert(FoilAuth::fromBase32(QString("=DMOB2HQ7EAQSEIY=")).isEmpty());
-    g_assert(FoilAuth::fromBase32(QString("DMOB2HQ7EB=")).isEmpty());
-}
-
-/*==========================================================================*
  * toBase32
  *==========================================================================*/
 
@@ -186,34 +125,6 @@ test_toBase32(
     QString out("aebagbafaydqqcikbmga2dqpcaireeyuculbogi2dmob2hq7");
     g_assert(FoilAuth::toBase32(QByteArray()).isEmpty());
     g_assert(FoilAuth::toBase32(QByteArray(in, sizeof(in))) == out);
-}
-
-/*==========================================================================*
- * rfc4648
- *==========================================================================*/
-
-static
-void
-test_rfc4648(
-    void)
-{
-    // Test vectors from RFC 4648
-    static const char* test[][2] = {
-        { "f", "MY======" },
-        { "fo", "MZXQ====" },
-        { "foo", "MZXW6===" },
-        { "foob", "MZXW6YQ=" },
-        { "fooba", "MZXW6YTB" },
-        { "foobar", "MZXW6YTBOI======" }
-    };
-
-    for (guint i = 0; i < G_N_ELEMENTS(test); i++) {
-        QByteArray data(test[i][0]);
-        QString base32(test[i][1]);
-        g_assert(FoilAuth::isValidBase32(base32));
-        g_assert(FoilAuth::fromBase32(base32) == data);
-        g_assert(FoilAuth::toBase32(data, false) == base32);
-    }
 }
 
 /*==========================================================================*
@@ -264,7 +175,7 @@ void
 test_totp(
     void)
 {
-    QByteArray secret = FoilAuth::fromBase32("VHIIKTVJC6MEOFTJ");
+    const QByteArray secret(HarbourBase32::fromBase32("VHIIKTVJC6MEOFTJ"));
     g_assert_cmpuint(FoilAuth::TOTP(secret, 1548529350, 1000000), == ,38068);
 }
 
@@ -277,9 +188,19 @@ void
 test_hotp(
     void)
 {
-    QByteArray secret = FoilAuth::fromBase32("MHGU3YYJJD6W44KUVED4FODUNN4JHJNQ");
-    g_assert_cmpuint(FoilAuth::HOTP(secret, 0, 1000000), == ,207601);
-    g_assert_cmpuint(FoilAuth::HOTP(secret, 1, 1000000), == ,444239);
+    const QByteArray secret(HarbourBase32::fromBase32("MHGU3YYJJD6W44KUVED4FODUNN4JHJNQ"));
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 0, 1000000
+        /* DigestAlgorithmSHA1 */), == ,207601);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1, 1000000
+        /* DigestAlgorithmSHA1 */), == ,444239);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 0, 1000000,
+        FoilAuth::DigestAlgorithmSHA256), == , 367047);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1, 1000000,
+        FoilAuth::DigestAlgorithmSHA256), == , 714922);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 0, 1000000,
+        FoilAuth::DigestAlgorithmSHA512), == , 308534);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1, 1000000,
+        FoilAuth::DigestAlgorithmSHA512), == , 899828);
 }
 
 /*==========================================================================*
@@ -477,9 +398,6 @@ int main(int argc, char* argv[])
     g_test_add_func(TEST_("basic"), test_basic);
     g_test_add_func(TEST_("toSize"), test_toSize);
     g_test_add_func(TEST_("isValidBase32"), test_isValidBase32);
-    g_test_add_func(TEST_("fromBase32"), test_fromBase32);
-    g_test_add_func(TEST_("base32pad"), test_base32pad);
-    g_test_add_func(TEST_("rfc4648"), test_rfc4648);
     g_test_add_func(TEST_("toBase32"), test_toBase32);
     g_test_add_func(TEST_("fileArray"), test_byteArray);
     g_test_add_func(TEST_("file"), test_file);

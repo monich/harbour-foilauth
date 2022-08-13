@@ -35,6 +35,7 @@
 #include "FoilAuthToken.h"
 #include "FoilAuth.h"
 
+#include "HarbourBase32.h"
 #include "HarbourDebug.h"
 #include "HarbourTask.h"
 
@@ -113,16 +114,18 @@ class FoilAuthModel::Util {
 private:
     Util();
 public:
-    static const FoilMsgEncryptOptions* encryptionOptions(FoilMsgEncryptOptions* opt);
+    static const FoilMsgEncryptOptions* encryptionOptions(FoilMsgEncryptOptions*);
 };
 
 
-const FoilMsgEncryptOptions* FoilAuthModel::Util::encryptionOptions(FoilMsgEncryptOptions* opt)
+const FoilMsgEncryptOptions*
+FoilAuthModel::Util::encryptionOptions(
+    FoilMsgEncryptOptions* aOpt)
 {
-    foilmsg_encrypt_defaults(opt);
-    opt->key_type = ENCRYPT_KEY_TYPE;
-    opt->signature = SIGNATURE_TYPE;
-    return opt;
+    foilmsg_encrypt_defaults(aOpt);
+    aOpt->key_type = ENCRYPT_KEY_TYPE;
+    aOpt->signature = SIGNATURE_TYPE;
+    return aOpt;
 }
 
 // ==========================================================================
@@ -143,80 +146,90 @@ public:
 
     typedef QList<ModelData*> List;
 
-    ModelData(QString aPath, AuthType aType,
-        QByteArray aSecret, QString aLabel, QString aIssuer,
+    ModelData(const QString aPath, AuthType aType,
+        const QByteArray aSecret, const QString aLabel, const QString aIssuer,
         int aDigits = FoilAuthToken::DEFAULT_DIGITS,
         int aCounter = FoilAuthToken::DEFAULT_COUNTER,
         int aTimeShift = FoilAuthToken::DEFAULT_TIMESHIFT,
         DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM,
         bool aFavorite = true);
-    ModelData(QString aPath, const FoilAuthToken& aToken, bool aFavorite = true);
+    ModelData(const QString, const FoilAuthToken&, bool aFavorite = true);
 
     QVariant get(Role aRole) const;
-    QString label() { return iToken.iLabel; }
+    const QString label() { return iToken.label(); }
     void setTokenPath(QString aPath);
 
-    static AuthType headerAuthType(const FoilMsg* aMsg);
-    static DigestAlgorithm headerAlgorithm(const FoilMsg* aMsg);
-    static QString headerString(const FoilMsg* aMsg, const char* aKey);
-    static quint64 headerUint64(const FoilMsg* aMsg, const char* aKey, quint64 aDefault);
-    static int headerInt(const FoilMsg* aMsg, const char* aKey, int aDefault);
-    static bool headerBool(const FoilMsg* aMsg, const char* aKey, bool aDefault);
+    static AuthType headerAuthType(const FoilMsg*);
+    static DigestAlgorithm headerAlgorithm(const FoilMsg*);
+    static QString headerString(const FoilMsg*, const char*);
+    static quint64 headerUint64(const FoilMsg*, const char*, quint64);
+    static int headerInt(const FoilMsg*, const char*, int);
+    static bool headerBool(const FoilMsg*, const char*, bool);
 
 public:
     QString iPath;
     QString iId;
     bool iFavorite;
     FoilAuthToken iToken;
-    QString iSecretBase32;
     QString iPrevPassword;
     QString iCurrentPassword;
     QString iNextPassword;
 };
 
-FoilAuthModel::ModelData::ModelData(QString aPath, AuthType aType,
-    QByteArray aSecret, QString aLabel, QString aIssuer, int aDigits,
-    int aCounter, int aTimeShift, DigestAlgorithm aAlgorithm,
+FoilAuthModel::ModelData::ModelData(
+    const QString aPath,
+    AuthType aType,
+    const QByteArray aSecret,
+    const QString aLabel,
+    const QString aIssuer,
+    int aDigits,
+    int aCounter,
+    int aTimeShift,
+    DigestAlgorithm aAlgorithm,
     bool aFavorite) :
     iPath(aPath),
     iId(QFileInfo(aPath).fileName()),
     iFavorite(aFavorite),
-    iToken(aType, aSecret, aLabel, aIssuer, aDigits, aCounter, aTimeShift, aAlgorithm),
-    iSecretBase32(FoilAuth::toBase32(aSecret))
+    iToken(aType, aSecret, aLabel, aIssuer, aDigits, aCounter, aTimeShift, aAlgorithm)
 {
-    HDEBUG(iSecretBase32 << aLabel);
+    HDEBUG(iToken.secretBase32() << iToken.label());
 }
 
-FoilAuthModel::ModelData::ModelData(QString aPath, const FoilAuthToken& aToken,
+FoilAuthModel::ModelData::ModelData(
+    const QString aPath,
+    const FoilAuthToken& aToken,
     bool aFavorite) :
     iPath(aPath),
     iId(QFileInfo(aPath).fileName()),
     iFavorite(aFavorite),
-    iToken(aToken),
-    iSecretBase32(FoilAuth::toBase32(iToken.iBytes))
+    iToken(aToken)
 {
-    HDEBUG(iSecretBase32 << iToken.iLabel);
+    HDEBUG(iToken.secretBase32() << iToken.label());
 }
 
-void FoilAuthModel::ModelData::setTokenPath(QString aPath)
+void
+FoilAuthModel::ModelData::setTokenPath(
+    QString aPath)
 {
     iPath = aPath;
     iId = QFileInfo(aPath).fileName();
 }
 
-QVariant FoilAuthModel::ModelData::get(Role aRole) const
+QVariant
+FoilAuthModel::ModelData::get(
+    Role aRole) const
 {
     switch (aRole) {
     case ModelIdRole: return iId;
     case FavoriteRole: return iFavorite;
-    case SecretRole: return iSecretBase32;
-    case IssuerRole: return iToken.iIssuer;
-    case DigitsRole: return iToken.iDigits;
-    case TypeRole: return (int)iToken.iType;
-    case AlgorithmRole: return (int)iToken.iAlgorithm;
-    case CounterRole: return iToken.iCounter;
-    case TimeShiftRole: return iToken.iTimeShift;
-    case LabelRole: return iToken.iLabel;
+    case SecretRole: return iToken.secretBase32();
+    case IssuerRole: return iToken.issuer();
+    case DigitsRole: return iToken.digits();
+    case TypeRole: return (int)iToken.type();
+    case AlgorithmRole: return (int)iToken.algorithm();
+    case CounterRole: return iToken.counter();
+    case TimeShiftRole: return iToken.timeShift();
+    case LabelRole: return iToken.label();
     case PrevPasswordRole: return iPrevPassword;
     case CurrentPasswordRole: return iCurrentPassword;
     case NextPasswordRole: return iNextPassword;
@@ -224,7 +237,9 @@ QVariant FoilAuthModel::ModelData::get(Role aRole) const
     return QVariant();
 }
 
-FoilAuthTypes::AuthType FoilAuthModel::ModelData::headerAuthType(const FoilMsg* aMsg)
+FoilAuthTypes::AuthType
+FoilAuthModel::ModelData::headerAuthType(
+    const FoilMsg* aMsg)
 {
     const char* value = foilmsg_get_value(aMsg, HEADER_TYPE);
     if (value) {
@@ -237,7 +252,9 @@ FoilAuthTypes::AuthType FoilAuthModel::ModelData::headerAuthType(const FoilMsg* 
     return DEFAULT_AUTH_TYPE;
 }
 
-FoilAuthTypes::DigestAlgorithm FoilAuthModel::ModelData::headerAlgorithm(const FoilMsg* aMsg)
+FoilAuthTypes::DigestAlgorithm
+FoilAuthModel::ModelData::headerAlgorithm(
+    const FoilMsg* aMsg)
 {
     const char* value = foilmsg_get_value(aMsg, HEADER_ALGORITHM);
     if (value) {
@@ -254,13 +271,20 @@ FoilAuthTypes::DigestAlgorithm FoilAuthModel::ModelData::headerAlgorithm(const F
     return DEFAULT_ALGORITHM;
 }
 
-QString FoilAuthModel::ModelData::headerString(const FoilMsg* aMsg, const char* aKey)
+QString
+FoilAuthModel::ModelData::headerString(
+    const FoilMsg* aMsg,
+    const char* aKey)
 {
     const char* value = foilmsg_get_value(aMsg, aKey);
     return (value && value[0]) ? QString::fromUtf8(value) : QString();
 }
 
-quint64 FoilAuthModel::ModelData::headerUint64(const FoilMsg* aMsg, const char* aKey, quint64 aDefault)
+quint64
+FoilAuthModel::ModelData::headerUint64(
+    const FoilMsg* aMsg,
+    const char* aKey,
+    quint64 aDefault)
 {
     const char* str = foilmsg_get_value(aMsg, aKey);
     guint64 value = aDefault;
@@ -268,7 +292,11 @@ quint64 FoilAuthModel::ModelData::headerUint64(const FoilMsg* aMsg, const char* 
     return value;
 }
 
-int FoilAuthModel::ModelData::headerInt(const FoilMsg* aMsg, const char* aKey, int aDefault)
+int
+FoilAuthModel::ModelData::headerInt(
+    const FoilMsg* aMsg,
+    const char* aKey,
+    int aDefault)
 {
     const char* str = foilmsg_get_value(aMsg, aKey);
     int value = aDefault;
@@ -276,7 +304,11 @@ int FoilAuthModel::ModelData::headerInt(const FoilMsg* aMsg, const char* aKey, i
     return value;
 }
 
-bool FoilAuthModel::ModelData::headerBool(const FoilMsg* aMsg, const char* aKey, bool aDefault)
+bool
+FoilAuthModel::ModelData::headerBool(
+    const FoilMsg* aMsg,
+    const char* aKey,
+    bool aDefault)
 {
     const char* str = foilmsg_get_value(aMsg, aKey);
     int value = 0;
@@ -287,35 +319,31 @@ bool FoilAuthModel::ModelData::headerBool(const FoilMsg* aMsg, const char* aKey,
 // FoilNotesModel::ModelInfo
 // ==========================================================================
 
-class FoilAuthModel::ModelInfo {
+class FoilAuthModel::ModelInfo
+{
 public:
     ModelInfo() {}
-    ModelInfo(const FoilMsg* msg);
-    ModelInfo(const ModelInfo& aInfo);
-    ModelInfo(const ModelData::List aData);
+    ModelInfo(const FoilMsg*);
+    ModelInfo(const ModelInfo&);
+    ModelInfo(const ModelData::List);
 
-    static ModelInfo load(QString aDir, FoilPrivateKey* aPrivate,
-        FoilKey* aPublic);
+    static ModelInfo load(const QString, FoilPrivateKey*, FoilKey*);
 
-    void save(QString aDir, FoilPrivateKey* aPrivate, FoilKey* aPublic);
-    ModelInfo& operator = (const ModelInfo& aInfo);
+    void save(const QString aDir, FoilPrivateKey*, FoilKey*);
+    ModelInfo& operator = (const ModelInfo&);
 
 public:
     QStringList iOrder;
 };
 
-FoilAuthModel::ModelInfo::ModelInfo(const ModelInfo& aInfo) :
+FoilAuthModel::ModelInfo::ModelInfo(
+    const ModelInfo& aInfo) :
     iOrder(aInfo.iOrder)
 {
 }
 
-FoilAuthModel::ModelInfo& FoilAuthModel::ModelInfo::operator=(const ModelInfo& aInfo)
-{
-    iOrder = aInfo.iOrder;
-    return *this;
-}
-
-FoilAuthModel::ModelInfo::ModelInfo(const ModelData::List aData)
+FoilAuthModel::ModelInfo::ModelInfo(
+const ModelData::List aData)
 {
     const int n = aData.count();
     if (n > 0) {
@@ -327,9 +355,10 @@ FoilAuthModel::ModelInfo::ModelInfo(const ModelData::List aData)
     }
 }
 
-FoilAuthModel::ModelInfo::ModelInfo(const FoilMsg* msg)
+FoilAuthModel::ModelInfo::ModelInfo(
+    const FoilMsg* aMsg)
 {
-    const char* order = foilmsg_get_value(msg, INFO_ORDER_HEADER);
+    const char* order = foilmsg_get_value(aMsg, INFO_ORDER_HEADER);
     if (order) {
         char** strv = g_strsplit(order, INFO_ORDER_DELIMITER_S, -1);
         for (char** ptr = strv; *ptr; ptr++) {
@@ -340,30 +369,44 @@ FoilAuthModel::ModelInfo::ModelInfo(const FoilMsg* msg)
     }
 }
 
-FoilAuthModel::ModelInfo FoilAuthModel::ModelInfo::load(QString aDir,
-    FoilPrivateKey* aPrivate, FoilKey* aPublic)
+FoilAuthModel::ModelInfo&
+FoilAuthModel::ModelInfo::operator=(
+    const ModelInfo& aInfo)
+{
+    iOrder = aInfo.iOrder;
+    return *this;
+}
+
+FoilAuthModel::ModelInfo
+FoilAuthModel::ModelInfo::load(
+    const QString aDir,
+    FoilPrivateKey* aPrivate,
+    FoilKey* aPublic)
 {
     ModelInfo info;
-    QString fullPath(aDir + "/" INFO_FILE);
+    const QString fullPath(aDir + "/" INFO_FILE);
     const QByteArray path(fullPath.toUtf8());
     const char* fname = path.constData();
     HDEBUG("Loading" << fname);
-    FoilMsg* msg = foilmsg_decrypt_file(aPrivate, fname, NULL);
-    if (msg) {
-        if (foilmsg_verify(msg, aPublic)) {
-            info = ModelInfo(msg);
+    FoilMsg* aMsg = foilmsg_decrypt_file(aPrivate, fname, NULL);
+    if (aMsg) {
+        if (foilmsg_verify(aMsg, aPublic)) {
+            info = ModelInfo(aMsg);
         } else {
             HWARN("Could not verify" << fname);
         }
-        foilmsg_free(msg);
+        foilmsg_free(aMsg);
     }
     return info;
 }
 
-void FoilAuthModel::ModelInfo::save(QString aDir, FoilPrivateKey* aPrivate,
+void
+FoilAuthModel::ModelInfo::save(
+    const QString aDir,
+    FoilPrivateKey* aPrivate,
     FoilKey* aPublic)
 {
-    QString fullPath(aDir + "/" INFO_FILE);
+    const QString fullPath(aDir + "/" INFO_FILE);
     const QByteArray path(fullPath.toUtf8());
     const char* fname = path.constData();
     FoilOutput* out = foil_output_file_new_open(fname);
@@ -403,27 +446,30 @@ void FoilAuthModel::ModelInfo::save(QString aDir, FoilPrivateKey* aPrivate,
 // FoilAuthModel::BaseTask
 // ==========================================================================
 
-class FoilAuthModel::BaseTask : public HarbourTask {
+class FoilAuthModel::BaseTask :
+    public HarbourTask
+{
     Q_OBJECT
 
 public:
-    BaseTask(QThreadPool* aPool, FoilPrivateKey* aPrivateKey,
-        FoilKey* aPublicKey);
+    BaseTask(QThreadPool*, FoilPrivateKey*, FoilKey*);
     virtual ~BaseTask();
 
-    FoilMsg* decryptAndVerify(QString aFileName) const;
-    FoilMsg* decryptAndVerify(const char* aFileName) const;
+    FoilMsg* decryptAndVerify(const QString) const;
+    FoilMsg* decryptAndVerify(const char*) const;
 
-    static bool removeFile(QString aPath);
-    static QByteArray toByteArray(const FoilMsg* aMsg);
+    static bool removeFile(const QString);
+    static QByteArray toByteArray(const FoilMsg*);
 
 public:
     FoilPrivateKey* iPrivateKey;
     FoilKey* iPublicKey;
 };
 
-FoilAuthModel::BaseTask::BaseTask(QThreadPool* aPool,
-    FoilPrivateKey* aPrivateKey, FoilKey* aPublicKey) :
+FoilAuthModel::BaseTask::BaseTask(
+    QThreadPool* aPool,
+    FoilPrivateKey* aPrivateKey,
+    FoilKey* aPublicKey) :
     HarbourTask(aPool),
     iPrivateKey(foil_private_key_ref(aPrivateKey)),
     iPublicKey(foil_key_ref(aPublicKey))
@@ -436,7 +482,9 @@ FoilAuthModel::BaseTask::~BaseTask()
     foil_key_unref(iPublicKey);
 }
 
-bool FoilAuthModel::BaseTask::removeFile(QString aPath)
+bool
+FoilAuthModel::BaseTask::removeFile(
+    const QString aPath)
 {
     if (!aPath.isEmpty()) {
         if (QFile::remove(aPath)) {
@@ -448,7 +496,9 @@ bool FoilAuthModel::BaseTask::removeFile(QString aPath)
     return false;
 }
 
-FoilMsg* FoilAuthModel::BaseTask::decryptAndVerify(QString aFileName) const
+FoilMsg*
+FoilAuthModel::BaseTask::decryptAndVerify(
+    const QString aFileName) const
 {
     if (!aFileName.isEmpty()) {
         const QByteArray fileNameBytes(aFileName.toUtf8());
@@ -458,30 +508,34 @@ FoilMsg* FoilAuthModel::BaseTask::decryptAndVerify(QString aFileName) const
     }
 }
 
-FoilMsg* FoilAuthModel::BaseTask::decryptAndVerify(const char* aFileName) const
+FoilMsg*
+FoilAuthModel::BaseTask::decryptAndVerify(
+    const char* aFileName) const
 {
     if (aFileName) {
         HDEBUG("Decrypting" << aFileName);
-        FoilMsg* msg = foilmsg_decrypt_file(iPrivateKey, aFileName, NULL);
-        if (msg) {
+        FoilMsg* aMsg = foilmsg_decrypt_file(iPrivateKey, aFileName, NULL);
+        if (aMsg) {
 #if HARBOUR_DEBUG
-            for (uint i = 0; i < msg->headers.count; i++) {
-                const FoilMsgHeader* header = msg->headers.header + i;
+            for (uint i = 0; i < aMsg->headers.count; i++) {
+                const FoilMsgHeader* header = aMsg->headers.header + i;
                 HDEBUG(" " << header->name << ":" << header->value);
             }
 #endif // HARBOUR_DEBUG
-            if (foilmsg_verify(msg, iPublicKey)) {
-                return msg;
+            if (foilmsg_verify(aMsg, iPublicKey)) {
+                return aMsg;
             } else {
                 HWARN("Could not verify" << aFileName);
             }
-            foilmsg_free(msg);
+            foilmsg_free(aMsg);
         }
     }
     return NULL;
 }
 
-QByteArray FoilAuthModel::BaseTask::toByteArray(const FoilMsg* aMsg)
+QByteArray
+FoilAuthModel::BaseTask::toByteArray(
+    const FoilMsg* aMsg)
 {
     if (aMsg) {
         const char* type = aMsg->content_type;
@@ -503,14 +557,15 @@ QByteArray FoilAuthModel::BaseTask::toByteArray(const FoilMsg* aMsg)
 // FoilAuthModel::GenerateKeyTask
 // ==========================================================================
 
-class FoilAuthModel::GenerateKeyTask : public BaseTask {
+class FoilAuthModel::GenerateKeyTask :
+public BaseTask
+{
     Q_OBJECT
 
 public:
-    GenerateKeyTask(QThreadPool* aPool, QString aKeyFile, int aBits,
-        QString aPassword);
+    GenerateKeyTask(QThreadPool*, const QString, int, const QString);
 
-    virtual void performTask();
+    void performTask() Q_DECL_OVERRIDE;
 
 public:
     const QString iKeyFile;
@@ -518,8 +573,11 @@ public:
     const QString iPassword;
 };
 
-FoilAuthModel::GenerateKeyTask::GenerateKeyTask(QThreadPool* aPool,
-    QString aKeyFile, int aBits, QString aPassword) :
+FoilAuthModel::GenerateKeyTask::GenerateKeyTask(
+    QThreadPool* aPool,
+    const QString aKeyFile,
+    int aBits,
+    const QString aPassword) :
     BaseTask(aPool, NULL, NULL),
     iKeyFile(aKeyFile),
     iBits(aBits),
@@ -527,7 +585,8 @@ FoilAuthModel::GenerateKeyTask::GenerateKeyTask(QThreadPool* aPool,
 {
 }
 
-void FoilAuthModel::GenerateKeyTask::performTask()
+void
+FoilAuthModel::GenerateKeyTask::performTask()
 {
     HDEBUG("Generating key..." << iBits << "bits");
     FoilKey* key = foil_key_generate_new(FOIL_KEY_RSA_PRIVATE, iBits);
@@ -556,15 +615,17 @@ void FoilAuthModel::GenerateKeyTask::performTask()
 // FoilAuthModel::EncryptTask
 // ==========================================================================
 
-class FoilAuthModel::EncryptTask : public BaseTask, public FoilAuthTypes {
+class FoilAuthModel::EncryptTask :
+    public BaseTask,
+    public FoilAuthTypes
+{
     Q_OBJECT
 
 public:
-    EncryptTask(QThreadPool* aPool, const ModelData* aData,
-        FoilPrivateKey* aPrivateKey, FoilKey* aPublicKey,
-        quint64 aTime, QString aDestDir);
+    EncryptTask(QThreadPool*, const ModelData*, FoilPrivateKey*, FoilKey*,
+        quint64, const QString);
 
-    virtual void performTask();
+    void performTask() Q_DECL_OVERRIDE;
 
 public:
     const QString iId;
@@ -579,9 +640,13 @@ public:
     QString iNextPassword;
 };
 
-FoilAuthModel::EncryptTask::EncryptTask(QThreadPool* aPool,
-    const ModelData* aData, FoilPrivateKey* aPrivateKey,
-    FoilKey* aPublicKey, quint64 aTime, QString aDestDir) :
+FoilAuthModel::EncryptTask::EncryptTask(
+    QThreadPool* aPool,
+    const ModelData* aData,
+    FoilPrivateKey* aPrivateKey,
+    FoilKey* aPublicKey,
+    quint64 aTime,
+    const QString aDestDir) :
     BaseTask(aPool, aPrivateKey, aPublicKey),
     iId(aData->iId),
     iFavorite(aData->iFavorite),
@@ -590,10 +655,11 @@ FoilAuthModel::EncryptTask::EncryptTask(QThreadPool* aPool,
     iRemoveFile(aData->iPath),
     iTime(aTime)
 {
-    HDEBUG("Encrypting" << iToken.iLabel);
+    HDEBUG("Encrypting" << iToken.label());
 }
 
-void FoilAuthModel::EncryptTask::performTask()
+void
+FoilAuthModel::EncryptTask::performTask()
 {
     GString* dest = g_string_sized_new(iDestDir.size() + 9);
     FoilOutput* out = FoilAuth::createFoilFile(iDestDir, dest);
@@ -604,10 +670,10 @@ void FoilAuthModel::EncryptTask::performTask()
         headers.header = header;
         headers.count = 0;
 
-        if (iToken.iType != DEFAULT_AUTH_TYPE) {
+        if (iToken.type() != DEFAULT_AUTH_TYPE) {
             header[headers.count].name = HEADER_TYPE;
             header[headers.count].value = FOILAUTH_TYPE_DEFAULT;
-            switch (iToken.iType) {
+            switch (iToken.type()) {
             case AuthTypeTOTP:
                 header[headers.count].value = FOILAUTH_TYPE_TOTP;
                 break;
@@ -618,14 +684,14 @@ void FoilAuthModel::EncryptTask::performTask()
             headers.count++;
         }
 
-        const QByteArray label(iToken.iLabel.toUtf8());
+        const QByteArray label(iToken.label().toUtf8());
         header[headers.count].name = HEADER_LABEL;
         header[headers.count].value = label.constData();
         headers.count++;
 
         QByteArray issuer;
-        if (!iToken.iIssuer.isEmpty()) {
-            issuer = iToken.iIssuer.toUtf8();
+        if (!iToken.issuer().isEmpty()) {
+            issuer = iToken.issuer().toUtf8();
             header[headers.count].name = HEADER_ISSUER;
             header[headers.count].value = issuer.constData();
             headers.count++;
@@ -638,31 +704,31 @@ void FoilAuthModel::EncryptTask::performTask()
         }
 
         char digits[16];
-        snprintf(digits, sizeof(digits), "%d", iToken.iDigits);
+        snprintf(digits, sizeof(digits), "%d", iToken.digits());
         header[headers.count].name = HEADER_DIGITS;
         header[headers.count].value = digits;
         headers.count++;
 
         char timeshift[16];
-        if (iToken.iTimeShift != FoilAuthToken::DEFAULT_TIMESHIFT) {
-            snprintf(timeshift, sizeof(timeshift), "%d", iToken.iTimeShift);
+        if (iToken.timeShift() != FoilAuthToken::DEFAULT_TIMESHIFT) {
+            snprintf(timeshift, sizeof(timeshift), "%d", iToken.timeShift());
             header[headers.count].name = HEADER_TIMESHIFT;
             header[headers.count].value = timeshift;
             headers.count++;
         }
 
         char counter[16];
-        if (iToken.iCounter != FoilAuthToken::DEFAULT_COUNTER) {
-            snprintf(counter, sizeof(counter), "%llu", iToken.iCounter);
+        if (iToken.counter() != FoilAuthToken::DEFAULT_COUNTER) {
+            snprintf(counter, sizeof(counter), "%llu", iToken.counter());
             header[headers.count].name = HEADER_COUNTER;
             header[headers.count].value = counter;
             headers.count++;
         }
 
-        if (iToken.iAlgorithm != DEFAULT_ALGORITHM) {
+        if (iToken.algorithm() != DEFAULT_ALGORITHM) {
             header[headers.count].name = HEADER_ALGORITHM;
             header[headers.count].value = FOILAUTH_ALGORITHM_DEFAULT;
-            switch (iToken.iAlgorithm) {
+            switch (iToken.algorithm()) {
             case DigestAlgorithmMD5:
                 header[headers.count].value = FOILAUTH_ALGORITHM_MD5;
                 break;
@@ -680,11 +746,12 @@ void FoilAuthModel::EncryptTask::performTask()
         }
 
         HASSERT(headers.count <= G_N_ELEMENTS(header));
-        HDEBUG("Writing" << FoilAuth::toBase32(iToken.iBytes));
+        HDEBUG("Writing" << iToken);
 
+        const QByteArray secret(iToken.secret());
         FoilBytes body;
-        body.val = (guint8*)iToken.iBytes.constData();
-        body.len = iToken.iBytes.length();
+        body.val = (guint8*)secret.constData();
+        body.len = secret.length();
 
         FoilMsgEncryptOptions opt;
         if (foilmsg_encrypt(out, &body, NULL, &headers,
@@ -700,9 +767,9 @@ void FoilAuthModel::EncryptTask::performTask()
             unlink(dest->str);
         }
 
-        if ((iTime || iToken.iType != FoilAuth::AuthTypeTOTP) && !isCanceled()) {
+        if ((iTime || iToken.type() != FoilAuth::AuthTypeTOTP) && !isCanceled()) {
             iCurrentPassword = iToken.passwordString(iTime);
-            if (iToken.iType == FoilAuth::AuthTypeTOTP) {
+            if (iToken.type() == FoilAuth::AuthTypeTOTP) {
                 iPrevPassword = iToken.passwordString(iTime - FoilAuth::PERIOD);
                 iNextPassword = iToken.passwordString(iTime + FoilAuth::PERIOD);
             } else {
@@ -719,13 +786,15 @@ void FoilAuthModel::EncryptTask::performTask()
 // FoilAuthModel::PasswordTask
 // ==========================================================================
 
-class FoilAuthModel::PasswordTask : public HarbourTask {
+class FoilAuthModel::PasswordTask :
+    public HarbourTask
+{
     Q_OBJECT
 
 public:
-    PasswordTask(QThreadPool* aPool, const ModelData* aData, quint64 aTime);
+    PasswordTask(QThreadPool*, const ModelData*, quint64);
 
-    virtual void performTask();
+    void performTask() Q_DECL_OVERRIDE;
 
 public:
     const QString iId;
@@ -736,22 +805,25 @@ public:
     QString iNextPassword;
 };
 
-FoilAuthModel::PasswordTask::PasswordTask(QThreadPool* aPool,
-    const ModelData* aData, quint64 aTime) :
+FoilAuthModel::PasswordTask::PasswordTask(
+    QThreadPool* aPool,
+    const ModelData* aData,
+    quint64 aTime) :
     HarbourTask(aPool),
     iId(aData->iId),
     iToken(aData->iToken),
     iTime(aTime)
 {
-    HDEBUG("Updating" << iToken.iLabel);
+    HDEBUG("Updating" << iToken.label());
 }
 
-void FoilAuthModel::PasswordTask::performTask()
+void
+FoilAuthModel::PasswordTask::performTask()
 {
     iCurrentPassword = iToken.passwordString(iTime);
     iPrevPassword = iToken.passwordString(iTime - FoilAuth::PERIOD);
     iNextPassword = iToken.passwordString(iTime + FoilAuth::PERIOD);
-    HDEBUG(iToken.iLabel << qPrintable(iPrevPassword) <<
+    HDEBUG(iToken.label() << qPrintable(iPrevPassword) <<
         qPrintable(iCurrentPassword) << qPrintable(iNextPassword));
 }
 
@@ -759,29 +831,36 @@ void FoilAuthModel::PasswordTask::performTask()
 // FoilNotesModel::SaveInfoTask
 // ==========================================================================
 
-class FoilAuthModel::SaveInfoTask : public BaseTask {
+class FoilAuthModel::SaveInfoTask :
+    public BaseTask
+{
     Q_OBJECT
 
 public:
-    SaveInfoTask(QThreadPool* aPool, ModelInfo aInfo, QString aDir,
-        FoilPrivateKey* aPrivateKey, FoilKey* aPublicKey);
+    SaveInfoTask(QThreadPool*, ModelInfo, const QString, FoilPrivateKey*,
+        FoilKey*);
 
-    virtual void performTask();
+    void performTask() Q_DECL_OVERRIDE;
 
 public:
     ModelInfo iInfo;
     QString iFoilDir;
 };
 
-FoilAuthModel::SaveInfoTask::SaveInfoTask(QThreadPool* aPool, ModelInfo aInfo,
-    QString aFoilDir, FoilPrivateKey* aPrivateKey, FoilKey* aPublicKey) :
+FoilAuthModel::SaveInfoTask::SaveInfoTask(
+    QThreadPool* aPool,
+    ModelInfo aInfo,
+    QString aFoilDir,
+    FoilPrivateKey* aPrivateKey,
+    FoilKey* aPublicKey) :
     BaseTask(aPool, aPrivateKey, aPublicKey),
     iInfo(aInfo),
     iFoilDir(aFoilDir)
 {
 }
 
-void FoilAuthModel::SaveInfoTask::performTask()
+void
+FoilAuthModel::SaveInfoTask::performTask()
 {
     if (!isCanceled()) {
         if (iInfo.iOrder.isEmpty()) {
@@ -796,7 +875,9 @@ void FoilAuthModel::SaveInfoTask::performTask()
 // FoilAuthModel::DecryptAllTask
 // ==========================================================================
 
-class FoilAuthModel::DecryptAllTask : public BaseTask {
+class FoilAuthModel::DecryptAllTask :
+    public BaseTask
+{
     Q_OBJECT
 
 public:
@@ -822,15 +903,14 @@ public:
         DecryptAllTask* iTask;
     };
 
-    DecryptAllTask(QThreadPool* aPool, QString aDir,
-        FoilPrivateKey* aPrivateKey, FoilKey* aPublicKey);
+    DecryptAllTask(QThreadPool*, const QString, FoilPrivateKey*, FoilKey*);
 
-    virtual void performTask();
+    void performTask() Q_DECL_OVERRIDE;
 
-    bool decryptToken(QString aPath);
+    bool decryptToken(const QString aPath);
 
 Q_SIGNALS:
-    void progress(DecryptAllTask::Progress::Ptr aProgress);
+    void progress(DecryptAllTask::Progress::Ptr);
 
 public:
     const QString iDir;
@@ -840,8 +920,11 @@ public:
 
 Q_DECLARE_METATYPE(FoilAuthModel::DecryptAllTask::Progress::Ptr)
 
-FoilAuthModel::DecryptAllTask::DecryptAllTask(QThreadPool* aPool,
-    QString aDir, FoilPrivateKey* aPrivateKey, FoilKey* aPublicKey) :
+FoilAuthModel::DecryptAllTask::DecryptAllTask(
+    QThreadPool* aPool,
+    const QString aDir,
+    FoilPrivateKey* aPrivateKey,
+    FoilKey* aPublicKey) :
     BaseTask(aPool, aPrivateKey, aPublicKey),
     iDir(aDir),
     iSaveInfo(false),
@@ -849,22 +932,24 @@ FoilAuthModel::DecryptAllTask::DecryptAllTask(QThreadPool* aPool,
 {
 }
 
-bool FoilAuthModel::DecryptAllTask::decryptToken(QString aPath)
+bool
+FoilAuthModel::DecryptAllTask::decryptToken(
+    const QString aPath)
 {
     bool ok = false;
-    FoilMsg* msg = decryptAndVerify(aPath);
-    if (msg) {
-        QByteArray bytes(FoilAuth::toByteArray(msg->data));
+    FoilMsg* aMsg = decryptAndVerify(aPath);
+    if (aMsg) {
+        QByteArray bytes(FoilAuth::toByteArray(aMsg->data));
         if (bytes.length() > 0) {
             ModelData* data = new ModelData(aPath,
-                ModelData::headerAuthType(msg), bytes,
-                ModelData::headerString(msg, HEADER_LABEL),
-                ModelData::headerString(msg, HEADER_ISSUER),
-                ModelData::headerInt(msg, HEADER_DIGITS, FoilAuthToken::DEFAULT_DIGITS),
-                ModelData::headerUint64(msg, HEADER_COUNTER, FoilAuthToken::DEFAULT_COUNTER),
-                ModelData::headerInt(msg, HEADER_TIMESHIFT, FoilAuthToken::DEFAULT_TIMESHIFT),
-                ModelData::headerAlgorithm(msg),
-                ModelData::headerBool(msg, HEADER_FAVORITE, false));
+                ModelData::headerAuthType(aMsg), bytes,
+                ModelData::headerString(aMsg, HEADER_LABEL),
+                ModelData::headerString(aMsg, HEADER_ISSUER),
+                ModelData::headerInt(aMsg, HEADER_DIGITS, FoilAuthToken::DEFAULT_DIGITS),
+                ModelData::headerUint64(aMsg, HEADER_COUNTER, FoilAuthToken::DEFAULT_COUNTER),
+                ModelData::headerInt(aMsg, HEADER_TIMESHIFT, FoilAuthToken::DEFAULT_TIMESHIFT),
+                ModelData::headerAlgorithm(aMsg),
+                ModelData::headerBool(aMsg, HEADER_FAVORITE, false));
 
             // Calculate current passwords while we are on it
             data->iCurrentPassword = data->iToken.passwordString(iTaskTime);
@@ -876,12 +961,13 @@ bool FoilAuthModel::DecryptAllTask::decryptToken(QString aPath)
             Q_EMIT progress(Progress::Ptr(new Progress(data, this)));
             ok = true;
         }
-        foilmsg_free(msg);
+        foilmsg_free(aMsg);
     }
     return ok;
 }
 
-void FoilAuthModel::DecryptAllTask::performTask()
+void
+FoilAuthModel::DecryptAllTask::performTask()
 {
     if (!isCanceled()) {
         const QString path(iDir);
@@ -948,7 +1034,9 @@ void FoilAuthModel::DecryptAllTask::performTask()
     s(FoilState,foilState) \
     s(TimeLeft,timeLeft)
 
-class FoilAuthModel::Private : public QObject {
+class FoilAuthModel::Private :
+    public QObject
+{
     Q_OBJECT
 
 public:
@@ -978,37 +1066,37 @@ public:
     FoilAuthModel* parentModel();
     int rowCount() const;
     ModelData* dataAt(int aIndex) const;
-    ModelData* findData(QString aId) const;
+    ModelData* findData(const QString aId) const;
     QList<FoilAuthToken> getTokens(const QList<int> aRows) const;
-    int findDataPos(QString aId) const;
+    int findDataPos(const QString aId) const;
     bool needTimer() const;
     void queueSignal(Signal aSignal);
     void emitQueuedSignals();
     void updateTimer();
     void checkTimer();
-    bool checkPassword(QString aPassword);
-    bool changePassword(QString aOldPassword, QString aNewPassword);
-    void setKeys(FoilPrivateKey* aPrivate, FoilKey* aPublic = NULL);
-    void setFoilState(FoilState aState);
-    void addToken(const FoilAuthToken& aToken, bool aFavorite = true);
-    void insertModelData(ModelData* aData);
-    void dataChanged(int aIndex, ModelData::Role aRole);
-    void dataChanged(QList<int> aRows, ModelData::Role aRole);
-    void destroyItemAt(int aIndex);
-    bool destroyItemAndRemoveFilesAt(int aIndex);
+    bool checkPassword(const QString);
+    bool changePassword(const QString, const QString);
+    void setKeys(FoilPrivateKey*, FoilKey* aPublic = Q_NULLPTR);
+    void setFoilState(FoilState);
+    void addToken(const FoilAuthToken&, bool aFavorite = true);
+    void insertModelData(ModelData*);
+    void dataChanged(int , ModelData::Role);
+    void dataChanged(QList<int>, ModelData::Role);
+    void destroyItemAt(int);
+    bool destroyItemAndRemoveFilesAt(int);
     bool destroyLastItemAndRemoveFiles();
-    void deleteToken(QString aId);
-    void deleteTokens(QStringList aIds);
+    void deleteToken(QString);
+    void deleteTokens(QStringList);
     void deleteAll();
     void clearModel();
     bool busy() const;
-    void encrypt(const ModelData* aData);
-    void updatePasswords(const ModelData* aData);
+    void encrypt(const ModelData*);
+    void updatePasswords(const ModelData*);
     void saveInfo();
-    void generate(int aBits, QString aPassword);
-    void lock(bool aTimeout);
-    bool unlock(QString aPassword);
-    bool encrypt(QString aBody, QColor aColor, uint aPageNr, uint aReqId);
+    void generate(int, const QString);
+    void lock(bool);
+    bool unlock(const QString aPassword);
+    bool encrypt(const QString aBody, const QColor aColor, uint aPageNr, uint aReqId);
 
 public:
     SignalMask iQueuedSignals;
@@ -1120,12 +1208,15 @@ FoilAuthModel::Private::~Private()
     qDeleteAll(iData);
 }
 
-inline FoilAuthModel* FoilAuthModel::Private::parentModel()
+inline FoilAuthModel*
+FoilAuthModel::Private::parentModel()
 {
     return qobject_cast<FoilAuthModel*>(parent());
 }
 
-void FoilAuthModel::Private::queueSignal(Signal aSignal)
+void
+FoilAuthModel::Private::queueSignal(
+    Signal aSignal)
 {
     if (aSignal >= 0 && aSignal < SignalCount) {
         const SignalMask signalBit = (SignalMask(1) << aSignal);
@@ -1141,7 +1232,8 @@ void FoilAuthModel::Private::queueSignal(Signal aSignal)
     }
 }
 
-void FoilAuthModel::Private::emitQueuedSignals()
+void
+FoilAuthModel::Private::emitQueuedSignals()
 {
     static const SignalEmitter emitSignal [] = {
 #define FOIL_SIGNAL_EMITTER_(Name,name) &FoilAuthModel::name##Changed,
@@ -1165,12 +1257,17 @@ void FoilAuthModel::Private::emitQueuedSignals()
     }
 }
 
-inline int FoilAuthModel::Private::rowCount() const
+inline
+int
+FoilAuthModel::Private::rowCount() const
 {
     return iData.count();
 }
 
-inline FoilAuthModel::ModelData* FoilAuthModel::Private::dataAt(int aIndex) const
+inline
+FoilAuthModel::ModelData*
+FoilAuthModel::Private::dataAt(
+    int aIndex) const
 {
     if (aIndex >= 0 && aIndex < iData.count()) {
         return iData.at(aIndex);
@@ -1179,7 +1276,9 @@ inline FoilAuthModel::ModelData* FoilAuthModel::Private::dataAt(int aIndex) cons
     }
 }
 
-FoilAuthModel::ModelData* FoilAuthModel::Private::findData(QString aId) const
+FoilAuthModel::ModelData*
+FoilAuthModel::Private::findData(
+    const QString aId) const
 {
     const int n = iData.count();
     for (int i = 0; i < n; i++) {
@@ -1191,7 +1290,9 @@ FoilAuthModel::ModelData* FoilAuthModel::Private::findData(QString aId) const
     return NULL;
 }
 
-int FoilAuthModel::Private::findDataPos(QString aId) const
+int
+FoilAuthModel::Private::findDataPos(
+    const QString aId) const
 {
     const int n = iData.count();
     for (int i = 0; i < n; i++) {
@@ -1202,7 +1303,9 @@ int FoilAuthModel::Private::findDataPos(QString aId) const
     return -1;
 }
 
-QList<FoilAuthToken> FoilAuthModel::Private::getTokens(const QList<int> aRows) const
+QList<FoilAuthToken>
+FoilAuthModel::Private::getTokens(
+    const QList<int> aRows) const
 {
     QList<FoilAuthToken> tokens;
     const int n = aRows.count();
@@ -1216,7 +1319,10 @@ QList<FoilAuthToken> FoilAuthModel::Private::getTokens(const QList<int> aRows) c
     return tokens;
 }
 
-void FoilAuthModel::Private::setKeys(FoilPrivateKey* aPrivate, FoilKey* aPublic)
+void
+FoilAuthModel::Private::setKeys(
+    FoilPrivateKey* aPrivate,
+    FoilKey* aPublic)
 {
     if (aPrivate) {
         if (iPrivateKey) {
@@ -1237,7 +1343,9 @@ void FoilAuthModel::Private::setKeys(FoilPrivateKey* aPrivate, FoilKey* aPublic)
     }
 }
 
-bool FoilAuthModel::Private::checkPassword(QString aPassword)
+bool
+FoilAuthModel::Private::checkPassword(
+    const QString aPassword)
 {
     GError* error = NULL;
     HDEBUG(iFoilKeyFile);
@@ -1276,8 +1384,10 @@ bool FoilAuthModel::Private::checkPassword(QString aPassword)
     return false;
 }
 
-bool FoilAuthModel::Private::changePassword(QString aOldPassword,
-    QString aNewPassword)
+bool
+FoilAuthModel::Private::changePassword(
+    const QString aOldPassword,
+    const QString aNewPassword)
 {
     HDEBUG(iFoilKeyFile);
     if (checkPassword(aOldPassword)) {
@@ -1314,12 +1424,13 @@ bool FoilAuthModel::Private::changePassword(QString aOldPassword,
     return false;
 }
 
-bool FoilAuthModel::Private::needTimer() const
+bool
+FoilAuthModel::Private::needTimer() const
 {
     if (iFoilState == FoilModelReady) {
         const int n = iData.count();
         for (int i = 0; i < n; i++) {
-            if (iData.at(i)->iToken.iType == FoilAuthToken::AuthTypeTOTP) {
+            if (iData.at(i)->iToken.type() == FoilAuthToken::AuthTypeTOTP) {
                 return true;
             }
         }
@@ -1327,7 +1438,8 @@ bool FoilAuthModel::Private::needTimer() const
     return false;
 }
 
-void FoilAuthModel::Private::checkTimer()
+void
+FoilAuthModel::Private::checkTimer()
 {
     if (needTimer()) {
         updateTimer();
@@ -1337,7 +1449,8 @@ void FoilAuthModel::Private::checkTimer()
     }
 }
 
-void FoilAuthModel::Private::setFoilState(FoilState aState)
+void
+FoilAuthModel::Private::setFoilState(FoilState aState)
 {
     if (iFoilState != aState) {
         iFoilState = aState;
@@ -1347,7 +1460,10 @@ void FoilAuthModel::Private::setFoilState(FoilState aState)
     }
 }
 
-void FoilAuthModel::Private::dataChanged(int aIndex, ModelData::Role aRole)
+void
+FoilAuthModel::Private::dataChanged(
+    int aIndex,
+    ModelData::Role aRole)
 {
     if (aIndex >= 0 && aIndex < iData.count()) {
         QVector<int> roles;
@@ -1358,7 +1474,10 @@ void FoilAuthModel::Private::dataChanged(int aIndex, ModelData::Role aRole)
     }
 }
 
-void FoilAuthModel::Private::dataChanged(QList<int> aRows, ModelData::Role aRole)
+void
+FoilAuthModel::Private::dataChanged(
+    QList<int> aRows,
+    ModelData::Role aRole)
 {
     const int n = aRows.count();
     if (n > 0) {
@@ -1375,20 +1494,24 @@ void FoilAuthModel::Private::dataChanged(QList<int> aRows, ModelData::Role aRole
     }
 }
 
-void FoilAuthModel::Private::insertModelData(ModelData* aData)
+void
+FoilAuthModel::Private::insertModelData(
+    ModelData* aData)
 {
     // Insert it into the model
     const int pos = iData.count();
     FoilAuthModel* model = parentModel();
     model->beginInsertRows(QModelIndex(), pos, pos);
     iData.append(aData);
-    HDEBUG(aData->iId << aData->iSecretBase32 << aData->label());
+    HDEBUG(aData->iId << aData->iToken.secretBase32() << aData->label());
     queueSignal(SignalCountChanged);
     checkTimer();
     model->endInsertRows();
 }
 
-void FoilAuthModel::Private::onDecryptAllProgress(DecryptAllTask::Progress::Ptr aProgress)
+void
+FoilAuthModel::Private::onDecryptAllProgress(
+    DecryptAllTask::Progress::Ptr aProgress)
 {
     if (aProgress && aProgress->iTask == iDecryptAllTask) {
         // Transfer ownership of this ModelData to the model
@@ -1398,7 +1521,8 @@ void FoilAuthModel::Private::onDecryptAllProgress(DecryptAllTask::Progress::Ptr 
     emitQueuedSignals();
 }
 
-void FoilAuthModel::Private::onDecryptAllTaskDone()
+void
+FoilAuthModel::Private::onDecryptAllTaskDone()
 {
     HDEBUG(iData.count() << "token(s) decrypted");
     if (sender() == iDecryptAllTask) {
@@ -1417,16 +1541,21 @@ void FoilAuthModel::Private::onDecryptAllTaskDone()
     emitQueuedSignals();
 }
 
-void FoilAuthModel::Private::addToken(const FoilAuthToken& aToken, bool aFavorite)
+void
+FoilAuthModel::Private::addToken(
+    const FoilAuthToken& aToken,
+    bool aFavorite)
 {
-    QString path = FoilAuth::createEmptyFoilFile(iFoilDataDir);
+    const QString path(FoilAuth::createEmptyFoilFile(iFoilDataDir));
     ModelData* data = new ModelData(path, aToken, aFavorite);
     insertModelData(data);
     updatePasswords(data);
     encrypt(data);
 }
 
-void FoilAuthModel::Private::encrypt(const ModelData* aData)
+void
+FoilAuthModel::Private::encrypt(
+    const ModelData* aData)
 {
     const bool wasBusy = busy();
     EncryptTask* task = new EncryptTask(iThreadPool, aData,
@@ -1440,7 +1569,8 @@ void FoilAuthModel::Private::encrypt(const ModelData* aData)
     }
 }
 
-void FoilAuthModel::Private::onEncryptTaskDone()
+void
+FoilAuthModel::Private::onEncryptTaskDone()
 {
     EncryptTask* task = qobject_cast<EncryptTask*>(sender());
     if (task) {
@@ -1482,7 +1612,9 @@ void FoilAuthModel::Private::onEncryptTaskDone()
     }
 }
 
-void FoilAuthModel::Private::updatePasswords(const ModelData* aData)
+void
+FoilAuthModel::Private::updatePasswords(
+    const ModelData* aData)
 {
     const bool wasBusy = busy();
     PasswordTask* task = new PasswordTask(iThreadPool, aData,
@@ -1495,7 +1627,8 @@ void FoilAuthModel::Private::updatePasswords(const ModelData* aData)
     }
 }
 
-void FoilAuthModel::Private::onPasswordTaskDone()
+void
+FoilAuthModel::Private::onPasswordTaskDone()
 {
     PasswordTask* task = qobject_cast<PasswordTask*>(sender());
     if (task) {
@@ -1532,7 +1665,8 @@ void FoilAuthModel::Private::onPasswordTaskDone()
     }
 }
 
-void FoilAuthModel::Private::saveInfo()
+void
+FoilAuthModel::Private::saveInfo()
 {
     // N.B. This method may change the busy state but doesn't queue
     // BusyChanged signal, it's done by the caller.
@@ -1542,7 +1676,8 @@ void FoilAuthModel::Private::saveInfo()
     iSaveInfoTask->submit(this, SLOT(onSaveInfoDone()));
 }
 
-void FoilAuthModel::Private::onSaveInfoDone()
+void
+FoilAuthModel::Private::onSaveInfoDone()
 {
     HDEBUG("Done");
     if (sender() == iSaveInfoTask) {
@@ -1556,7 +1691,10 @@ void FoilAuthModel::Private::onSaveInfoDone()
     }
 }
 
-void FoilAuthModel::Private::generate(int aBits, QString aPassword)
+void
+FoilAuthModel::Private::generate(
+    int aBits,
+    QString aPassword)
 {
     const bool wasBusy = busy();
     if (iGenerateKeyTask) iGenerateKeyTask->release();
@@ -1571,7 +1709,8 @@ void FoilAuthModel::Private::generate(int aBits, QString aPassword)
     emitQueuedSignals();
 }
 
-void FoilAuthModel::Private::onGenerateKeyTaskDone()
+void
+FoilAuthModel::Private::onGenerateKeyTaskDone()
 {
     HDEBUG("Got a new key");
     HASSERT(sender() == iGenerateKeyTask);
@@ -1592,7 +1731,9 @@ void FoilAuthModel::Private::onGenerateKeyTaskDone()
     emitQueuedSignals();
 }
 
-void FoilAuthModel::Private::destroyItemAt(int aIndex)
+void
+FoilAuthModel::Private::destroyItemAt(
+    int aIndex)
 {
     if (aIndex >= 0 && aIndex <= iData.count()) {
         FoilAuthModel* model = parentModel();
@@ -1605,7 +1746,9 @@ void FoilAuthModel::Private::destroyItemAt(int aIndex)
     }
 }
 
-bool FoilAuthModel::Private::destroyItemAndRemoveFilesAt(int aIndex)
+bool
+FoilAuthModel::Private::destroyItemAndRemoveFilesAt(
+    int aIndex)
 {
     ModelData* data = dataAt(aIndex);
     if (data) {
@@ -1617,7 +1760,8 @@ bool FoilAuthModel::Private::destroyItemAndRemoveFilesAt(int aIndex)
     return false;
 }
 
-bool FoilAuthModel::Private::destroyLastItemAndRemoveFiles()
+bool
+FoilAuthModel::Private::destroyLastItemAndRemoveFiles()
 {
     const int n = iData.count();
     if (n > 0) {
@@ -1630,7 +1774,9 @@ bool FoilAuthModel::Private::destroyLastItemAndRemoveFiles()
     return false;
 }
 
-void FoilAuthModel::Private::deleteToken(QString aId)
+void
+FoilAuthModel::Private::deleteToken(
+    QString aId)
 {
     const bool wasBusy = busy();
     if (destroyItemAndRemoveFilesAt(findDataPos(aId))) {
@@ -1644,7 +1790,9 @@ void FoilAuthModel::Private::deleteToken(QString aId)
     }
 }
 
-void FoilAuthModel::Private::deleteTokens(QStringList aIds)
+void
+FoilAuthModel::Private::deleteTokens(
+    QStringList aIds)
 {
     const bool wasBusy = busy();
     const int n = aIds.count();
@@ -1666,7 +1814,8 @@ void FoilAuthModel::Private::deleteTokens(QStringList aIds)
     }
 }
 
-void FoilAuthModel::Private::deleteAll()
+void
+FoilAuthModel::Private::deleteAll()
 {
     const int n = iData.count();
     if (n > 0) {
@@ -1685,7 +1834,8 @@ void FoilAuthModel::Private::deleteAll()
     }
 }
 
-void FoilAuthModel::Private::clearModel()
+void
+FoilAuthModel::Private::clearModel()
 {
     const int n = iData.count();
     if (n > 0) {
@@ -1699,7 +1849,9 @@ void FoilAuthModel::Private::clearModel()
     }
 }
 
-void FoilAuthModel::Private::lock(bool aTimeout)
+void
+FoilAuthModel::Private::lock(
+    bool aTimeout)
 {
     // Cancel whatever we are doing
     FoilAuthModel* model = parentModel();
@@ -1741,7 +1893,9 @@ void FoilAuthModel::Private::lock(bool aTimeout)
     }
 }
 
-bool FoilAuthModel::Private::unlock(QString aPassword)
+bool
+FoilAuthModel::Private::unlock(
+    QString aPassword)
 {
     GError* error = NULL;
     HDEBUG(iFoilKeyFile);
@@ -1797,7 +1951,8 @@ bool FoilAuthModel::Private::unlock(QString aPassword)
     return ok;
 }
 
-bool FoilAuthModel::Private::busy() const
+bool
+FoilAuthModel::Private::busy() const
 {
     if (iSaveInfoTask ||
         iGenerateKeyTask ||
@@ -1810,7 +1965,8 @@ bool FoilAuthModel::Private::busy() const
     }
 }
 
-void FoilAuthModel::Private::updateTimer()
+void
+FoilAuthModel::Private::updateTimer()
 {
     const qint64 msecsSinceEpoch = QDateTime::currentMSecsSinceEpoch();
     const qint64 secsSinceEpoch = msecsSinceEpoch / 1000;
@@ -1841,7 +1997,8 @@ void FoilAuthModel::Private::updateTimer()
     }
 }
 
-void FoilAuthModel::Private::onTimer()
+void
+FoilAuthModel::Private::onTimer()
 {
     updateTimer();
     emitQueuedSignals();
@@ -1860,27 +2017,35 @@ FoilAuthModel::FoilAuthModel(QObject* aParent) :
 }
 
 // Callback for qmlRegisterSingletonType<FoilAuthModel>
-QObject* FoilAuthModel::createSingleton(QQmlEngine* aEngine, QJSEngine* aScript)
+QObject*
+FoilAuthModel::createSingleton(
+    QQmlEngine*,
+    QJSEngine*)
 {
     return new FoilAuthModel;
 }
 
-int FoilAuthModel::typeRole()
+int
+FoilAuthModel::typeRole()
 {
     return ModelData::TypeRole;
 }
 
-int FoilAuthModel::favoriteRole()
+int
+FoilAuthModel::favoriteRole()
 {
     return ModelData::FavoriteRole;
 }
 
-Qt::ItemFlags FoilAuthModel::flags(const QModelIndex& aIndex) const
+Qt::ItemFlags
+FoilAuthModel::flags(
+    const QModelIndex& aIndex) const
 {
     return SUPER::flags(aIndex) | Qt::ItemIsEditable;
 }
 
-QHash<int,QByteArray> FoilAuthModel::roleNames() const
+QHash<int,QByteArray>
+FoilAuthModel::roleNames() const
 {
     QHash<int,QByteArray> roles;
 #define ROLE(X,x) roles.insert(ModelData::X##Role, #x);
@@ -1889,18 +2054,27 @@ FOILAUTH_ROLES(ROLE)
     return roles;
 }
 
-int FoilAuthModel::rowCount(const QModelIndex& aParent) const
+int
+FoilAuthModel::rowCount(
+    const QModelIndex&) const
 {
     return iPrivate->rowCount();
 }
 
-QVariant FoilAuthModel::data(const QModelIndex& aIndex, int aRole) const
+QVariant
+FoilAuthModel::data(
+    const QModelIndex& aIndex,
+    int aRole) const
 {
     ModelData* data = iPrivate->dataAt(aIndex.row());
     return data ? data->get((ModelData::Role)aRole) : QVariant();
 }
 
-bool FoilAuthModel::setData(const QModelIndex& aIndex, const QVariant& aValue, int aRole)
+bool
+FoilAuthModel::setData(
+    const QModelIndex& aIndex,
+    const QVariant& aValue,
+    int aRole)
 {
     const int row = aIndex.row();
     ModelData* data = iPrivate->dataAt(row);
@@ -1925,7 +2099,7 @@ bool FoilAuthModel::setData(const QModelIndex& aIndex, const QVariant& aValue, i
                 const QString label = aValue.toString();
                 HDEBUG(row << "label" << label);
                 if (data->label() != label) {
-                    data->iToken.iLabel = label;
+                    data->iToken = data->iToken.withLabel(label);
                     iPrivate->encrypt(data);
                     iPrivate->emitQueuedSignals();
                     roles.append(aRole);
@@ -1935,22 +2109,15 @@ bool FoilAuthModel::setData(const QModelIndex& aIndex, const QVariant& aValue, i
             return true;
         case ModelData::SecretRole:
             {
-                QString base32(aValue.toString().toLower());
-                const QByteArray secret(FoilAuth::fromBase32(base32));
+                const QString base32(aValue.toString().toLower());
+                const QByteArray secret(HarbourBase32::fromBase32(base32));
                 HDEBUG(row << "secret" << base32 << "->" << secret.size() << "bytes");
                 if (secret.size() > 0) {
-                    base32 = FoilAuth::toBase32(secret);
-                    if (data->iToken.iBytes != secret) {
+                    if (data->iToken.secret() != secret) {
                         // Secret has actually changed
-                        data->iToken.iBytes = secret;
-                        data->iSecretBase32 = base32;
+                        data->iToken = data->iToken.withSecret(secret);
                         iPrivate->encrypt(data);
                         iPrivate->emitQueuedSignals();
-                        roles.append(aRole);
-                        Q_EMIT dataChanged(aIndex, aIndex, roles);
-                    } else if (data->iSecretBase32 != base32) {
-                        // Fix BASE32 representation
-                        data->iSecretBase32 = base32;
                         roles.append(aRole);
                         Q_EMIT dataChanged(aIndex, aIndex, roles);
                     }
@@ -1964,51 +2131,50 @@ bool FoilAuthModel::setData(const QModelIndex& aIndex, const QVariant& aValue, i
                 const int digits = aValue.toInt(&ok);
                 HDEBUG(row << "digits" << digits);
                 if (ok) {
-                    if (data->iToken.iDigits == digits) {
-                        return true;
-                    } else if (data->iToken.setDigits(digits)) {
+                    if (data->iToken.digits() != digits) {
+                        data->iToken = data->iToken.withDigits(digits);
                         iPrivate->encrypt(data);
                         iPrivate->emitQueuedSignals();
                         roles.append(aRole);
                         Q_EMIT dataChanged(aIndex, aIndex, roles);
-                        return true;
                     }
+                    return true;
                 }
             }
             break;
         case ModelData::TypeRole:
             {
                 bool ok;
-                const int type = aValue.toInt(&ok);
-                if (ok) {
+                const FoilAuthTypes::AuthType type =
+                    (FoilAuthTypes::AuthType) aValue.toInt(&ok);
+                if (ok && FoilAuthToken::validType(type) == type) {
                     HDEBUG(row << "type" << type);
-                    if (data->iToken.iType == (FoilAuthTypes::AuthType)type) {
-                        return true;
-                    } else if (data->iToken.setType((FoilAuthTypes::AuthType)type)) {
+                    if (data->iToken.type() != type) {
+                        data->iToken = data->iToken.withType(type);
                         iPrivate->encrypt(data);
                         iPrivate->emitQueuedSignals();
                         roles.append(aRole);
                         Q_EMIT dataChanged(aIndex, aIndex, roles);
-                        return true;
                     }
+                    return true;
                 }
             }
             break;
         case ModelData::AlgorithmRole:
             {
                 bool ok;
-                const int alg = aValue.toInt(&ok);
+                const FoilAuthTypes::DigestAlgorithm alg =
+                    (FoilAuthTypes::DigestAlgorithm) aValue.toInt(&ok);
                 if (ok) {
                     HDEBUG(row << "algorithm" << alg);
-                    if (data->iToken.iAlgorithm == (FoilAuthTypes::DigestAlgorithm)alg) {
-                        return true;
-                    } else if (data->iToken.setAlgorithm((FoilAuthTypes::DigestAlgorithm)alg)) {
+                    if (data->iToken.algorithm() != alg) {
+                        data->iToken = data->iToken.withAlgorithm(alg);
                         iPrivate->encrypt(data);
                         iPrivate->emitQueuedSignals();
                         roles.append(aRole);
                         Q_EMIT dataChanged(aIndex, aIndex, roles);
-                        return true;
                     }
+                    return true;
                 }
             }
             break;
@@ -2018,8 +2184,8 @@ bool FoilAuthModel::setData(const QModelIndex& aIndex, const QVariant& aValue, i
                 const quint64 counter = aValue.toULongLong(&ok);
                 HDEBUG(row << "counter" << counter);
                 if (ok) {
-                    if (data->iToken.iCounter != counter) {
-                        data->iToken.iCounter = counter;
+                    if (data->iToken.counter() != counter) {
+                        data->iToken = data->iToken.withCounter(counter);
                         iPrivate->encrypt(data);
                         iPrivate->emitQueuedSignals();
                         roles.append(aRole);
@@ -2035,8 +2201,8 @@ bool FoilAuthModel::setData(const QModelIndex& aIndex, const QVariant& aValue, i
                 int sec = aValue.toInt(&ok);
                 HDEBUG(row << "timeshift" << sec);
                 if (ok) {
-                    if (data->iToken.iTimeShift != sec) {
-                        data->iToken.iTimeShift = sec;
+                    if (data->iToken.timeShift() != sec) {
+                        data->iToken = data->iToken.withTimeShift(sec);
                         iPrivate->encrypt(data);
                         iPrivate->emitQueuedSignals();
                         roles.append(aRole);
@@ -2060,8 +2226,13 @@ bool FoilAuthModel::setData(const QModelIndex& aIndex, const QVariant& aValue, i
     return false;
 }
 
-bool FoilAuthModel::moveRows(const QModelIndex &aSrcParent, int aSrcRow,
-    int aCount, const QModelIndex &aDestParent, int aDestRow)
+bool
+FoilAuthModel::moveRows(
+    const QModelIndex& aSrcParent,
+    int aSrcRow,
+    int,
+    const QModelIndex& aDestParent,
+    int aDestRow)
 {
     const int size = iPrivate->rowCount();
     if (aSrcParent == aDestParent &&
@@ -2087,68 +2258,87 @@ bool FoilAuthModel::moveRows(const QModelIndex &aSrcParent, int aSrcRow,
     }
 }
 
-int FoilAuthModel::period() const
+int
+FoilAuthModel::period() const
 {
     return FoilAuth::PERIOD;
 }
 
-int FoilAuthModel::timeLeft() const
+int
+FoilAuthModel::timeLeft() const
 {
     return iPrivate->iTimeLeft;
 }
 
-bool FoilAuthModel::busy() const
+bool
+FoilAuthModel::busy() const
 {
     return iPrivate->busy();
 }
 
-bool FoilAuthModel::keyAvailable() const
+bool
+FoilAuthModel::keyAvailable() const
 {
-    return iPrivate->iPrivateKey != NULL;
+    return iPrivate->iPrivateKey != Q_NULLPTR;
 }
 
-bool FoilAuthModel::timerActive() const
+bool
+FoilAuthModel::timerActive() const
 {
     return iPrivate->iTimer->isActive();
 }
 
-FoilAuthModel::FoilState FoilAuthModel::foilState() const
+FoilAuthModel::FoilState
+FoilAuthModel::foilState() const
 {
     return iPrivate->iFoilState;
 }
 
-bool FoilAuthModel::checkPassword(QString aPassword)
+bool
+FoilAuthModel::checkPassword(
+    QString aPassword)
 {
     return iPrivate->checkPassword(aPassword);
 }
 
-bool FoilAuthModel::changePassword(QString aOld, QString aNew)
+bool
+FoilAuthModel::changePassword(
+    QString aOld,
+    QString aNew)
 {
     bool ok = iPrivate->changePassword(aOld, aNew);
     iPrivate->emitQueuedSignals();
     return ok;
 }
 
-void FoilAuthModel::generateKey(int aBits, QString aPassword)
+void
+FoilAuthModel::generateKey(
+    int aBits,
+    const QString aPassword)
 {
     iPrivate->generate(aBits, aPassword);
     iPrivate->emitQueuedSignals();
 }
 
-void FoilAuthModel::lock(bool aTimeout)
+void
+FoilAuthModel::lock(
+    bool aTimeout)
 {
     iPrivate->lock(aTimeout);
     iPrivate->emitQueuedSignals();
 }
 
-bool FoilAuthModel::unlock(QString aPassword)
+bool
+FoilAuthModel::unlock(
+    const QString aPassword)
 {
     const bool ok = iPrivate->unlock(aPassword);
     iPrivate->emitQueuedSignals();
     return ok;
 }
 
-int FoilAuthModel::millisecondsLeft()
+int
+FoilAuthModel::millisecondsLeft()
 {
     if (iPrivate->iTimeLeft > 0) {
         const QDateTime now(QDateTime::currentDateTime());
@@ -2163,12 +2353,19 @@ int FoilAuthModel::millisecondsLeft()
     }
 }
 
-bool FoilAuthModel::addToken(int aType, QString aSecretBase32,
-    QString aLabel, QString aIssuer, int aDigits, int aCounter,
-    int aTimeShift, int aAlgorithm)
+bool
+FoilAuthModel::addToken(
+    int aType,
+    QString aSecretBase32,
+    QString aLabel,
+    QString aIssuer,
+    int aDigits,
+    int aCounter,
+    int aTimeShift,
+    int aAlgorithm)
 {
     HDEBUG(aSecretBase32 << aLabel << aIssuer << aDigits << aCounter << aTimeShift << aAlgorithm);
-    QByteArray secretBytes = FoilAuth::fromBase32(aSecretBase32);
+    const QByteArray secretBytes(HarbourBase32::fromBase32(aSecretBase32));
     if (secretBytes.size() > 0) {
         iPrivate->addToken(FoilAuthToken((FoilAuthTypes::AuthType) aType,
             secretBytes, aLabel, aIssuer, aDigits, aCounter, aTimeShift,
@@ -2179,20 +2376,25 @@ bool FoilAuthModel::addToken(int aType, QString aSecretBase32,
     return false;
 }
 
-void FoilAuthModel::addToken(const FoilAuthToken* aToken, bool aFavorite)
+void
+FoilAuthModel::addToken(
+    FoilAuthToken aToken,
+    bool aFavorite)
 {
-    if (aToken && aToken->isValid()) {
-        HDEBUG(aToken->iLabel);
-        iPrivate->addToken(*aToken, aFavorite);
+    if (aToken.isValid()) {
+        HDEBUG(aToken.label());
+        iPrivate->addToken(aToken, aFavorite);
         iPrivate->emitQueuedSignals();
     }
 }
 
-bool FoilAuthModel::addTokenUri(QString aUri)
+bool
+FoilAuthModel::addTokenUri(
+    const QString aUri)
 {
-    FoilAuthToken token;
+    FoilAuthToken token(FoilAuthToken::fromUri(aUri));
     HDEBUG(aUri);
-    if (token.parseUri(aUri)) {
+    if (token.isValid()) {
         iPrivate->addToken(token);
         iPrivate->emitQueuedSignals();
         return true;
@@ -2200,28 +2402,35 @@ bool FoilAuthModel::addTokenUri(QString aUri)
     return false;
 }
 
-void FoilAuthModel::deleteToken(QString aId)
+void
+FoilAuthModel::deleteToken(
+    const QString aId)
 {
     HDEBUG(aId);
     iPrivate->deleteToken(aId);
     iPrivate->emitQueuedSignals();
 }
 
-void FoilAuthModel::deleteTokens(QStringList aIds)
+void
+FoilAuthModel::deleteTokens(
+    const QStringList aIds)
 {
     HDEBUG(aIds);
     iPrivate->deleteTokens(aIds);
     iPrivate->emitQueuedSignals();
 }
 
-void FoilAuthModel::deleteAll()
+void
+FoilAuthModel::deleteAll()
 {
     HDEBUG("deleting all tokena");
     iPrivate->deleteAll();
     iPrivate->emitQueuedSignals();
 }
 
-QStringList FoilAuthModel::getIdsAt(const QList<int> aRows) const
+QStringList
+FoilAuthModel::getIdsAt(
+    const QList<int> aRows) const
 {
     QStringList ids;
     const int n = aRows.count();
@@ -2235,9 +2444,11 @@ QStringList FoilAuthModel::getIdsAt(const QList<int> aRows) const
     return ids;
 }
 
-int FoilAuthModel::indexOf(const FoilAuthToken* aToken) const
+int
+FoilAuthModel::indexOf(
+    FoilAuthToken aToken) const
 {
-    if (aToken) {
+    if (aToken.isValid()) {
         const int n = iPrivate->rowCount();
         for (int i = 0; i < n; i++) {
             if (iPrivate->dataAt(i)->iToken.equals(aToken)) {
@@ -2248,18 +2459,22 @@ int FoilAuthModel::indexOf(const FoilAuthToken* aToken) const
     return -1;
 }
 
-bool FoilAuthModel::containsSecret(QByteArray aSecret) const
+bool
+FoilAuthModel::containsSecret(
+    const QByteArray aSecret) const
 {
     const int n = iPrivate->rowCount();
     for (int i = 0; i < n; i++) {
-        if (iPrivate->dataAt(i)->iToken.iBytes == aSecret) {
+        if (iPrivate->dataAt(i)->iToken.secret() == aSecret) {
             return true;
         }
     }
     return false;
 }
 
-QStringList FoilAuthModel::generateMigrationUris(const QList<int> aRows) const
+QStringList
+FoilAuthModel::generateMigrationUris(
+    const QList<int> aRows) const
 {
     HDEBUG(aRows);
     const QList<FoilAuthToken> tokens(iPrivate->getTokens(aRows));

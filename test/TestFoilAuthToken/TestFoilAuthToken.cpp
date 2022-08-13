@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2021 Jolla Ltd.
- * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2022 Jolla Ltd.
+ * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -34,6 +34,7 @@
 #include "FoilAuthToken.h"
 #include "FoilAuth.h"
 
+#include "HarbourBase32.h"
 #include "HarbourDebug.h"
 
 #include <QCoreApplication>
@@ -51,37 +52,119 @@ void
 test_basic(
     void)
 {
-    QByteArray data("secret");
-    FoilAuthToken token1(FoilAuthToken::AuthTypeTOTP, data, "Label",
+    static const uchar secret[] = {
+        0xA9, 0xD0, 0x85, 0x4E, 0xA9, 0x17, 0x98, 0x47, 0x16, 0x69
+    };
+    const QByteArray secretData((char*)secret, sizeof(secret));
+    const QByteArray secretData2((char*)secret, sizeof(secret)/2);
+
+    FoilAuthToken token1(FoilAuthToken::AuthTypeTOTP, secretData, "Label",
         "Issuer", 1, FoilAuthToken::DEFAULT_COUNTER, 10);
     FoilAuthToken token2(token1);
     FoilAuthToken token3;
 
+    g_assert(token1.isValid());
     g_assert(token1 == token2);
     g_assert(token1 != token3);
     token3 = token2;
     g_assert(token1 == token3);
+    g_assert(token1.secret() == secretData);
+    g_assert(token1.secretBase32() == QString("vhiiktvjc6meoftj"));
 
-    g_assert(!token3.setDigits(0));
-    g_assert(token1 == token3);
+    g_assert(token3.withType((FoilAuthToken::AuthType)-1) == token3);
+    g_assert(token3.withDigits(0) == token3);
+    g_assert(token3.withDigits(FoilAuthToken::MAX_DIGITS + 1) == token3);
+    g_assert(token3.withAlgorithm((FoilAuthToken::DigestAlgorithm)-1) == token3);
+    g_assert(token3.withType(token3.type()) == token3);
+    g_assert(token3.withAlgorithm(token3.algorithm()) == token3);
+    g_assert(token3.withDigits(token3.digits()) == token3);
+    g_assert(token3.withCounter(token3.counter()) == token3);
+    g_assert(token3.withSecret(token3.secret()) == token3);
+    g_assert(token3.withLabel(token3.label()) == token3);
+    g_assert(token3.withIssuer(token3.issuer()) == token3);
+    g_assert(token3.withTimeShift(token3.timeShift()) == token3);
 
-    g_assert(!token3.setDigits(FoilAuthToken::MAX_DIGITS + 1));
-    g_assert(token1 == token3);
+    token2 = token3.withType(FoilAuthToken::AuthTypeHOTP);
+    g_assert(token2 != token3);
+    g_assert_cmpint(token2.type(), == ,FoilAuthToken::AuthTypeHOTP);
 
-    g_assert(!token3.setAlgorithm((FoilAuthToken::DigestAlgorithm)-1));
-    g_assert(token1 == token3);
+    token2 = token3.withAlgorithm(FoilAuthToken::DigestAlgorithmSHA512);
+    g_assert(token2 != token3);
+    g_assert_cmpint(token2.algorithm(),==,FoilAuthToken::DigestAlgorithmSHA512);
 
-    g_assert(token3.setAlgorithm(token3.iAlgorithm));
-    g_assert(token1 == token3);
+    token2 = token3.withSecret(secretData2);
+    g_assert(token2 != token3);
+    g_assert(token2.secret() == secretData2);
+    g_assert(token2.secretBase32() == QString("vhiiktvj"));
 
-    g_assert(!token3.setType((FoilAuthToken::AuthType)-1));
-    g_assert(token1 == token3);
+    token2 = token3.withLabel("Label2");
+    g_assert(token2 != token3);
+    g_assert(token2.label() == QString("Label2"));
 
-    g_assert(token3.setType(token3.iType));
-    g_assert(token1 == token3);
+    token2 = token3.withIssuer("Issuer2");
+    g_assert(token2 != token3);
+    g_assert(token2.issuer() == QString("Issuer2"));
 
-    g_assert(token3.setDigits(token3.iDigits + 1));
-    g_assert(token1 != token3);
+    token2 = token3.withCounter(12345);
+    g_assert(token2 != token3);
+    g_assert_cmpint(token2.counter(), == ,12345);
+
+    token2 = token3.withDigits(token3.digits() + 1);
+    g_assert(token2 != token3);
+    g_assert_cmpint(token2.digits(), == ,token3.digits() + 1);
+
+    token2 = token3.withTimeShift(token3.timeShift() + 1);
+    g_assert(token2 != token3);
+    g_assert_cmpint(token2.timeShift(), == ,token3.timeShift() + 1);
+}
+
+/*==========================================================================*
+ * validDigits
+ *==========================================================================*/
+
+static
+void
+test_validDigits(
+    void)
+{
+    g_assert_cmpint(FoilAuthToken::validDigits(FoilAuthToken::MIN_DIGITS), == ,FoilAuthToken::MIN_DIGITS);
+    g_assert_cmpint(FoilAuthToken::validDigits(FoilAuthToken::MIN_DIGITS - 1), == ,FoilAuthToken::DEFAULT_DIGITS);
+    g_assert_cmpint(FoilAuthToken::validDigits(FoilAuthToken::MAX_DIGITS), == ,FoilAuthToken::MAX_DIGITS);
+    g_assert_cmpint(FoilAuthToken::validDigits(FoilAuthToken::MAX_DIGITS + 1), == ,FoilAuthToken::DEFAULT_DIGITS);
+}
+
+/*==========================================================================*
+ * invalid
+ *==========================================================================*/
+
+static
+void
+test_invalid(
+    void)
+{
+    FoilAuthToken invalid;
+
+    g_assert(!invalid.isValid());
+    g_assert_cmpint(invalid.type(), == ,FoilAuthToken::DEFAULT_AUTH_TYPE);
+    g_assert_cmpint(invalid.algorithm(), == ,FoilAuthToken::DEFAULT_ALGORITHM);
+    g_assert(invalid.label().isEmpty());
+    g_assert(invalid.issuer().isEmpty());
+    g_assert(invalid.secret().isEmpty());
+    g_assert(invalid.secretBase32().isEmpty());
+    g_assert_cmpint(invalid.timeShift(), == ,0);
+    g_assert_cmpint(invalid.counter(), == ,0);
+    g_assert_cmpint(invalid.digits(), == ,0);
+    g_assert_cmpint(invalid.password(123456789), == ,0);
+    g_assert(invalid.passwordString(123456789).isEmpty());
+
+    g_assert(invalid.withType(FoilAuthToken::DEFAULT_AUTH_TYPE) == invalid);
+    g_assert(invalid.withAlgorithm(FoilAuthToken::DEFAULT_ALGORITHM) == invalid);
+    g_assert(invalid.withLabel(QString("foo")) == invalid);
+    g_assert(invalid.withIssuer(QString("bar")) == invalid);
+    g_assert(invalid.withSecret(QByteArray()) == invalid);
+    g_assert(invalid.withTimeShift(1) == invalid);
+    g_assert(invalid.withCounter(1) == invalid);
+    g_assert(invalid.withDigits(FoilAuthToken::DEFAULT_DIGITS) == invalid);
 }
 
 /*==========================================================================*
@@ -93,92 +176,108 @@ void
 test_password(
     void)
 {
-    QByteArray data = FoilAuth::fromBase32("VHIIKTVJC6MEOFTJ");
+    QByteArray data = HarbourBase32::fromBase32("VHIIKTVJC6MEOFTJ");
     FoilAuthToken token(FoilAuthToken::AuthTypeTOTP, data, "Label", "Issuer");
     g_assert(token.passwordString(1548529350) == QString("038068"));
 }
 
 /*==========================================================================*
- * parseUri
+ * fromUri
  *==========================================================================*/
 
 static
 void
-test_parseUri(
+test_fromUri(
     void)
 {
     static const uchar bytes[] = {
         0xA9, 0xD0, 0x85, 0x4E, 0xA9, 0x17, 0x98, 0x47, 0x16, 0x69
     };
 
+    g_assert(!FoilAuthToken::fromUri("otpauth://totp/").isValid());
+    g_assert(!FoilAuthToken::fromUri("otpauth://totp/.....").isValid());
+    g_assert(!FoilAuthToken::fromUri("otpauth://totp/Test Secret?issuer=Test Issuer").isValid());
+    g_assert(!FoilAuthToken::fromUri("auth://totp/Test Secret?issuer=Test Issuer").isValid());
+
     FoilAuthToken token;
-    g_assert(!token.parseUri("otpauth://totp/"));
-    g_assert(!token.parseUri("otpauth://totp/....."));
-    g_assert(!token.parseUri("otpauth://totp/Test Secret?issuer=Test Issuer"));
-    g_assert(!token.parseUri("auth://totp/Test Secret?issuer=Test Issuer"));
 
-    g_assert(token.parseUri("otpauth://totp/Test Secret?secret=VHIIKTVJC6MEOFTJ&issuer=Test Issuer&foo=bar"));
-    g_assert(token.iBytes == QByteArray((char*)bytes, sizeof(bytes)));
-    g_assert(token.iLabel == QString("Test Secret"));
-    g_assert(token.iIssuer == QString("Test Issuer"));
-    g_assert_cmpint(token.iDigits, == ,FoilAuthToken::DEFAULT_DIGITS);
-    g_assert_cmpint(token.iCounter, == ,FoilAuthToken::DEFAULT_COUNTER);
-    g_assert_cmpint(token.iTimeShift, == ,FoilAuthToken::DEFAULT_TIMESHIFT);
-    g_assert_cmpint(token.iAlgorithm, == ,FoilAuthToken::DEFAULT_ALGORITHM);
+    token = FoilAuthToken::fromUri("otpauth://totp/Test Secret?secret=VHIIKTVJC6MEOFTJ&issuer=Test Issuer&foo=bar");
+    g_assert(token.isValid());
+    g_assert(token.secret() == QByteArray((char*)bytes, sizeof(bytes)));
+    g_assert(token.secretBase32() == QString("vhiiktvjc6meoftj"));
+    g_assert(token.label() == QString("Test Secret"));
+    g_assert(token.issuer() == QString("Test Issuer"));
+    g_assert_cmpint(token.digits(), == ,FoilAuthToken::DEFAULT_DIGITS);
+    g_assert_cmpint(token.counter(), == ,FoilAuthToken::DEFAULT_COUNTER);
+    g_assert_cmpint(token.timeShift(), == ,FoilAuthToken::DEFAULT_TIMESHIFT);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthToken::DEFAULT_ALGORITHM);
 
-    g_assert(token.parseUri("otpauth://totp/?secret=VHIIKTVJ&digits=2&algorithm=foo"));
-    g_assert(token.iBytes == QByteArray((char*)bytes, sizeof(bytes)/2));
-    g_assert(token.iLabel.isEmpty());
-    g_assert(token.iIssuer.isEmpty());
-    g_assert_cmpint(token.iDigits, == ,2);
-    g_assert_cmpint(token.iCounter, == ,FoilAuthToken::DEFAULT_COUNTER);
-    g_assert_cmpint(token.iTimeShift, == ,FoilAuthToken::DEFAULT_TIMESHIFT);
-    g_assert_cmpint(token.iAlgorithm, == ,FoilAuthToken::DEFAULT_ALGORITHM);
 
-    g_assert(token.parseUri("otpauth://totp/?secret=VHIIKTVJ&digits=23&algorithm=MD5"));
-    g_assert(token.iBytes == QByteArray((char*)bytes, sizeof(bytes)/2));
-    g_assert(token.iLabel.isEmpty());
-    g_assert(token.iIssuer.isEmpty());
-    g_assert_cmpint(token.iDigits, == ,FoilAuthToken::DEFAULT_DIGITS);
-    g_assert_cmpint(token.iCounter, == ,FoilAuthToken::DEFAULT_COUNTER);
-    g_assert_cmpint(token.iTimeShift, == ,FoilAuthToken::DEFAULT_TIMESHIFT);
-    g_assert_cmpint(token.iAlgorithm, == ,FoilAuthToken::DigestAlgorithmMD5);
+    token = FoilAuthToken::fromUri("otpauth://totp/?secret=VHIIKTVJ&digits=2&algorithm=foo");
+    g_assert(token.isValid());
+    g_assert(token.secret() == QByteArray((char*)bytes, sizeof(bytes)/2));
+    g_assert(token.secretBase32() == QString("vhiiktvj"));
+    g_assert(token.label().isEmpty());
+    g_assert(token.issuer().isEmpty());
+    g_assert_cmpint(token.digits(), == ,2);
+    g_assert_cmpint(token.counter(), == ,FoilAuthToken::DEFAULT_COUNTER);
+    g_assert_cmpint(token.timeShift(), == ,FoilAuthToken::DEFAULT_TIMESHIFT);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthToken::DEFAULT_ALGORITHM);
 
-    g_assert(token.parseUri("otpauth://totp/?secret=VHIIKTVJ&digits=x&algorithm=SHA1"));
-    g_assert(token.iBytes == QByteArray((char*)bytes, sizeof(bytes)/2));
-    g_assert(token.iLabel.isEmpty());
-    g_assert(token.iIssuer.isEmpty());
-    g_assert_cmpint(token.iDigits, == ,FoilAuthToken::DEFAULT_DIGITS);
-    g_assert_cmpint(token.iCounter, == ,FoilAuthToken::DEFAULT_COUNTER);
-    g_assert_cmpint(token.iTimeShift, == ,FoilAuthToken::DEFAULT_TIMESHIFT);
-    g_assert_cmpint(token.iAlgorithm, == ,FoilAuthToken::DigestAlgorithmSHA1);
+    token = FoilAuthToken::fromUri("otpauth://totp/?secret=VHIIKTVJ&digits=23&algorithm=MD5");
+    g_assert(token.isValid());
+    g_assert(token.secret() == QByteArray((char*)bytes, sizeof(bytes)/2));
+    g_assert(token.secretBase32() == QString("vhiiktvj"));
+    g_assert(token.label().isEmpty());
+    g_assert(token.issuer().isEmpty());
+    g_assert_cmpint(token.digits(), == ,FoilAuthToken::DEFAULT_DIGITS);
+    g_assert_cmpint(token.counter(), == ,FoilAuthToken::DEFAULT_COUNTER);
+    g_assert_cmpint(token.timeShift(), == ,FoilAuthToken::DEFAULT_TIMESHIFT);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthToken::DigestAlgorithmMD5);
 
-    g_assert(token.parseUri("otpauth://totp/?secret=VHIIKTVJ&digits=x&algorithm=SHA256"));
-    g_assert(token.iBytes == QByteArray((char*)bytes, sizeof(bytes)/2));
-    g_assert(token.iLabel.isEmpty());
-    g_assert(token.iIssuer.isEmpty());
-    g_assert_cmpint(token.iDigits, == ,FoilAuthToken::DEFAULT_DIGITS);
-    g_assert_cmpint(token.iCounter, == ,FoilAuthToken::DEFAULT_COUNTER);
-    g_assert_cmpint(token.iTimeShift, == ,FoilAuthToken::DEFAULT_TIMESHIFT);
-    g_assert_cmpint(token.iAlgorithm, == ,FoilAuthToken::DigestAlgorithmSHA256);
+    token = FoilAuthToken::fromUri("otpauth://totp/?secret=VHIIKTVJ&digits=x&algorithm=SHA1");
+    g_assert(token.isValid());
+    g_assert(token.secret() == QByteArray((char*)bytes, sizeof(bytes)/2));
+    g_assert(token.secretBase32() == QString("vhiiktvj"));
+    g_assert(token.label().isEmpty());
+    g_assert(token.issuer().isEmpty());
+    g_assert_cmpint(token.digits(), == ,FoilAuthToken::DEFAULT_DIGITS);
+    g_assert_cmpint(token.counter(), == ,FoilAuthToken::DEFAULT_COUNTER);
+    g_assert_cmpint(token.timeShift(), == ,FoilAuthToken::DEFAULT_TIMESHIFT);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthToken::DigestAlgorithmSHA1);
 
-    g_assert(token.parseUri("otpauth://totp/?secret=VHIIKTVJ&digits=x&algorithm=SHA512"));
-    g_assert(token.iBytes == QByteArray((char*)bytes, sizeof(bytes)/2));
-    g_assert(token.iLabel.isEmpty());
-    g_assert(token.iIssuer.isEmpty());
-    g_assert_cmpint(token.iDigits, == ,FoilAuthToken::DEFAULT_DIGITS);
-    g_assert_cmpint(token.iCounter, == ,FoilAuthToken::DEFAULT_COUNTER);
-    g_assert_cmpint(token.iTimeShift, == ,FoilAuthToken::DEFAULT_TIMESHIFT);
-    g_assert_cmpint(token.iAlgorithm, == ,FoilAuthToken::DigestAlgorithmSHA512);
+    token = FoilAuthToken::fromUri("otpauth://totp/?secret=VHIIKTVJ&digits=x&algorithm=SHA256");
+    g_assert(token.isValid());
+    g_assert(token.secret() == QByteArray((char*)bytes, sizeof(bytes)/2));
+    g_assert(token.secretBase32() == QString("vhiiktvj"));
+    g_assert(token.label().isEmpty());
+    g_assert(token.issuer().isEmpty());
+    g_assert_cmpint(token.digits(), == ,FoilAuthToken::DEFAULT_DIGITS);
+    g_assert_cmpint(token.counter(), == ,FoilAuthToken::DEFAULT_COUNTER);
+    g_assert_cmpint(token.timeShift(), == ,FoilAuthToken::DEFAULT_TIMESHIFT);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthToken::DigestAlgorithmSHA256);
 
-    g_assert(token.parseUri("otpauth://hotp/HOTP%20test?secret=vhiiktvjc6meoftj&digits=6&counter=3"));
-    g_assert(token.iBytes == QByteArray((char*)bytes, sizeof(bytes)));
-    g_assert(token.iLabel == QString("HOTP test"));
-    g_assert(token.iIssuer.isEmpty());
-    g_assert_cmpint(token.iDigits, == ,FoilAuthToken::DEFAULT_DIGITS);
-    g_assert_cmpint(token.iCounter, == ,3);
-    g_assert_cmpint(token.iTimeShift, == ,FoilAuthToken::DEFAULT_TIMESHIFT);
-    g_assert_cmpint(token.iAlgorithm, == ,FoilAuthToken::DEFAULT_ALGORITHM);
+    token = FoilAuthToken::fromUri("otpauth://totp/?secret=VHIIKTVJ&digits=x&algorithm=SHA512");
+    g_assert(token.isValid());
+    g_assert(token.secret() == QByteArray((char*)bytes, sizeof(bytes)/2));
+    g_assert(token.secretBase32() == QString("vhiiktvj"));
+    g_assert(token.label().isEmpty());
+    g_assert(token.issuer().isEmpty());
+    g_assert_cmpint(token.digits(), == ,FoilAuthToken::DEFAULT_DIGITS);
+    g_assert_cmpint(token.counter(), == ,FoilAuthToken::DEFAULT_COUNTER);
+    g_assert_cmpint(token.timeShift(), == ,FoilAuthToken::DEFAULT_TIMESHIFT);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthToken::DigestAlgorithmSHA512);
+
+    token = FoilAuthToken::fromUri("otpauth://hotp/HOTP%20test?secret=vhiiktvjc6meoftj&digits=6&counter=3");
+    g_assert(token.isValid());
+    g_assert(token.secret() == QByteArray((char*)bytes, sizeof(bytes)));
+    g_assert(token.secretBase32() == QString("vhiiktvjc6meoftj"));
+    g_assert(token.label() == QString("HOTP test"));
+    g_assert(token.issuer().isEmpty());
+    g_assert_cmpint(token.digits(), == ,FoilAuthToken::DEFAULT_DIGITS);
+    g_assert_cmpint(token.counter(), == ,3);
+    g_assert_cmpint(token.timeShift(), == ,FoilAuthToken::DEFAULT_TIMESHIFT);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthToken::DEFAULT_ALGORITHM);
 }
 
 /*==========================================================================*
@@ -208,8 +307,8 @@ test_toUri(
     QString uri(token.toUri());
     g_assert(uri == QString("otpauth://totp/Test%20Secret?secret=vhiiktvjc6meoftj&issuer=Test%20Issuer&digits=5"));
 
-    FoilAuthToken token2;
-    g_assert(token2.parseUri(uri));
+    FoilAuthToken token2 = FoilAuthToken::fromUri(uri);
+    g_assert(token2.isValid());
     g_assert(token2 == token);
 
     // Algorithm
@@ -244,16 +343,15 @@ void
 test_toVariantMap(
     void)
 {
-    FoilAuthToken token;
-
     // Invalid token
-    QVariantMap map = token.toVariantMap();
+    QVariantMap map = FoilAuthToken().toVariantMap();
     g_assert(map.count() == 1);
     g_assert(map.contains(FoilAuthToken::KEY_VALID));
     g_assert(!map.value(FoilAuthToken::KEY_VALID).toBool());
 
     // Valid token
-    g_assert(token.parseUri("otpauth://totp/Test?secret=vhiiktvjc6meoftj&issuer=Issuer&digits=5"));
+    FoilAuthToken token = FoilAuthToken::fromUri("otpauth://totp/Test?secret=vhiiktvjc6meoftj&issuer=Issuer&digits=5");
+    g_assert(token.isValid());
     map = token.toVariantMap();
 
     g_assert_cmpint(map.count(), == ,9);
@@ -737,33 +835,33 @@ test_fromProtoBuf(
     g_assert_cmpint(result.count(), == ,4);
 
     FoilAuthToken token = result.at(0);
-    g_assert(token.iBytes == QByteArray((char*)secret0, sizeof(secret0)));
-    g_assert(token.iLabel == QString("Example Company:test@example.com"));
-    g_assert(token.iIssuer == QString("Example Company"));
-    g_assert_cmpint(token.iDigits, == ,6);
-    g_assert_cmpint(token.iTimeShift, == ,FoilAuthToken::DEFAULT_TIMESHIFT);
-    g_assert_cmpint(token.iAlgorithm, == ,FoilAuthToken::DigestAlgorithmSHA1);
+    g_assert(token.secret() == QByteArray((char*)secret0, sizeof(secret0)));
+    g_assert(token.label() == QString("Example Company:test@example.com"));
+    g_assert(token.issuer() == QString("Example Company"));
+    g_assert_cmpint(token.digits(), == ,6);
+    g_assert_cmpint(token.timeShift(), == ,FoilAuthToken::DEFAULT_TIMESHIFT);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthToken::DigestAlgorithmSHA1);
 
     token = result.at(1);
-    g_assert(token.iBytes == QByteArray((char*)secret1, sizeof(secret1)));
-    g_assert(token.iLabel == QString("WordPress:ThinkingTeapot"));
-    g_assert(token.iIssuer == QString("WordPress"));
-    g_assert_cmpint(token.iDigits, == ,8);
-    g_assert_cmpint(token.iAlgorithm, == ,FoilAuthToken::DigestAlgorithmSHA256);
+    g_assert(token.secret() == QByteArray((char*)secret1, sizeof(secret1)));
+    g_assert(token.label() == QString("WordPress:ThinkingTeapot"));
+    g_assert(token.issuer() == QString("WordPress"));
+    g_assert_cmpint(token.digits(), == ,8);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthToken::DigestAlgorithmSHA256);
 
     token = result.at(2);
-    g_assert(token.iBytes == QByteArray((char*)secret2, sizeof(secret2)));
-    g_assert(token.iLabel == QString("Google:example@gmail.com"));
-    g_assert(token.iIssuer == QString("Google"));
-    g_assert_cmpint(token.iDigits, == ,6);
-    g_assert_cmpint(token.iAlgorithm, == ,FoilAuthToken::DigestAlgorithmSHA512);
+    g_assert(token.secret() == QByteArray((char*)secret2, sizeof(secret2)));
+    g_assert(token.label() == QString("Google:example@gmail.com"));
+    g_assert(token.issuer() == QString("Google"));
+    g_assert_cmpint(token.digits(), == ,6);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthToken::DigestAlgorithmSHA512);
 
     token = result.at(3);
-    g_assert(token.iBytes == QByteArray((char*)secret2, sizeof(secret2)));
-    g_assert(token.iLabel == QString("Google:example@gmail.com"));
-    g_assert(token.iIssuer == QString("Google"));
-    g_assert_cmpint(token.iDigits, == ,6);
-    g_assert_cmpint(token.iAlgorithm, == ,FoilAuthToken::DigestAlgorithmMD5);
+    g_assert(token.secret() == QByteArray((char*)secret2, sizeof(secret2)));
+    g_assert(token.label() == QString("Google:example@gmail.com"));
+    g_assert(token.issuer() == QString("Google"));
+    g_assert_cmpint(token.digits(), == ,6);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthToken::DigestAlgorithmMD5);
 }
 
 /*==========================================================================*
@@ -962,8 +1060,10 @@ int main(int argc, char* argv[])
     QCoreApplication app(argc, argv);
     g_test_init(&argc, &argv, NULL);
     g_test_add_func(TEST_("basic"), test_basic);
+    g_test_add_func(TEST_("validDigits"), test_validDigits);
+    g_test_add_func(TEST_("invalid"), test_invalid);
     g_test_add_func(TEST_("password"), test_password);
-    g_test_add_func(TEST_("parseUri"), test_parseUri);
+    g_test_add_func(TEST_("fromUri"), test_fromUri);
     g_test_add_func(TEST_("toUri"), test_toUri);
     g_test_add_func(TEST_("toVariantMap"), test_toVariantMap);
     g_test_add_func(TEST_("toProtoBuf"), test_toProtoBuf);

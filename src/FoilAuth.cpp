@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2021 Jolla Ltd.
- * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2022 Jolla Ltd.
+ * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -61,11 +61,13 @@
 // FoilAuth::Private
 // ==========================================================================
 
-class FoilAuth::Private : public QObject {
+class FoilAuth::Private :
+    public QObject
+{
     Q_OBJECT
 
 public:
-    Private(FoilAuth* aParent);
+    Private(FoilAuth*);
 
     static bool foilPicsInstalled();
     static bool foilNotesInstalled();
@@ -92,31 +94,37 @@ FoilAuth::Private::Private(FoilAuth* aParent) :
     iOtherFoilAppsInstalled = otherFoilAppsInstalled();
 }
 
-inline FoilAuth* FoilAuth::Private::foilAuth() const
+inline
+FoilAuth*
+FoilAuth::Private::foilAuth() const
 {
     return qobject_cast<FoilAuth*>(parent());
 }
 
-bool FoilAuth::Private::foilPicsInstalled()
+bool
+FoilAuth::Private::foilPicsInstalled()
 {
     const bool installed = QFile::exists(FOILPICS_PATH);
     HDEBUG("FoilPics is" << (installed ? "installed" : "not installed"));
     return installed;
 }
 
-bool FoilAuth::Private::foilNotesInstalled()
+bool
+FoilAuth::Private::foilNotesInstalled()
 {
     const bool installed = QFile::exists(FOILNOTES_PATH);
     HDEBUG("FoilNotes is" << (installed ? "installed" : "not installed"));
     return installed;
 }
 
-bool FoilAuth::Private::otherFoilAppsInstalled()
+bool
+FoilAuth::Private::otherFoilAppsInstalled()
 {
     return foilPicsInstalled() || foilNotesInstalled();
 }
 
-void FoilAuth::Private::checkFoilAppsInstalled()
+void
+FoilAuth::Private::checkFoilAppsInstalled()
 {
     const bool haveOtherFoilApps = otherFoilAppsInstalled();
     if (iOtherFoilAppsInstalled != haveOtherFoilApps) {
@@ -136,17 +144,23 @@ FoilAuth::FoilAuth(QObject* aParent) :
 }
 
 // Callback for qmlRegisterSingletonType<FoilAuth>
-QObject* FoilAuth::createSingleton(QQmlEngine* aEngine, QJSEngine* aScript)
+QObject*
+FoilAuth::createSingleton(
+    QQmlEngine*,
+    QJSEngine*)
 {
     return new FoilAuth;
 }
 
-bool FoilAuth::otherFoilAppsInstalled() const
+bool
+FoilAuth::otherFoilAppsInstalled() const
 {
     return iPrivate->iOtherFoilAppsInstalled;
 }
 
-QSize FoilAuth::toSize(QVariant aVariant)
+QSize
+FoilAuth::toSize(
+    QVariant aVariant)
 {
     // e.g. "1920x1080"
     if (aVariant.isValid()) {
@@ -165,22 +179,24 @@ QSize FoilAuth::toSize(QVariant aVariant)
     return QSize();
 }
 
-bool FoilAuth::isValidBase32(QString aBase32)
+bool
+FoilAuth::isValidBase32(
+    const QString aBase32)
 {
     return HarbourBase32::isValidBase32(aBase32);
 }
 
-QByteArray FoilAuth::fromBase32(QString aBase32)
-{
-    return HarbourBase32::fromBase32(aBase32);
-}
-
-QString FoilAuth::toBase32(QByteArray aBinary, bool aLowerCase)
+QString
+FoilAuth::toBase32(
+    const QByteArray aBinary,
+    bool aLowerCase)
 {
     return HarbourBase32::toBase32(aBinary, aLowerCase);
 }
 
-QByteArray FoilAuth::toByteArray(GBytes* aData)
+QByteArray
+FoilAuth::toByteArray(
+    GBytes* aData)
 {
     if (aData) {
         gsize size;
@@ -194,13 +210,19 @@ QByteArray FoilAuth::toByteArray(GBytes* aData)
 
 // QStringList is an array like object, but it is not an array in QML.
 // Couldn't figure out how to modify it from QML
-QStringList FoilAuth::stringListRemove(QStringList aList, QString aString)
+QStringList
+FoilAuth::stringListRemove(
+    QStringList aList,
+    const QString aString)
 {
     aList.removeOne(aString);
     return aList;
 }
 
-FoilOutput* FoilAuth::createFoilFile(QString aDestDir, GString* aOutPath)
+FoilOutput*
+FoilAuth::createFoilFile(
+    const QString aDestDir,
+    GString* aOutPath)
 {
     // Generate random name for the encrypted file
     FoilOutput* out = NULL;
@@ -222,7 +244,9 @@ FoilOutput* FoilAuth::createFoilFile(QString aDestDir, GString* aOutPath)
     return out;
 }
 
-QString FoilAuth::createEmptyFoilFile(QString aDestDir)
+QString
+FoilAuth::createEmptyFoilFile(
+    const QString aDestDir)
 {
     GString* dest = g_string_sized_new(aDestDir.size() + 9);
     FoilOutput* out = createFoilFile(aDestDir, dest);
@@ -236,12 +260,22 @@ QString FoilAuth::createEmptyFoilFile(QString aDestDir)
     return path;
 }
 
-uint FoilAuth::TOTP(QByteArray aSecret, quint64 aTime, uint aMaxPass, DigestAlgorithm aAlgorithm)
+uint
+FoilAuth::TOTP(
+    const QByteArray aSecret,
+    quint64 aTime,
+    uint aMaxPass,
+    DigestAlgorithm aAlgorithm)
 {
     return FoilAuth::HOTP(aSecret, aTime/PERIOD, aMaxPass, aAlgorithm);
 }
 
-uint FoilAuth::HOTP(QByteArray aSecret, quint64 aCounter, uint aMaxPass, DigestAlgorithm aAlgorithm)
+uint
+FoilAuth::HOTP(
+    const QByteArray aSecret,
+    quint64 aCounter,
+    uint aMaxPass,
+    DigestAlgorithm aAlgorithm)
 {
     const guint64 msg = htobe64(aCounter);
     GType (*digest_type)(void) = foil_impl_digest_sha1_get_type;
@@ -272,14 +306,18 @@ uint FoilAuth::HOTP(QByteArray aSecret, quint64 aCounter, uint aMaxPass, DigestA
     return mini_hash % aMaxPass;
 }
 
-QString FoilAuth::toUri(Type aType, QString aSecretBase32, QString aLabel,
+QString
+FoilAuth::toUri(
+    Type aType,
+    const QString aSecretBase32,
+    const QString aLabel,
     QString aIssuer, int aDigits, quint64 aCounter, int aTimeShift,
     Algorithm aAlgorithm)
 {
-    QByteArray secret(fromBase32(aSecretBase32));
+    const QByteArray secret(HarbourBase32::fromBase32(aSecretBase32));
     if (!secret.isEmpty()) {
-        QString uri = FoilAuthToken((AuthType)aType, secret, aLabel, aIssuer, aDigits,
-            aCounter, aTimeShift, (DigestAlgorithm) aAlgorithm).toUri();
+        QString uri(FoilAuthToken((AuthType)aType, secret, aLabel, aIssuer, aDigits,
+            aCounter, aTimeShift, (DigestAlgorithm) aAlgorithm).toUri());
         HDEBUG(aType << aSecretBase32 << aLabel << aIssuer << aDigits <<
             aCounter << aTimeShift << aAlgorithm << "=>" << uri);
         return uri;
@@ -287,14 +325,16 @@ QString FoilAuth::toUri(Type aType, QString aSecretBase32, QString aLabel,
     return QString();
 }
 
-QVariantMap FoilAuth::parseUri(QString aUri)
+QVariantMap
+FoilAuth::parseUri(
+    const QString aUri)
 {
-    FoilAuthToken token;
-    token.parseUri(aUri);
-    return token.toVariantMap();
+    return FoilAuthToken::fromUri(aUri).toVariantMap();
 }
 
-QVariantList FoilAuth::parseMigrationUri(QString aUri)
+QVariantList
+FoilAuth::parseMigrationUri(
+    const QString aUri)
 {
     const QByteArray uri(aUri.trimmed().toUtf8());
 
@@ -342,7 +382,9 @@ QVariantList FoilAuth::parseMigrationUri(QString aUri)
     return result;
 }
 
-QString FoilAuth::migrationUri(QByteArray aData)
+QString
+FoilAuth::migrationUri(
+    const QByteArray aData)
 {
     QString uri;
     if (!aData.isEmpty()) {

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2021 Jolla Ltd.
- * Copyright (C) 2019-2021 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2022 Jolla Ltd.
+ * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -33,6 +33,8 @@
 
 #ifndef FOILAUTH_MODEL_H
 #define FOILAUTH_MODEL_H
+
+#include "FoilAuthToken.h"
 
 #include "foil_types.h"
 
@@ -81,7 +83,7 @@ public:
         FoilModelReady
     };
 
-    FoilAuthModel(QObject* aParent = NULL);
+    FoilAuthModel(QObject* aParent = Q_NULLPTR);
 
     static int typeRole();
     static int favoriteRole();
@@ -93,39 +95,38 @@ public:
     bool timerActive() const;
     FoilState foilState() const;
 
-    int indexOf(const FoilAuthToken* aToken) const;
-    bool contains(const FoilAuthToken* aToken) const;
-    bool containsSecret(QByteArray aToken) const;
-    void addToken(const FoilAuthToken* aToken, bool aFavorite);
+    int indexOf(FoilAuthToken) const;
+    bool contains(FoilAuthToken) const;
+    bool containsSecret(QByteArray) const;
+    void addToken(FoilAuthToken, bool aFavorite);
 
-    Q_INVOKABLE void generateKey(int aBits, QString aPassword);
-    Q_INVOKABLE bool checkPassword(QString aPassword);
-    Q_INVOKABLE bool changePassword(QString aOld, QString aNew);
+    Q_INVOKABLE void generateKey(int, QString);
+    Q_INVOKABLE bool checkPassword(const QString);
+    Q_INVOKABLE bool changePassword(const QString aOld, const QString aNew);
     Q_INVOKABLE void lock(bool aTimeout);
-    Q_INVOKABLE bool unlock(QString aPassword);
+    Q_INVOKABLE bool unlock(const QString aPassword);
     Q_INVOKABLE int millisecondsLeft();
 
-    Q_INVOKABLE bool addToken(int aType, QString aTokenBase32,
-        QString aLabel, QString aIssuer, int aDigits, int aCounter,
-        int aTimeShift, int aAlgorithm);
-    Q_INVOKABLE bool addTokenUri(QString aUri);
-    Q_INVOKABLE void deleteToken(QString aId);
-    Q_INVOKABLE void deleteTokens(QStringList aIds);
+    Q_INVOKABLE bool addToken(int aType, const QString aTokenBase32,
+        const QString aLabel, const QString aIssuer, int aDigits,
+        int aCounter, int aTimeShift, int aAlgorithm);
+    Q_INVOKABLE bool addTokenUri(const QString);
+    Q_INVOKABLE void deleteToken(const QString);
+    Q_INVOKABLE void deleteTokens(const QStringList);
     Q_INVOKABLE void deleteAll();
-    Q_INVOKABLE QStringList getIdsAt(const QList<int> aRows) const;
-    Q_INVOKABLE QStringList generateMigrationUris(const QList<int> aRows) const;
+    Q_INVOKABLE QStringList getIdsAt(const QList<int>) const;
+    Q_INVOKABLE QStringList generateMigrationUris(const QList<int>) const;
 
     // QAbstractItemModel
-    Qt::ItemFlags flags(const QModelIndex& aIndex) const Q_DECL_OVERRIDE;
+    Qt::ItemFlags flags(const QModelIndex&) const Q_DECL_OVERRIDE;
     QHash<int,QByteArray> roleNames() const Q_DECL_OVERRIDE;
     int rowCount(const QModelIndex& aParent = QModelIndex()) const Q_DECL_OVERRIDE;
-    QVariant data(const QModelIndex& aIndex, int aRole) const Q_DECL_OVERRIDE;
-    bool setData(const QModelIndex& aIndex, const QVariant& aValue, int aRole) Q_DECL_OVERRIDE;
-    bool moveRows(const QModelIndex &aSrcParent, int aSrcRow, int aCount,
-        const QModelIndex &aDestParent, int aDestRow) Q_DECL_OVERRIDE;
+    QVariant data(const QModelIndex&, int) const Q_DECL_OVERRIDE;
+    bool setData(const QModelIndex&, const QVariant&, int) Q_DECL_OVERRIDE;
+    bool moveRows(const QModelIndex&, int, int, const QModelIndex&, int) Q_DECL_OVERRIDE;
 
     // Callback for qmlRegisterSingletonType<FoilAuthModel>
-    static QObject* createSingleton(QQmlEngine* aEngine, QJSEngine* aScript);
+    static QObject* createSingleton(QQmlEngine*, QJSEngine*);
 
 Q_SIGNALS:
     void countChanged();
@@ -143,7 +144,7 @@ private:
 };
 
 // Inline wrappers
-inline bool FoilAuthModel::contains(const FoilAuthToken* aToken) const
+inline bool FoilAuthModel::contains(const FoilAuthToken aToken) const
     { return indexOf(aToken) >= 0; }
 
 #endif // FOILAUTH_MODEL_H
