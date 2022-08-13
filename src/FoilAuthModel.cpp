@@ -258,9 +258,7 @@ FoilAuthModel::ModelData::headerAlgorithm(
 {
     const char* value = foilmsg_get_value(aMsg, HEADER_ALGORITHM);
     if (value) {
-        if (!g_ascii_strcasecmp(value, FOILAUTH_ALGORITHM_MD5)) {
-            return DigestAlgorithmMD5;
-        } else if (!g_ascii_strcasecmp(value, FOILAUTH_ALGORITHM_SHA1)) {
+        if (!g_ascii_strcasecmp(value, FOILAUTH_ALGORITHM_SHA1)) {
             return DigestAlgorithmSHA1;
         } else if (!g_ascii_strcasecmp(value, FOILAUTH_ALGORITHM_SHA256)) {
             return DigestAlgorithmSHA256;
@@ -729,9 +727,6 @@ FoilAuthModel::EncryptTask::performTask()
             header[headers.count].name = HEADER_ALGORITHM;
             header[headers.count].value = FOILAUTH_ALGORITHM_DEFAULT;
             switch (iToken.algorithm()) {
-            case DigestAlgorithmMD5:
-                header[headers.count].value = FOILAUTH_ALGORITHM_MD5;
-                break;
             case DigestAlgorithmSHA1:
                 header[headers.count].value = FOILAUTH_ALGORITHM_SHA1;
                 break;

@@ -280,9 +280,6 @@ FoilAuth::HOTP(
     const guint64 msg = htobe64(aCounter);
     GType (*digest_type)(void) = foil_impl_digest_sha1_get_type;
     switch (aAlgorithm) {
-    case DigestAlgorithmMD5:
-        digest_type = foil_impl_digest_md5_get_type;
-        break;
     case DigestAlgorithmSHA1:
         digest_type = foil_impl_digest_sha1_get_type;
         break;

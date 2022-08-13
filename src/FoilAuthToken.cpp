@@ -69,7 +69,6 @@ const QString FoilAuthToken::KEY_ALGORITHM(FOILAUTH_KEY_ALGORITHM);
 const QString FoilAuthToken::TYPE_TOTP(FOILAUTH_TYPE_TOTP);
 const QString FoilAuthToken::TYPE_HOTP(FOILAUTH_TYPE_HOTP);
 
-const QString FoilAuthToken::ALGORITHM_MD5(FOILAUTH_ALGORITHM_MD5);
 const QString FoilAuthToken::ALGORITHM_SHA1(FOILAUTH_ALGORITHM_SHA1);
 const QString FoilAuthToken::ALGORITHM_SHA256(FOILAUTH_ALGORITHM_SHA256);
 const QString FoilAuthToken::ALGORITHM_SHA512(FOILAUTH_ALGORITHM_SHA512);
@@ -187,7 +186,7 @@ public:
         bool isValid() const {
             return !secret.isEmpty() &&
                 (algorithm == ALGORITHM_SHA1 || algorithm == ALGORITHM_SHA256 ||
-                 algorithm == ALGORITHM_SHA512 || algorithm == ALGORITHM_MD5) &&
+                 algorithm == ALGORITHM_SHA512) &&
                 (digits == DIGIT_COUNT_SIX || digits == DIGIT_COUNT_EIGHT) &&
                 (type == OTP_TYPE_TOTP || type == OTP_TYPE_HOTP);
         }
@@ -204,7 +203,6 @@ public:
         }
         static Algorithm encodeAlgorithm(DigestAlgorithm aAlgorithm) {
             switch (aAlgorithm) {
-            case DigestAlgorithmMD5: return ALGORITHM_MD5;
             case DigestAlgorithmSHA1: return ALGORITHM_SHA1;
             case DigestAlgorithmSHA256: return ALGORITHM_SHA256;
             case DigestAlgorithmSHA512:  return ALGORITHM_SHA512;
@@ -213,10 +211,10 @@ public:
         }
         DigestAlgorithm digestAlgorithm() const {
             switch (algorithm) {
-            case ALGORITHM_MD5: return DigestAlgorithmMD5;
             case ALGORITHM_SHA1: return DigestAlgorithmSHA1;
             case ALGORITHM_SHA256: return DigestAlgorithmSHA256;
             case ALGORITHM_SHA512:  return DigestAlgorithmSHA512;
+            case ALGORITHM_MD5: // fallthrough
             case ALGORITHM_UNSPECIFIED: break;
             }
             return DEFAULT_ALGORITHM;
@@ -586,7 +584,6 @@ FoilAuthToken::validAlgorithm(
     DigestAlgorithm aAlgorithm)
 {
     switch (aAlgorithm) {
-    case DigestAlgorithmMD5:
     case DigestAlgorithmSHA1:
     case DigestAlgorithmSHA256:
     case DigestAlgorithmSHA512:
@@ -680,9 +677,7 @@ FoilAuthToken::fromUri(
                 }
                 if (!algorithm.isEmpty()) {
                     const QString algValue(QString::fromLatin1(algorithm).toUpper());
-                    if (algValue == ALGORITHM_MD5) {
-                        alg = DigestAlgorithmMD5;
-                    } else if (algValue == ALGORITHM_SHA1) {
+                    if (algValue == ALGORITHM_SHA1) {
                         alg = DigestAlgorithmSHA1;
                     } else if (algValue == ALGORITHM_SHA256) {
                         alg = DigestAlgorithmSHA256;
@@ -717,9 +712,6 @@ FoilAuthToken::toUri() const
         buf.append("&" FOILAUTH_KEY_DIGITS "=");
         buf.append(QString::number(iPrivate->iDigits));
         switch (iPrivate->iAlgorithm) {
-        case DigestAlgorithmMD5:
-            buf.append("&" FOILAUTH_KEY_ALGORITHM "=" FOILAUTH_ALGORITHM_MD5);
-            break;
         case DigestAlgorithmSHA256:
             buf.append("&" FOILAUTH_KEY_ALGORITHM "=" FOILAUTH_ALGORITHM_SHA256);
             break;

@@ -50,7 +50,6 @@ class FoilAuthToken :
     FoilAuthToken(Private*);
 
 public:
-    static const QString ALGORITHM_MD5;
     static const QString ALGORITHM_SHA1;
     static const QString ALGORITHM_SHA256;
     static const QString ALGORITHM_SHA512;

@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2021 Jolla Ltd.
- * Copyright (C) 2021 Slava Monich <slava@monich.com>
+ * Copyright (C) 2021-2022 Jolla Ltd.
+ * Copyright (C) 2021-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -38,7 +38,6 @@
 #define FOILAUTH_TYPE_HOTP          "hotp"
 #define FOILAUTH_TYPE_DEFAULT       FOILAUTH_TYPE_TOTP
 
-#define FOILAUTH_ALGORITHM_MD5      "MD5"
 #define FOILAUTH_ALGORITHM_SHA1     "SHA1"
 #define FOILAUTH_ALGORITHM_SHA256   "SHA256"
 #define FOILAUTH_ALGORITHM_SHA512   "SHA512"
@@ -52,7 +51,6 @@ public:
     };
 
     enum DigestAlgorithm {
-        DigestAlgorithmMD5,
         DigestAlgorithmSHA1,
         DigestAlgorithmSHA256,
         DigestAlgorithmSHA512

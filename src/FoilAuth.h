@@ -63,7 +63,6 @@ public:
 
     // Export these to QML
     enum Algorithm {
-        AlgorithmMD5 = DigestAlgorithmMD5,
         AlgorithmSHA1 = DigestAlgorithmSHA1,
         AlgorithmSHA256 = DigestAlgorithmSHA256,
         AlgorithmSHA512 = DigestAlgorithmSHA512,

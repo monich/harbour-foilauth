@@ -189,10 +189,14 @@ test_hotp(
     void)
 {
     const QByteArray secret(HarbourBase32::fromBase32("MHGU3YYJJD6W44KUVED4FODUNN4JHJNQ"));
-    g_assert_cmpuint(FoilAuth::HOTP(secret, 0, 1000000
-        /* DigestAlgorithmSHA1 */), == ,207601);
-    g_assert_cmpuint(FoilAuth::HOTP(secret, 1, 1000000
-        /* DigestAlgorithmSHA1 */), == ,444239);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 0, 1000000,
+        (FoilAuth::DigestAlgorithm)-1 /* DigestAlgorithmSHA1 */), == ,207601);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1, 1000000,
+        (FoilAuth::DigestAlgorithm)-1 /* DigestAlgorithmSHA1 */), == ,444239);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 0, 1000000,
+        FoilAuth::DigestAlgorithmSHA1), == ,207601);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1, 1000000,
+        FoilAuth::DigestAlgorithmSHA1), == ,444239);
     g_assert_cmpuint(FoilAuth::HOTP(secret, 0, 1000000,
         FoilAuth::DigestAlgorithmSHA256), == , 367047);
     g_assert_cmpuint(FoilAuth::HOTP(secret, 1, 1000000,

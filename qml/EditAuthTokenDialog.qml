@@ -169,7 +169,6 @@ Dialog {
                     menu: ContextMenu {
                         x: 0
                         width: algorithmComboBox.width
-                        MenuItem { text: "MD5" }
                         //: Menu item for the default digest algorithm
                         //% "%1 (default)"
                         MenuItem { text: qsTrId("foilauth-token-digest_algorithm-default").arg("SHA1") }
