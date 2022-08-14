@@ -20,10 +20,9 @@ Dialog {
     property alias secret: secretField.text
     property alias digits: digitsField.text
     property alias counter: counterField.text
-    property alias timeShift: timeShiftField.text
+    property alias timeshift: timeshiftField.text
 
     signal tokenAccepted(var dialog)
-    signal replacedWith(var page)
 
     onAccepted: tokenAccepted(thisDialog)
 
@@ -31,7 +30,7 @@ Dialog {
         id: generator
 
         ecLevel: FoilAuthSettings.qrCodeEcLevel
-        text: FoilAuth.toUri(type, secret, label, issuer, digits, counter, timeShift, algorithm)
+        text: FoilAuth.toUri(type, secret, label, issuer, digits, counter, timeshift, algorithm)
     }
 
     Item {
@@ -62,6 +61,9 @@ Dialog {
 
             DialogHeader {
                 id: header
+                //: Dialog button
+                //% "Save"
+                acceptText: qsTrId("foilauth-edit_token-save")
             }
 
             TextField {
@@ -120,7 +122,7 @@ Dialog {
                     enabled: !qrCodeOnly
 
                     EnterKey.iconSource: "image://theme/icon-m-enter-next"
-                    EnterKey.onClicked: timeShiftField.focus = true
+                    EnterKey.onClicked: timeshiftField.focus = true
                 }
 
                 TextField {
@@ -141,7 +143,7 @@ Dialog {
                 }
 
                 TextField {
-                    id: timeShiftField
+                    id: timeshiftField
 
                     width: parent.columnWidth
                     //: Text field label (number of password digits)

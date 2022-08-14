@@ -155,31 +155,42 @@ SilicaListView {
             //% "Add token"
             text: qsTrId("foilauth-menu-new_auth_token")
             onClicked: {
-                pageStack.push("ScanPage.qml", {
+                var page = pageStack.push("ScanPage.qml", {
                     "allowedOrientations": allowedOrientations
-                }).done.connect(function(token) {
-                    var props = {
-                        //: Dialog button
-                        //% "Save"
-                        acceptText: qsTrId("foilauth-edit_token-save"),
-                        //: Dialog title
+                })
+
+                page.skip.connect(function() {
+                    pageStack.replace(editAuthTokenDialogComponent, {
                         //% "Add token"
-                        dialogTitle: qsTrId("foilauth-add_token-title")
-                    }
-                    if (token.valid) {
-                        props["type"] = token.type
-                        props["label"] = token.label
-                        props["issuer"] = token.issuer
-                        props["secret"] = token.secret
-                        props["digits"] = token.digits
-                        props["counter"] = token.counter
-                        props["timeShift"] = token.timeshift
-                        props["algorithm"] = token.algorithm
-                    }
-                    pageStack.replace(editAuthTokenDialogComponent, props).tokenAccepted.connect(function(dialog) {
+                        "dialogTitle": qsTrId("foilauth-add_token-title")
+                    }).tokenAccepted.connect(function(dialog) {
                         FoilAuthModel.addToken(dialog.type, dialog.secret, dialog.label, dialog.issuer,
                             dialog.digits, dialog.counter, dialog.timeshift, dialog.algorithm)
                     })
+                })
+                page.tokenDetected.connect(function(token) {
+                    pageStack.replace(editAuthTokenDialogComponent, {
+                        //: Dialog title
+                        //% "Add token"
+                        "dialogTitle": qsTrId("foilauth-add_token-title"),
+                        "type": token.type,
+                        "label": token.label,
+                        "issuer": token.issuer,
+                        "secret": token.secret,
+                        "digits": token.digits,
+                        "counter": token.counter,
+                        "timeshift": token.timeshift,
+                        "algorithm": token.algorithm
+                    }).tokenAccepted.connect(function(dialog) {
+                        FoilAuthModel.addToken(dialog.type, dialog.secret, dialog.label, dialog.issuer,
+                            dialog.digits, dialog.counter, dialog.timeshift, dialog.algorithm)
+                    })
+                })
+                page.tokensDetected.connect(function(model) {
+                    pageStack.replace(Qt.resolvedUrl("SelectTokensPage.qml"), {
+                        "allowedOrientations": thisPage.allowedOrientations,
+                        "tokens": model.getTokens()
+                    }).tokensAccepted.connect(FoilAuthModel.addTokens)
                 })
             }
         }
@@ -240,7 +251,7 @@ SilicaListView {
                         pageStack.push(Qt.resolvedUrl("QRCodePage.qml"), {
                             allowedOrientations: mainPage.allowedOrientations,
                             uri: FoilAuth.toUri(model.type, model.secret, model.label, model.issuer,
-                                model.digits, model.counter, model.timeShift, model.algorithm)
+                                model.digits, model.counter, model.timeshift, model.algorithm)
                         })
                     }
                 }
@@ -251,9 +262,6 @@ SilicaListView {
                     onClicked: {
                         var item  = tokenListDelegate
                         pageStack.push(editAuthTokenDialogComponent, {
-                            //: Dialog button
-                            //% "Save"
-                            acceptText: qsTrId("foilauth-edit_token-save"),
                             //: Dialog title
                             //% "Edit token"
                             dialogTitle: qsTrId("foilauth-edit_token-title"),
@@ -264,7 +272,7 @@ SilicaListView {
                             algorithm: model.algorithm,
                             digits: model.digits,
                             counter: model.counter,
-                            timeShift: model.timeShift
+                            timeshift: model.timeshift
                         }).tokenAccepted.connect(function(dialog) {
                             item.updateToken(dialog)
                         })
@@ -391,7 +399,7 @@ SilicaListView {
             model.algorithm = token.algorithm
             model.digits = token.digits
             model.counter = token.counter
-            model.timeShift = token.timeShift
+            model.timeshift = token.timeshift
         }
 
         property real pressX

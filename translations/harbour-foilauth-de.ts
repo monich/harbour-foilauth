@@ -174,7 +174,7 @@
     <message id="foilauth-scan-title">
         <source>Scan QR code</source>
         <extracomment>Page title (suggestion to scan QR code)</extracomment>
-        <translation type="unfinished">Scannen Sie einen QR Code</translation>
+        <translation type="unfinished">Scannen einen QR Code</translation>
     </message>
     <message id="foilauth-scan-zoom_label">
         <source>Zoom</source>
@@ -382,15 +382,10 @@
         <extracomment>Dialog button</extracomment>
         <translation>Speichern</translation>
     </message>
-    <message id="foilauth-select_token-title">
-        <source>This QR code contains multiple tokens. Please select one:</source>
-        <extracomment>Wrappable page title</extracomment>
-        <translation type="unfinished">Dieser QR-Code enthält mehrere Token. Bitte wählen eine aus:</translation>
-    </message>
     <message id="foilauth-select_page-header">
         <source>Select tokens</source>
         <extracomment>Page title</extracomment>
-        <translation type="unfinished">Wählen Sie Token</translation>
+        <translation type="unfinished">Wählen die Token</translation>
     </message>
     <message id="foilauth-select_page-hint_delete_selected">
         <source>Delete selected tokens</source>
@@ -400,12 +395,17 @@
     <message id="foilauth-select_page-hint_export_selected">
         <source>Export selected tokens via QR code</source>
         <extracomment>Hint text</extracomment>
-        <translation type="unfinished">Ausgewählte Token per QR-Code exportieren</translation>
+        <translation type="unfinished">Ausgewählte die Token per QR-Code exportieren</translation>
     </message>
     <message id="foilauth-export_page-title">
         <source>Code %1 of %2</source>
         <extracomment>Page header</extracomment>
         <translation type="unfinished">Code %1/%2</translation>
+    </message>
+    <message id="foilauth-select_tokens-title-add_tokens">
+        <source>Select tokens to add</source>
+        <extracomment>Dialog title</extracomment>
+        <translation type="unfinished">Wählen die hinzuzufügenden Token aus</translation>
     </message>
     <message id="foilauth-settings_page-header-version">
         <source>Version %1</source>
@@ -430,7 +430,7 @@
     <message id="jail-terminal_hint">
         <source>If you have developer mode enabled, you may also try running &lt;b&gt;%1&lt;/b&gt; from the terminal. Sorry for the inconvenience!</source>
         <extracomment>Hint suggesting to run the app from the terminal</extracomment>
-        <translation type="unfinished">Wenn Sie den Entwicklermodus aktiviert haben, können Sie auch versuchen, &lt;b&gt;%1&lt;/b&gt; vom Terminal aus auszuführen. Entschuldigen Sie die Unannehmlichkeiten!</translation>
+        <translation type="unfinished">Wenn den Entwicklermodus aktiviert haben, können auch versuchen, &lt;b&gt;%1&lt;/b&gt; vom Terminal aus auszuführen. Entschuldigen die Unannehmlichkeiten!</translation>
     </message>
 </context>
 </TS>

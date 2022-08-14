@@ -354,11 +354,6 @@
         <extracomment>Dialog button</extracomment>
         <translation>Mentés</translation>
     </message>
-    <message id="foilauth-select_token-title">
-        <source>This QR code contains multiple tokens. Please select one:</source>
-        <extracomment>Wrappable page title</extracomment>
-        <translation type="unfinished">Ez a QR-kód több tokent tartalmaz. Kérlek válassz egyet:</translation>
-    </message>
     <message id="foilauth-menu-select_tokens">
         <source>Select</source>
         <extracomment>Pulley menu item, opens selection page</extracomment>
@@ -403,6 +398,11 @@
         <source>Code %1 of %2</source>
         <extracomment>Page header</extracomment>
         <translation type="unfinished">Kód %1/%2</translation>
+    </message>
+    <message id="foilauth-select_tokens-title-add_tokens">
+        <source>Select tokens to add</source>
+        <extracomment>Dialog title</extracomment>
+        <translation type="unfinished">Válassza ki a hozzáadni kívánt tokeneket</translation>
     </message>
     <message id="foilauth-settings_page-header-version">
         <source>Version %1</source>

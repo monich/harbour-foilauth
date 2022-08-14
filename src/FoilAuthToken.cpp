@@ -119,7 +119,8 @@ const QString FoilAuthToken::ALGORITHM_SHA512(FOILAUTH_ALGORITHM_SHA512);
 // int32 batch_id = 5;
 // }
 
-class FoilAuthToken::Private
+class FoilAuthToken::Private :
+    public FoilAuthTypes
 {
 public:
     Private(AuthType, QByteArray, QString, QString, QString, int, quint64, int, DigestAlgorithm);
@@ -251,7 +252,7 @@ public:
     QString iIssuer;
     quint64 iCounter;
     int iDigits;
-    int iTimeShift; // Seconds
+    int iTimeshift; // Seconds
 };
 
 FoilAuthToken::Private::Private(
@@ -273,7 +274,7 @@ FoilAuthToken::Private::Private(
     iIssuer(aIssuer),
     iCounter(aCounter),
     iDigits(aDigits),
-    iTimeShift(aTimeShift)
+    iTimeshift(aTimeShift)
 {
 }
 
@@ -417,14 +418,14 @@ FoilAuthToken::FoilAuthToken(
 }
 
 FoilAuthToken::FoilAuthToken(
-    AuthType aType,
+    FoilAuthTypes::AuthType aType,
     QByteArray aSecret,
     QString aLabel,
     QString aIssuer,
     int aDigits,
     quint64 aCounter,
     int aTimeShift,
-    DigestAlgorithm aAlgorithm) :
+    FoilAuthTypes::DigestAlgorithm aAlgorithm) :
     iPrivate(new Private(validType(aType),
         aSecret, HarbourBase32::toBase32(aSecret), aLabel, aIssuer,
         validDigits(aDigits), aCounter, aTimeShift, validAlgorithm(aAlgorithm)))
@@ -474,7 +475,7 @@ FoilAuthToken::equals(
             iPrivate->iAlgorithm == other->iAlgorithm &&
             iPrivate->iDigits == other->iDigits &&
             iPrivate->iCounter == other->iCounter &&
-            iPrivate->iTimeShift == other->iTimeShift &&
+            iPrivate->iTimeshift == other->iTimeshift &&
             iPrivate->iSecret == other->iSecret &&
             iPrivate->iLabel == other->iLabel &&
             iPrivate->iIssuer == other->iIssuer;
@@ -492,37 +493,37 @@ FoilAuthToken::isValid() const
 FoilAuthTypes::AuthType
 FoilAuthToken::type() const
 {
-    return iPrivate ? iPrivate->iType : DEFAULT_AUTH_TYPE;
+    return iPrivate ? iPrivate->iType : FoilAuthTypes::DEFAULT_AUTH_TYPE;
 }
 
 FoilAuthTypes::DigestAlgorithm
 FoilAuthToken::algorithm() const
 {
-    return iPrivate ? iPrivate->iAlgorithm : DEFAULT_ALGORITHM;
+    return iPrivate ? iPrivate->iAlgorithm : FoilAuthTypes::DEFAULT_ALGORITHM;
 }
 
-const QString
+QString
 FoilAuthToken::label() const
 {
     return iPrivate ? iPrivate->iLabel : QString();
 }
 
-const QString
+QString
 FoilAuthToken::issuer() const
 {
     return iPrivate ? iPrivate->iIssuer: QString();
+}
+
+QString
+FoilAuthToken::secretBase32() const
+{
+    return iPrivate ? iPrivate->iSecretBase32 : QString();
 }
 
 const QByteArray
 FoilAuthToken::secret() const
 {
     return iPrivate ? iPrivate->iSecret : QByteArray();
-}
-
-const QString
-FoilAuthToken::secretBase32() const
-{
-    return iPrivate ? iPrivate->iSecretBase32 : QString();
 }
 
 quint64
@@ -538,9 +539,9 @@ FoilAuthToken::digits() const
 }
 
 int
-FoilAuthToken::timeShift() const
+FoilAuthToken::timeshift() const
 {
-    return iPrivate ? iPrivate->iTimeShift : 0;
+    return iPrivate ? iPrivate->iTimeshift : 0;
 }
 
 uint
@@ -564,32 +565,32 @@ FoilAuthToken::validDigits(
     int aDigits)
 {
     return (aDigits >= MIN_DIGITS && aDigits <= MAX_DIGITS) ?
-        aDigits : DEFAULT_DIGITS;
+        aDigits : FoilAuthTypes::DEFAULT_DIGITS;
 }
 
 FoilAuthTypes::AuthType
 FoilAuthToken::validType(
-    AuthType aType)
+    int aType)
 {
     switch (aType) {
-    case AuthTypeTOTP:
-    case AuthTypeHOTP:
-        return aType;
+    case FoilAuthTypes::AuthTypeTOTP:
+    case FoilAuthTypes::AuthTypeHOTP:
+        return (FoilAuthTypes::AuthType) aType;
     }
-    return DEFAULT_AUTH_TYPE;
+    return FoilAuthTypes::DEFAULT_AUTH_TYPE;
 }
 
 FoilAuthTypes::DigestAlgorithm
 FoilAuthToken::validAlgorithm(
-    DigestAlgorithm aAlgorithm)
+    int aAlgorithm)
 {
     switch (aAlgorithm) {
-    case DigestAlgorithmSHA1:
-    case DigestAlgorithmSHA256:
-    case DigestAlgorithmSHA512:
-        return aAlgorithm;
+    case FoilAuthTypes::DigestAlgorithmSHA1:
+    case FoilAuthTypes::DigestAlgorithmSHA256:
+    case FoilAuthTypes::DigestAlgorithmSHA512:
+        return (FoilAuthTypes::DigestAlgorithm) aAlgorithm;
     }
-    return DEFAULT_ALGORITHM;
+    return FoilAuthTypes::DEFAULT_ALGORITHM;
 }
 
 FoilAuthToken
@@ -604,12 +605,12 @@ FoilAuthToken::fromUri(
 
     // Check scheme + type prefix
     GUtilData prefixBytes;
-    AuthType type = AuthTypeTOTP;
+    FoilAuthTypes::AuthType type = FoilAuthTypes::AuthTypeTOTP;
     gutil_data_from_string(&prefixBytes, FOILAUTH_SCHEME "://"
         FOILAUTH_TYPE_TOTP "/");
     bool prefixOK = gutil_range_skip_prefix(&pos, &prefixBytes);
     if (!prefixOK) {
-        type = AuthTypeHOTP;
+        type = FoilAuthTypes::AuthTypeHOTP;
         gutil_data_from_string(&prefixBytes, FOILAUTH_SCHEME "://"
             FOILAUTH_TYPE_HOTP "/");
         prefixOK = gutil_range_skip_prefix(&pos, &prefixBytes);
@@ -656,10 +657,10 @@ FoilAuthToken::fromUri(
             const QByteArray bytes(HarbourBase32::fromBase32(QUrl::fromPercentEncoding(secret)));
 
             if (!bytes.isEmpty()) {
-                DigestAlgorithm alg = DEFAULT_ALGORITHM;
-                int dig = DEFAULT_DIGITS;
-                int imf = DEFAULT_COUNTER;
-                int timeShift = DEFAULT_TIMESHIFT;
+                FoilAuthTypes::DigestAlgorithm alg = FoilAuthTypes::DEFAULT_ALGORITHM;
+                int dig = FoilAuthTypes::DEFAULT_DIGITS;
+                int imf = FoilAuthTypes::DEFAULT_COUNTER;
+                int timeshift = FoilAuthTypes::DEFAULT_TIMESHIFT;
 
                 if (!digits.isEmpty()) {
                     bool ok;
@@ -678,17 +679,17 @@ FoilAuthToken::fromUri(
                 if (!algorithm.isEmpty()) {
                     const QString algValue(QString::fromLatin1(algorithm).toUpper());
                     if (algValue == ALGORITHM_SHA1) {
-                        alg = DigestAlgorithmSHA1;
+                        alg = FoilAuthTypes::DigestAlgorithmSHA1;
                     } else if (algValue == ALGORITHM_SHA256) {
-                        alg = DigestAlgorithmSHA256;
+                        alg = FoilAuthTypes::DigestAlgorithmSHA256;
                     } else if (algValue == ALGORITHM_SHA512) {
-                        alg = DigestAlgorithmSHA512;
+                        alg = FoilAuthTypes::DigestAlgorithmSHA512;
                     }
                 }
                 return FoilAuthToken(type, bytes,
                     QUrl::fromPercentEncoding(label),
                     QUrl::fromPercentEncoding(issuer),
-                    dig, imf, timeShift, alg);
+                    dig, imf, timeshift, alg);
             }
         }
     }
@@ -700,7 +701,7 @@ FoilAuthToken::toUri() const
 {
     if (isValid()) {
         QString buf(FOILAUTH_SCHEME "://");
-        buf.append(iPrivate->iType == AuthTypeHOTP ? TYPE_HOTP : TYPE_TOTP);
+        buf.append(iPrivate->iType == FoilAuthTypes::AuthTypeHOTP ? TYPE_HOTP : TYPE_TOTP);
         buf.append(QChar('/'));
         buf.append(QUrl::toPercentEncoding(iPrivate->iLabel, "@"));
         buf.append("?" FOILAUTH_KEY_SECRET "=");
@@ -712,23 +713,23 @@ FoilAuthToken::toUri() const
         buf.append("&" FOILAUTH_KEY_DIGITS "=");
         buf.append(QString::number(iPrivate->iDigits));
         switch (iPrivate->iAlgorithm) {
-        case DigestAlgorithmSHA256:
+        case FoilAuthTypes::DigestAlgorithmSHA256:
             buf.append("&" FOILAUTH_KEY_ALGORITHM "=" FOILAUTH_ALGORITHM_SHA256);
             break;
-        case DigestAlgorithmSHA512:
+        case FoilAuthTypes::DigestAlgorithmSHA512:
             buf.append("&" FOILAUTH_KEY_ALGORITHM "=" FOILAUTH_ALGORITHM_SHA512);
             break;
-        case DEFAULT_ALGORITHM: // DigestAlgorithmSHA1
+        case FoilAuthTypes::DEFAULT_ALGORITHM: // DigestAlgorithmSHA1
             break;
         }
         switch (iPrivate->iType) {
-        case AuthTypeTOTP:
-            if (iPrivate->iTimeShift != DEFAULT_TIMESHIFT) {
+        case FoilAuthTypes::AuthTypeTOTP:
+            if (iPrivate->iTimeshift != FoilAuthTypes::DEFAULT_TIMESHIFT) {
                 buf.append("&" FOILAUTH_KEY_TIMESHIFT "=");
-                buf.append(QString::number(iPrivate->iTimeShift));
+                buf.append(QString::number(iPrivate->iTimeshift));
             }
             break;
-        case AuthTypeHOTP:
+        case FoilAuthTypes::AuthTypeHOTP:
             buf.append("&" FOILAUTH_KEY_COUNTER "=");
             buf.append(QString::number(iPrivate->iCounter));
             break;
@@ -752,7 +753,7 @@ FoilAuthToken::toVariantMap() const
         out.insert(KEY_ISSUER, iPrivate->iIssuer);
         out.insert(KEY_DIGITS, iPrivate->iDigits);
         out.insert(KEY_COUNTER, iPrivate->iCounter);
-        out.insert(KEY_TIMESHIFT, iPrivate->iTimeShift);
+        out.insert(KEY_TIMESHIFT, iPrivate->iTimeshift);
         out.insert(KEY_ALGORITHM, (int) iPrivate->iAlgorithm);
     }
     return out;
@@ -772,7 +773,8 @@ FoilAuthToken::fromProtoBuf(
     while (Private::parseOtpParameters(&pos, &p)) {
         if (p.isValid()) {
             result.append(FoilAuthToken(p.authType(), p.secret, p.name, p.issuer,
-                p.numDigits(), p.counter, DEFAULT_TIMESHIFT, p.digestAlgorithm()));
+                p.numDigits(), p.counter, FoilAuthTypes::DEFAULT_TIMESHIFT,
+                p.digestAlgorithm()));
         }
         p.clear();
     }
@@ -806,7 +808,7 @@ FoilAuthToken::toProtoBuf() const
         HarbourProtoBuf::appendVarIntKeyValue(&payload,
             Private::TYPE_TAG,
             Private::OtpParameters::encodeOtpType(iPrivate->iType));
-        if (iPrivate->iType == AuthTypeHOTP) {
+        if (iPrivate->iType == FoilAuthTypes::AuthTypeHOTP) {
             HarbourProtoBuf::appendVarIntKeyValue(&payload,
                 Private::COUNTER_TAG,
                 iPrivate->iCounter);
@@ -900,17 +902,17 @@ FoilAuthToken::toProtoBufs(
 
 FoilAuthToken
 FoilAuthToken::withType(
-    AuthType aType) const
+    FoilAuthTypes::AuthType aType) const
 {
 
     if (iPrivate) {
-        const AuthType type = validType(aType);
+        const FoilAuthTypes::AuthType type = validType(aType);
 
         if (iPrivate->iType != type) {
             return FoilAuthToken(new Private(type,
                 iPrivate->iSecret, iPrivate->iSecretBase32, iPrivate->iLabel,
                 iPrivate->iIssuer, iPrivate->iDigits, iPrivate->iCounter,
-                iPrivate->iTimeShift, iPrivate->iAlgorithm));
+                iPrivate->iTimeshift, iPrivate->iAlgorithm));
         }
     }
     return *this;
@@ -918,16 +920,16 @@ FoilAuthToken::withType(
 
 FoilAuthToken
 FoilAuthToken::withAlgorithm(
-    DigestAlgorithm aAlgorithm) const
+    FoilAuthTypes::DigestAlgorithm aAlgorithm) const
 {
     if (iPrivate) {
-        const DigestAlgorithm alg = validAlgorithm(aAlgorithm);
+        const FoilAuthTypes::DigestAlgorithm alg = validAlgorithm(aAlgorithm);
 
         if (iPrivate->iAlgorithm != alg) {
             return FoilAuthToken(new Private(iPrivate->iType,
                 iPrivate->iSecret, iPrivate->iSecretBase32, iPrivate->iLabel,
                 iPrivate->iIssuer, iPrivate->iDigits, iPrivate->iCounter,
-                iPrivate->iTimeShift, alg));
+                iPrivate->iTimeshift, alg));
         }
     }
     return *this;
@@ -941,7 +943,7 @@ FoilAuthToken::withSecret(
         return FoilAuthToken(new Private(iPrivate->iType,
             aSecret, HarbourBase32::toBase32(aSecret), iPrivate->iLabel,
             iPrivate->iIssuer, iPrivate->iDigits, iPrivate->iCounter,
-            iPrivate->iTimeShift, iPrivate->iAlgorithm));
+            iPrivate->iTimeshift, iPrivate->iAlgorithm));
     }
     return *this;
 }
@@ -954,7 +956,7 @@ FoilAuthToken::withLabel(
         return FoilAuthToken(new Private(iPrivate->iType,
             iPrivate->iSecret, iPrivate->iSecretBase32, aLabel,
             iPrivate->iIssuer, iPrivate->iDigits, iPrivate->iCounter,
-            iPrivate->iTimeShift, iPrivate->iAlgorithm));
+            iPrivate->iTimeshift, iPrivate->iAlgorithm));
     }
     return *this;
 }
@@ -967,7 +969,7 @@ FoilAuthToken::withIssuer(
         return FoilAuthToken(new Private(iPrivate->iType,
             iPrivate->iSecret, iPrivate->iSecretBase32, iPrivate->iLabel,
             aIssuer, iPrivate->iDigits, iPrivate->iCounter,
-            iPrivate->iTimeShift, iPrivate->iAlgorithm));
+            iPrivate->iTimeshift, iPrivate->iAlgorithm));
     }
     return *this;
 }
@@ -981,7 +983,7 @@ FoilAuthToken::withDigits(
         return FoilAuthToken(new Private(iPrivate->iType,
             iPrivate->iSecret, iPrivate->iSecretBase32, iPrivate->iLabel,
             iPrivate->iIssuer, aDigits, iPrivate->iCounter,
-            iPrivate->iTimeShift, iPrivate->iAlgorithm));
+            iPrivate->iTimeshift, iPrivate->iAlgorithm));
     }
     return *this;
 }
@@ -994,25 +996,24 @@ FoilAuthToken::withCounter(
         return FoilAuthToken(new Private(iPrivate->iType,
             iPrivate->iSecret, iPrivate->iSecretBase32, iPrivate->iLabel,
             iPrivate->iIssuer, iPrivate->iDigits, aCounter,
-            iPrivate->iTimeShift, iPrivate->iAlgorithm));
+            iPrivate->iTimeshift, iPrivate->iAlgorithm));
     }
     return *this;
 }
 
 FoilAuthToken
-FoilAuthToken::withTimeShift(
-    int aTimeShift) const
+FoilAuthToken::withTimeshift(
+    int aTimeshift) const
 {
-    if (iPrivate && iPrivate->iTimeShift != aTimeShift) {
+    if (iPrivate && iPrivate->iTimeshift != aTimeshift) {
         return FoilAuthToken(new Private(iPrivate->iType,
             iPrivate->iSecret, iPrivate->iSecretBase32, iPrivate->iLabel,
             iPrivate->iIssuer, iPrivate->iDigits, iPrivate->iCounter,
-            aTimeShift, iPrivate->iAlgorithm));
+            aTimeshift, iPrivate->iAlgorithm));
     }
     return *this;
 }
 
-#if HARBOUR_DEBUG
 QDebug
 operator<<(
     QDebug aDebug,
@@ -1023,10 +1024,10 @@ operator<<(
         aDebug.nospace() << "FoilAuthToken(" << aToken.label() <<
             ", " << aToken.issuer() << ", " <<aToken.type() <<
             ", " << aToken.algorithm() << ", " <<  aToken.secretBase32() <<
-            ", " << aToken.digits() << ", " << aToken.counter() << ")";
+            ", " << aToken.digits() << ", " << aToken.counter() <<
+            ", " << aToken.timeshift() << ")";
     } else {
         aDebug << "FoilAuthToken()";
     }
     return aDebug;
 }
-#endif // HARBOUR_DEBUG

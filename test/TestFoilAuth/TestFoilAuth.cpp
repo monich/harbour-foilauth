@@ -285,23 +285,19 @@ test_parseUri(
     void)
 {
     // Invalid token
-    QVariantMap map = FoilAuth::parseUri(QString());
-    g_assert_cmpint(map.count(), == ,1);
-    g_assert(map.contains(FoilAuthToken::KEY_VALID));
-    g_assert(!map.value(FoilAuthToken::KEY_VALID).toBool());
+    g_assert(!FoilAuth::parseUri(QString()).isValid());
 
     // Valid token
-    map = FoilAuth::parseUri("otpauth://totp/Test?secret=vhiiktvjc6meoftj&issuer=Issuer&digits=5");
-    g_assert(map.count() == 9);
-    g_assert(map.value(FoilAuthToken::KEY_VALID).toBool());
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_TYPE).toInt(), == ,FoilAuthToken::AuthTypeTOTP);
-    g_assert(map.value(FoilAuthToken::KEY_LABEL).toString() == QString("Test"));
-    g_assert(map.value(FoilAuthToken::KEY_SECRET).toString() == QString("vhiiktvjc6meoftj"));
-    g_assert(map.value(FoilAuthToken::KEY_ISSUER).toString() == QString("Issuer"));
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_DIGITS).toInt(), == ,5);
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_COUNTER).toInt(), == ,FoilAuthToken::DEFAULT_COUNTER);
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_TIMESHIFT).toInt(), == ,FoilAuthToken::DEFAULT_TIMESHIFT);
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_ALGORITHM).toInt(), == ,FoilAuthToken::DEFAULT_ALGORITHM);
+    FoilAuthToken token = FoilAuth::parseUri("otpauth://totp/Test?secret=vhiiktvjc6meoftj&issuer=Issuer&digits=5");
+    g_assert(token.isValid());
+    g_assert_cmpint(token.type(), == ,FoilAuthTypes::AuthTypeTOTP);
+    g_assert(token.secretBase32() == QString("vhiiktvjc6meoftj"));
+    g_assert(token.label() == QString("Test"));
+    g_assert(token.issuer() == QString("Issuer"));
+    g_assert_cmpint(token.digits(), == ,5);
+    g_assert_cmpint(token.counter(), == ,FoilAuthTypes::DEFAULT_COUNTER);
+    g_assert_cmpint(token.timeshift(), == ,FoilAuthTypes::DEFAULT_TIMESHIFT);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthTypes::DEFAULT_ALGORITHM);
 }
 
 /*==========================================================================*
@@ -313,63 +309,60 @@ void
 test_parseMigrationUri(
     void)
 {
-    QVariantList list = FoilAuth::parseMigrationUri(QString());
+    QList<FoilAuthToken> list = FoilAuth::parseMigrationUri(QString());
     g_assert_cmpint(list.count(), == ,0);
 
     // One TOTP tocken
     list = FoilAuth::parseMigrationUri(QString("otpauth-migration://offline?data=CjcKCl96gqF5WDwySA4SGFdvcmRQcmVzczpUaGlua2luZ1RlYXBvdBoJV29yZFByZXNzIAEoAjAC"));
     g_assert_cmpint(list.count(), == ,1);
 
-    QVariantMap map = list.at(0).toMap();
-    g_assert(map.count() == 9);
+    FoilAuthToken token = list.at(0);
 
     QByteArray label, secret, issuer;
-    g_assert(map.value(FoilAuthToken::KEY_VALID).toBool());
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_TYPE).toInt(), == ,FoilAuthToken::AuthTypeTOTP);
-    label = map.value(FoilAuthToken::KEY_LABEL).toString().toUtf8();
-    secret = map.value(FoilAuthToken::KEY_SECRET).toString().toUtf8();
-    issuer = map.value(FoilAuthToken::KEY_ISSUER).toString().toUtf8();
+    g_assert(token.isValid());
+    g_assert_cmpint(token.type(), == ,FoilAuthTypes::AuthTypeTOTP);
+    label = token.label().toUtf8();
+    secret = token.secretBase32().toUtf8();
+    issuer = token.issuer().toUtf8();
     g_assert_cmpstr(label, == ,"WordPress:ThinkingTeapot");
     g_assert_cmpstr(secret, == ,"l55ifilzla6desao");
     g_assert_cmpstr(issuer, == ,"WordPress");
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_DIGITS).toInt(), == ,8);
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_COUNTER).toInt(), == ,FoilAuthToken::DEFAULT_COUNTER);
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_TIMESHIFT).toInt(), == ,FoilAuthToken::DEFAULT_TIMESHIFT);
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_ALGORITHM).toInt(), == ,FoilAuthToken::DEFAULT_ALGORITHM);
+    g_assert_cmpint(token.digits(), == ,8);
+    g_assert_cmpint(token.counter(), == ,FoilAuthTypes::DEFAULT_COUNTER);
+    g_assert_cmpint(token.timeshift(), == ,FoilAuthTypes::DEFAULT_TIMESHIFT);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthTypes::DEFAULT_ALGORITHM);
 
     // One HOTP + one TOTP token
     list = FoilAuth::parseMigrationUri(QString("otpauth-migration://offline?data=CikKFGHNTeMJSP1ucVSpB8K4dGt4k6WwEglIT1RQIHRlc3QgASgBMAE4AwojChDGzIcWUVA5HichlIduvZrUEglUT1RQIHRlc3QgASgBMAIQARgBIAAo%2BOCI%2Bvn%2F%2F%2F%2F%2FAQ%3D%3D"));
     g_assert_cmpint(list.count(), == ,2);
 
     // HOTP
-    map = list.at(0).toMap();
-    g_assert(map.count() == 9);
-    g_assert(map.value(FoilAuthToken::KEY_VALID).toBool());
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_TYPE).toInt(), == ,FoilAuthToken::AuthTypeHOTP);
-    label = map.value(FoilAuthToken::KEY_LABEL).toString().toUtf8();
-    secret = map.value(FoilAuthToken::KEY_SECRET).toString().toUtf8();
-    g_assert(map.value(FoilAuthToken::KEY_ISSUER).toString().isEmpty());
+    token = list.at(0);
+    g_assert(token.isValid());
+    g_assert_cmpint(token.type(), == ,FoilAuthTypes::AuthTypeHOTP);
+    label = token.label().toUtf8();
+    secret = token.secretBase32().toUtf8();
+    issuer = token.issuer().toUtf8();
     g_assert_cmpstr(label, == ,"HOTP test");
     g_assert_cmpstr(secret, == ,"mhgu3yyjjd6w44kuved4fodunn4jhjnq");
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_DIGITS).toInt(), == ,FoilAuthTypes::DEFAULT_DIGITS);
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_COUNTER).toInt(), == ,3);
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_TIMESHIFT).toInt(), == ,FoilAuthToken::DEFAULT_TIMESHIFT);
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_ALGORITHM).toInt(), == ,FoilAuthToken::DEFAULT_ALGORITHM);
+    g_assert_cmpint(token.digits(), == ,FoilAuthTypes::DEFAULT_DIGITS);
+    g_assert_cmpint(token.counter(), == ,3);
+    g_assert_cmpint(token.timeshift(), == ,FoilAuthTypes::DEFAULT_TIMESHIFT);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthTypes::DEFAULT_ALGORITHM);
 
     // TOTP
-    map = list.at(1).toMap();
-    g_assert(map.count() == 9);
-    g_assert(map.value(FoilAuthToken::KEY_VALID).toBool());
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_TYPE).toInt(), == ,FoilAuthToken::AuthTypeTOTP);
-    label = map.value(FoilAuthToken::KEY_LABEL).toString().toUtf8();
-    secret = map.value(FoilAuthToken::KEY_SECRET).toString().toUtf8();
-    g_assert(map.value(FoilAuthToken::KEY_ISSUER).toString().isEmpty());
+    token = list.at(1);
+    g_assert(token.isValid());
+    g_assert_cmpint(token.type(), == ,FoilAuthTypes::AuthTypeTOTP);
+    label = token.label().toUtf8();
+    secret = token.secretBase32().toUtf8();
+    issuer = token.issuer().toUtf8();
     g_assert_cmpstr(label, == ,"TOTP test");
     g_assert_cmpstr(secret, == ,"y3giofsrka4r4jzbssdw5pm22q======");
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_DIGITS).toInt(), == ,FoilAuthTypes::DEFAULT_DIGITS);
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_COUNTER).toInt(), == ,FoilAuthToken::DEFAULT_COUNTER);
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_TIMESHIFT).toInt(), == ,FoilAuthToken::DEFAULT_TIMESHIFT);
-    g_assert_cmpint(map.value(FoilAuthToken::KEY_ALGORITHM).toInt(), == ,FoilAuthToken::DEFAULT_ALGORITHM);
+    g_assert_cmpint(token.digits(), == ,FoilAuthTypes::DEFAULT_DIGITS);
+    g_assert_cmpint(token.counter(), == ,FoilAuthTypes::DEFAULT_COUNTER);
+    g_assert_cmpint(token.timeshift(), == ,FoilAuthTypes::DEFAULT_TIMESHIFT);
+    g_assert_cmpint(token.algorithm(), == ,FoilAuthTypes::DEFAULT_ALGORITHM);
 }
 
 /*==========================================================================*

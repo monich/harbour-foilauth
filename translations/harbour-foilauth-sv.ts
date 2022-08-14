@@ -358,11 +358,6 @@
         <extracomment>Dialog button</extracomment>
         <translation>Spara</translation>
     </message>
-    <message id="foilauth-select_token-title">
-        <source>This QR code contains multiple tokens. Please select one:</source>
-        <extracomment>Wrappable page title</extracomment>
-        <translation type="unfinished">Denna QR-kod innehåller flera tokens. Välj en:</translation>
-    </message>
     <message id="foilauth-menu-select_tokens">
         <source>Select</source>
         <extracomment>Pulley menu item, opens selection page</extracomment>
@@ -407,6 +402,11 @@
         <source>Code %1 of %2</source>
         <extracomment>Page header</extracomment>
         <translation type="unfinished">Kod %1/%2</translation>
+    </message>
+    <message id="foilauth-select_tokens-title-add_tokens">
+        <source>Select tokens to add</source>
+        <extracomment>Dialog title</extracomment>
+        <translation type="unfinished">Välj tokens att lägga till</translation>
     </message>
     <message id="foilauth-settings_page-header-version">
         <source>Version %1</source>

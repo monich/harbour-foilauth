@@ -80,6 +80,7 @@ HEADERS += \
     src/FoilAuth.h \
     src/FoilAuthDefs.h \
     src/FoilAuthFavoritesModel.h \
+    src/FoilAuthImportModel.h \
     src/FoilAuthModel.h \
     src/FoilAuthSettings.h \
     src/FoilAuthToken.h \
@@ -91,6 +92,7 @@ HEADERS += \
 SOURCES += \
     src/FoilAuth.cpp \
     src/FoilAuthFavoritesModel.cpp \
+    src/FoilAuthImportModel.cpp \
     src/FoilAuthModel.cpp \
     src/FoilAuthSettings.cpp \
     src/FoilAuthToken.cpp \

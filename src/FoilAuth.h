@@ -34,7 +34,7 @@
 #ifndef FOILAUTH_H
 #define FOILAUTH_H
 
-#include "FoilAuthTypes.h"
+#include "FoilAuthToken.h"
 
 #include "foil_types.h"
 
@@ -98,8 +98,8 @@ public:
     Q_INVOKABLE static QString toUri(Type aType, const QString aSecretBase32,
         const QString aLabel, const QString aIssuer, int aDigits,
         quint64 aCounter, int aTimeShift, Algorithm);
-    Q_INVOKABLE static QVariantMap parseUri(const QString);
-    Q_INVOKABLE static QVariantList parseMigrationUri(const QString);
+    Q_INVOKABLE static FoilAuthToken parseUri(const QString);
+    Q_INVOKABLE static QList<FoilAuthToken> parseMigrationUri(const QString);
     Q_INVOKABLE static bool isValidBase32(const QString);
     Q_INVOKABLE static QStringList stringListRemove(QStringList, const QString);
 

@@ -375,11 +375,6 @@
         <extracomment>Dialog button</extracomment>
         <translation>Сохранить</translation>
     </message>
-    <message id="foilauth-select_token-title">
-        <source>This QR code contains multiple tokens. Please select one:</source>
-        <extracomment>Wrappable page title</extracomment>
-        <translation>Этот QR-код содержит сразу несколько кодов авторизации. Выберите какой-нибудь один:</translation>
-    </message>
     <message id="foilauth-remorse-deleting_selected_token">
         <source>Deleting selected token</source>
         <extracomment>Remorse popup text (single token selected)</extracomment>
@@ -409,6 +404,11 @@
         <source>Code %1 of %2</source>
         <extracomment>Page header</extracomment>
         <translation>Код %1 из %2</translation>
+    </message>
+    <message id="foilauth-select_tokens-title-add_tokens">
+        <source>Select tokens to add</source>
+        <extracomment>Dialog title</extracomment>
+        <translation>Выберите нужные коды</translation>
     </message>
     <message id="foilauth-settings_page-header-version">
         <source>Version %1</source>

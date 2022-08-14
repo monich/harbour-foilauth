@@ -32,8 +32,9 @@
  */
 
 #include "FoilAuthDefs.h"
-#include "FoilAuthModel.h"
 #include "FoilAuthFavoritesModel.h"
+#include "FoilAuthImportModel.h"
+#include "FoilAuthModel.h"
 #include "FoilAuthSettings.h"
 #include "FoilAuthToken.h"
 #include "FoilAuth.h"
@@ -64,18 +65,27 @@
 
 static void register_types(const char* uri, int v1 = 1, int v2 = 0)
 {
-    qmlRegisterSingletonType<HarbourProcessState>(uri, v1, v2, "HarbourProcessState", HarbourProcessState::createSingleton);
-    qmlRegisterSingletonType<HarbourSystemState>(uri, v1, v2, "HarbourSystemState", HarbourSystemState::createSingleton);
-    qmlRegisterSingletonType<FoilAuthSettings>(uri, v1, v2, "FoilAuthSettings", FoilAuthSettings::createSingleton);
-    qmlRegisterSingletonType<FoilAuthModel>(uri, v1, v2, "FoilAuthModel", FoilAuthModel::createSingleton);
-    qmlRegisterSingletonType<FoilAuth>(uri, v1, v2, "FoilAuth", FoilAuth::createSingleton);
-    qmlRegisterSingletonType<SailOTP>(uri, v1, v2, "SailOTP", SailOTP::createSingleton);
-    qmlRegisterType<FoilAuthFavoritesModel>(uri, v1, v2, "FoilAuthFavoritesModel");
-    qmlRegisterType<HarbourOrganizeListModel>(uri, v1, v2, "HarbourOrganizeListModel");
-    qmlRegisterType<HarbourQrCodeGenerator>(uri, v1, v2, "HarbourQrCodeGenerator");
-    qmlRegisterType<HarbourSelectionListModel>(uri, v1, v2, "HarbourSelectionListModel");
-    qmlRegisterType<HarbourSingleImageProvider>(uri, v1, v2, "HarbourSingleImageProvider");
-    qmlRegisterType<QrCodeScanner>(uri, v1, v2, "QrCodeScanner");
+#define REGISTER_TYPE(uri, v1, v2, Class) \
+    qmlRegisterType<Class>(uri, v1, v2, #Class)
+#define REGISTER_SINGLETON_TYPE(uri, v1, v2, Class) \
+    qmlRegisterSingletonType<Class>(uri, v1, v2, #Class, \
+    Class::createSingleton)
+
+    REGISTER_SINGLETON_TYPE(uri, v1, v2, HarbourProcessState);
+    REGISTER_SINGLETON_TYPE(uri, v1, v2, HarbourSystemState);
+    REGISTER_SINGLETON_TYPE(uri, v1, v2, FoilAuthSettings);
+    REGISTER_SINGLETON_TYPE(uri, v1, v2, FoilAuthModel);
+    REGISTER_SINGLETON_TYPE(uri, v1, v2, FoilAuth);
+    REGISTER_SINGLETON_TYPE(uri, v1, v2, SailOTP);
+    REGISTER_TYPE(uri, v1, v2, FoilAuthFavoritesModel);
+    REGISTER_TYPE(uri, v1, v2, FoilAuthImportModel);
+    REGISTER_TYPE(uri, v1, v2, HarbourOrganizeListModel);
+    REGISTER_TYPE(uri, v1, v2, HarbourQrCodeGenerator);
+    REGISTER_TYPE(uri, v1, v2, HarbourSelectionListModel);
+    REGISTER_TYPE(uri, v1, v2, HarbourSingleImageProvider);
+    REGISTER_TYPE(uri, v1, v2, QrCodeScanner);
+    qRegisterMetaType<FoilAuthToken>();
+    qRegisterMetaType<QList<FoilAuthToken> >();
 }
 
 int main(int argc, char *argv[])
@@ -156,11 +166,11 @@ int main(int argc, char *argv[])
     context->setContextProperty("FoilAuthAppName", QString(FOILAUTH_APP_NAME));
     context->setContextProperty("TorchSupported", torchSupported);
     context->setContextProperty("FoilAuthDefaultDigits",
-        QVariant::fromValue((int)FoilAuthToken::DEFAULT_DIGITS));
+        QVariant::fromValue((int)FoilAuthTypes::DEFAULT_DIGITS));
     context->setContextProperty("FoilAuthDefaultCounter",
-        QVariant::fromValue((int)FoilAuthToken::DEFAULT_COUNTER));
+        QVariant::fromValue((int)FoilAuthTypes::DEFAULT_COUNTER));
     context->setContextProperty("FoilAuthDefaultTimeShift",
-        QVariant::fromValue((int)FoilAuthToken::DEFAULT_TIMESHIFT));
+        QVariant::fromValue((int)FoilAuthTypes::DEFAULT_TIMESHIFT));
     if (res_4_3.isValid()) {
         context->setContextProperty("ViewfinderResolution_4_3", res_4_3);
     }

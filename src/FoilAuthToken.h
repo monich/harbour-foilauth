@@ -44,8 +44,19 @@
 #include <QVariantMap>
 
 // Read-only token object, cheap to copy
-class FoilAuthToken :
-    public FoilAuthTypes {
+class FoilAuthToken
+{
+    Q_GADGET
+    Q_PROPERTY(bool valid READ isValid CONSTANT)
+    Q_PROPERTY(int type READ type CONSTANT)
+    Q_PROPERTY(int algorithm READ algorithm CONSTANT)
+    Q_PROPERTY(QString label READ label CONSTANT)
+    Q_PROPERTY(QString issuer READ issuer CONSTANT)
+    Q_PROPERTY(QString secret READ secretBase32 CONSTANT)
+    Q_PROPERTY(int digits READ digits CONSTANT)
+    Q_PROPERTY(int counter READ counter CONSTANT)
+    Q_PROPERTY(int timeshift READ timeshift CONSTANT)
+
     class Private;
     FoilAuthToken(Private*);
 
@@ -72,22 +83,22 @@ public:
 
     FoilAuthToken();
     FoilAuthToken(const FoilAuthToken& aToken);
-    FoilAuthToken(AuthType, QByteArray, QString, QString,
-        int aDigits = DEFAULT_DIGITS,
-        quint64 aCounter = DEFAULT_COUNTER,
-        int aTimeShift = DEFAULT_TIMESHIFT,
-        DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM);
+    FoilAuthToken(FoilAuthTypes::AuthType, QByteArray, QString, QString,
+        int aDigits = FoilAuthTypes::DEFAULT_DIGITS,
+        quint64 aCounter = FoilAuthTypes::DEFAULT_COUNTER,
+        int aTimeshift = FoilAuthTypes::DEFAULT_TIMESHIFT,
+        FoilAuthTypes::DigestAlgorithm aAlgorithm = FoilAuthTypes::DEFAULT_ALGORITHM);
     ~FoilAuthToken();
 
     Q_REQUIRED_RESULT static FoilAuthToken fromUri(const QString);
-    Q_REQUIRED_RESULT FoilAuthToken withType(AuthType) const;
-    Q_REQUIRED_RESULT FoilAuthToken withAlgorithm(DigestAlgorithm) const;
+    Q_REQUIRED_RESULT FoilAuthToken withType(FoilAuthTypes::AuthType) const;
+    Q_REQUIRED_RESULT FoilAuthToken withAlgorithm(FoilAuthTypes::DigestAlgorithm) const;
     Q_REQUIRED_RESULT FoilAuthToken withSecret(const QByteArray) const;
     Q_REQUIRED_RESULT FoilAuthToken withLabel(const QString) const;
     Q_REQUIRED_RESULT FoilAuthToken withIssuer(const QString) const;
     Q_REQUIRED_RESULT FoilAuthToken withCounter(quint64) const;
     Q_REQUIRED_RESULT FoilAuthToken withDigits(int) const;
-    Q_REQUIRED_RESULT FoilAuthToken withTimeShift(int) const;
+    Q_REQUIRED_RESULT FoilAuthToken withTimeshift(int) const;
 
     FoilAuthToken& operator=(const FoilAuthToken& aToken);
     bool operator==(const FoilAuthToken& aToken) const;
@@ -95,23 +106,23 @@ public:
     bool equals(const FoilAuthToken&) const;
 
     bool isValid() const;
-    AuthType type() const;
-    DigestAlgorithm algorithm() const;
-    const QString label() const;
-    const QString issuer() const;
+    FoilAuthTypes::AuthType type() const;
+    FoilAuthTypes::DigestAlgorithm algorithm() const;
+    QString label() const;
+    QString issuer() const;
+    QString secretBase32() const;
     const QByteArray secret() const;
-    const QString secretBase32() const;
     quint64 counter() const;
     int digits() const;
-    int timeShift() const;
+    int timeshift() const;
     uint password(quint64 aTime) const;
     Q_REQUIRED_RESULT QString passwordString(quint64) const;
     Q_REQUIRED_RESULT QString toUri() const;
     Q_REQUIRED_RESULT QVariantMap toVariantMap() const;
     Q_REQUIRED_RESULT QByteArray toProtoBuf() const;
 
-    Q_REQUIRED_RESULT static AuthType validType(AuthType);
-    Q_REQUIRED_RESULT static DigestAlgorithm validAlgorithm(DigestAlgorithm);
+    Q_REQUIRED_RESULT static FoilAuthTypes::AuthType validType(int);
+    Q_REQUIRED_RESULT static FoilAuthTypes::DigestAlgorithm validAlgorithm(int);
     Q_REQUIRED_RESULT static int validDigits(int);
     Q_REQUIRED_RESULT static QList<FoilAuthToken> fromProtoBuf(const QByteArray&);
     Q_REQUIRED_RESULT static QByteArray toProtoBuf(const QList<FoilAuthToken>&);

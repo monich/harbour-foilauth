@@ -175,8 +175,8 @@ SailOTP::Private::fetchTokens(
 
                             Token token;
                             token.iFavorite = (query.value(COL_FAV).toInt() != 0);
-                            token.iToken = FoilAuthToken(isHOTP ? FoilAuthToken::AuthTypeHOTP :
-                                FoilAuthToken::AuthTypeTOTP, secret, title, QString(),
+                            token.iToken = FoilAuthToken(isHOTP ? FoilAuthTypes::AuthTypeHOTP :
+                                FoilAuthTypes::AuthTypeTOTP, secret, title, QString(),
                                 (lenVal && lenVal > 0) ? lenVal : DEFAULT_DIGITS,
                                 (counterOk && counterVal > 0) ? counterVal : DEFAULT_COUNTER,
                                 diffOk ? diffVal : DEFAULT_TIMESHIFT, DEFAULT_ALGORITHM);

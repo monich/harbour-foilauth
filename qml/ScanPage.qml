@@ -16,7 +16,9 @@ Page {
     readonly property bool canShowViewFinder: Qt.application.active &&
         (status === PageStatus.Active || status === PageStatus.Deactivating)
 
-    signal done(var token)
+    signal tokenDetected(var token)
+    signal tokensDetected(var tokens)
+    signal skip()
 
     onStatusChanged: {
         if (status === PageStatus.Active) {
@@ -87,6 +89,10 @@ Page {
         }
     }
 
+    FoilAuthImportModel {
+        id: importModel
+    }
+
     QrCodeScanner {
         id: scanner
 
@@ -95,45 +101,18 @@ Page {
         rotation: orientationAngle()
 
         onScanFinished: {
-            if (result.valid) {
-                var token = FoilAuth.parseUri(result.text)
-                if (token.valid) {
-                    markImageProvider.image = image
-                    markImage.visible = true
-                    unsupportedCodeNotification.close()
-                    pageStackPopTimer.token = token
-                    pageStackPopTimer.start()
-                } else {
-                    var tokens = FoilAuth.parseMigrationUri(result.text)
-                    if (tokens.length === 1) {
-                        markImageProvider.image = image
-                        markImage.visible = true
-                        unsupportedCodeNotification.close()
-                        pageStackPopTimer.token = tokens[0]
-                        pageStackPopTimer.start()
-                    } else if (tokens.length > 1) {
-                        markImageProvider.image = image
-                        markImage.visible = true
-                        unsupportedCodeNotification.close()
-                        var page = pageStack.push(Qt.resolvedUrl("SelectTokenPage.qml"), {
-                            allowedOrientations: thisPage.allowedOrientations,
-                            tokens: tokens
-                        })
-                        page.tokenSelected.connect(function(token) {
-                            thisPage.done(token)
-                        })
-                } else if (lastInvalidCode !== result.text) {
-                    lastInvalidCode = result.text
-                    markImageProvider.image = image
-                    markImage.visible = true
-                    unsupportedCodeNotification.publish()
-                    restartScanTimer.start()
-                } else {
-                    if (thisPage.canScan) {
-                        scanner.start()
-                    }
-                }
-                }
+            importModel.setUri(result.text)
+            if (importModel.count > 0) {
+                markImageProvider.image = image
+                markImage.visible = true
+                unsupportedCodeNotification.close()
+                pageStackPopTimer.start()
+            } else if (lastInvalidCode !== result.text) {
+                lastInvalidCode = result.text
+                markImageProvider.image = image
+                markImage.visible = true
+                unsupportedCodeNotification.publish()
+                restartScanTimer.start()
             } else if (thisPage.canScan) {
                 scanner.start()
             }
@@ -143,10 +122,15 @@ Page {
     Timer {
         id: pageStackPopTimer
 
-        property var token
-
         interval: 1000
-        onTriggered: thisPage.done(token)
+        onTriggered: {
+            var n = importModel.count
+            if (n === 1) {
+                thisPage.tokenDetected(importModel.getToken(0))
+            } else if (n > 1) {
+                thisPage.tokensDetected(importModel)
+            }
+        }
     }
 
     Timer {
@@ -342,7 +326,7 @@ Page {
         //: Button label (skip scanning)
         //% "Skip"
         text: qsTrId("foilauth-scan-skip_button")
-        onClicked: thisPage.done({ "valid" : false })
+        onClicked: thisPage.skip()
     }
 
     Image {

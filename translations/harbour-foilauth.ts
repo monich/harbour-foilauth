@@ -372,11 +372,6 @@
         <extracomment>Dialog button</extracomment>
         <translation>Save</translation>
     </message>
-    <message id="foilauth-select_token-title">
-        <source>This QR code contains multiple tokens. Please select one:</source>
-        <extracomment>Wrappable page title</extracomment>
-        <translation>This QR code contains multiple tokens. Please select one:</translation>
-    </message>
     <message id="foilauth-remorse-deleting_selected_token">
         <source>Deleting selected token</source>
         <extracomment>Remorse popup text (single token selected)</extracomment>
@@ -406,6 +401,11 @@
         <source>Code %1 of %2</source>
         <extracomment>Page header</extracomment>
         <translation>Code %1 of %2</translation>
+    </message>
+    <message id="foilauth-select_tokens-title-add_tokens">
+        <source>Select tokens to add</source>
+        <extracomment>Dialog title</extracomment>
+        <translation>Select tokens to add</translation>
     </message>
     <message id="foilauth-settings_page-header-version">
         <source>Version %1</source>

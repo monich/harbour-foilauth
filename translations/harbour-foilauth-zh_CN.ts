@@ -355,11 +355,6 @@
         <extracomment>Dialog button</extracomment>
         <translation>保存</translation>
     </message>
-    <message id="foilauth-select_token-title">
-        <source>This QR code contains multiple tokens. Please select one:</source>
-        <extracomment>Wrappable page title</extracomment>
-        <translation type="unfinished">此QR码包含多个令牌。 请选择一个：</translation>
-    </message>
     <message id="foilauth-menu-select_tokens">
         <source>Select</source>
         <extracomment>Pulley menu item, opens selection page</extracomment>
@@ -404,6 +399,11 @@
         <source>Code %1 of %2</source>
         <extracomment>Page header</extracomment>
         <translation type="unfinished">代码 %1/%2</translation>
+    </message>
+    <message id="foilauth-select_tokens-title-add_tokens">
+        <source>Select tokens to add</source>
+        <extracomment>Dialog title</extracomment>
+        <translation type="unfinished">选择要添加的令牌</translation>
     </message>
     <message id="foilauth-settings_page-header-version">
         <source>Version %1</source>

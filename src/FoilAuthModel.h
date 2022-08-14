@@ -105,12 +105,11 @@ public:
     Q_INVOKABLE bool changePassword(const QString aOld, const QString aNew);
     Q_INVOKABLE void lock(bool aTimeout);
     Q_INVOKABLE bool unlock(const QString aPassword);
-    Q_INVOKABLE int millisecondsLeft();
 
     Q_INVOKABLE bool addToken(int aType, const QString aTokenBase32,
         const QString aLabel, const QString aIssuer, int aDigits,
         int aCounter, int aTimeShift, int aAlgorithm);
-    Q_INVOKABLE bool addTokenUri(const QString);
+    Q_INVOKABLE void addTokens(const QList<FoilAuthToken>);
     Q_INVOKABLE void deleteToken(const QString);
     Q_INVOKABLE void deleteTokens(const QStringList);
     Q_INVOKABLE void deleteAll();

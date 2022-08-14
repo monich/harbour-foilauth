@@ -322,14 +322,14 @@ FoilAuth::toUri(
     return QString();
 }
 
-QVariantMap
+FoilAuthToken
 FoilAuth::parseUri(
     const QString aUri)
 {
-    return FoilAuthToken::fromUri(aUri).toVariantMap();
+    return FoilAuthToken::fromUri(aUri);
 }
 
-QVariantList
+QList<FoilAuthToken>
 FoilAuth::parseMigrationUri(
     const QString aUri)
 {
@@ -339,7 +339,7 @@ FoilAuth::parseMigrationUri(
     pos.ptr = (const guint8*)uri.constData();
     pos.end = pos.ptr + uri.size();
 
-    QVariantList result;
+    QList<FoilAuthToken> result;
     FoilBytes prefixBytes;
     foil_bytes_from_string(&prefixBytes, FOILAUTH_MIGRATION_PREFIX);
     if (foil_parse_skip_bytes(&pos, &prefixBytes)) {
@@ -364,13 +364,9 @@ FoilAuth::parseMigrationUri(
                 }
 #endif // HARBOUR_DEBUG
 
-                const QByteArray buf((const char*)data, size);
-                const QList<FoilAuthToken> tokens(FoilAuthToken::fromProtoBuf(buf));
-                const int n = tokens.count();
-                HDEBUG(n << "tokens");
-                for (int i = 0; i < n; i++) {
-                    result.append(tokens.at(i).toVariantMap());
-                }
+                const QByteArray buf(QByteArray::fromRawData((const char*)data, size));
+                result = FoilAuthToken::fromProtoBuf(buf);
+                HDEBUG(result.count() << "tokens" << result);
                 g_bytes_unref(bytes);
             }
             g_free(unescaped);

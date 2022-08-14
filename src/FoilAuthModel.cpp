@@ -97,7 +97,7 @@
     role(Digits,digits) \
     role(Algorithm,algorithm) \
     role(Counter,counter) \
-    role(TimeShift,timeShift) \
+    role(Timeshift,timeshift) \
     role(Label,label) \
     role(PrevPassword,prevPassword) \
     role(CurrentPassword,currentPassword) \
@@ -132,7 +132,9 @@ FoilAuthModel::Util::encryptionOptions(
 // FoilAuthModel::ModelData
 // ==========================================================================
 
-class FoilAuthModel::ModelData : public FoilAuthTypes {
+class FoilAuthModel::ModelData :
+    public FoilAuthTypes
+{
 public:
     enum Role {
 #define FIRST(X,x) FirstRole = Qt::UserRole, X##Role = FirstRole,
@@ -148,9 +150,8 @@ public:
 
     ModelData(const QString aPath, AuthType aType,
         const QByteArray aSecret, const QString aLabel, const QString aIssuer,
-        int aDigits = FoilAuthToken::DEFAULT_DIGITS,
-        int aCounter = FoilAuthToken::DEFAULT_COUNTER,
-        int aTimeShift = FoilAuthToken::DEFAULT_TIMESHIFT,
+        int aDigits = DEFAULT_DIGITS, int aCounter = DEFAULT_COUNTER,
+        int aTimeShift = DEFAULT_TIMESHIFT,
         DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM,
         bool aFavorite = true);
     ModelData(const QString, const FoilAuthToken&, bool aFavorite = true);
@@ -228,7 +229,7 @@ FoilAuthModel::ModelData::get(
     case TypeRole: return (int)iToken.type();
     case AlgorithmRole: return (int)iToken.algorithm();
     case CounterRole: return iToken.counter();
-    case TimeShiftRole: return iToken.timeShift();
+    case TimeshiftRole: return iToken.timeshift();
     case LabelRole: return iToken.label();
     case PrevPasswordRole: return iPrevPassword;
     case CurrentPasswordRole: return iCurrentPassword;
@@ -445,7 +446,8 @@ FoilAuthModel::ModelInfo::save(
 // ==========================================================================
 
 class FoilAuthModel::BaseTask :
-    public HarbourTask
+    public HarbourTask,
+    public FoilAuthTypes
 {
     Q_OBJECT
 
@@ -614,8 +616,7 @@ FoilAuthModel::GenerateKeyTask::performTask()
 // ==========================================================================
 
 class FoilAuthModel::EncryptTask :
-    public BaseTask,
-    public FoilAuthTypes
+    public BaseTask
 {
     Q_OBJECT
 
@@ -708,15 +709,15 @@ FoilAuthModel::EncryptTask::performTask()
         headers.count++;
 
         char timeshift[16];
-        if (iToken.timeShift() != FoilAuthToken::DEFAULT_TIMESHIFT) {
-            snprintf(timeshift, sizeof(timeshift), "%d", iToken.timeShift());
+        if (iToken.timeshift() != DEFAULT_TIMESHIFT) {
+            snprintf(timeshift, sizeof(timeshift), "%d", iToken.timeshift());
             header[headers.count].name = HEADER_TIMESHIFT;
             header[headers.count].value = timeshift;
             headers.count++;
         }
 
         char counter[16];
-        if (iToken.counter() != FoilAuthToken::DEFAULT_COUNTER) {
+        if (iToken.counter() != DEFAULT_COUNTER) {
             snprintf(counter, sizeof(counter), "%llu", iToken.counter());
             header[headers.count].name = HEADER_COUNTER;
             header[headers.count].value = counter;
@@ -940,9 +941,9 @@ FoilAuthModel::DecryptAllTask::decryptToken(
                 ModelData::headerAuthType(aMsg), bytes,
                 ModelData::headerString(aMsg, HEADER_LABEL),
                 ModelData::headerString(aMsg, HEADER_ISSUER),
-                ModelData::headerInt(aMsg, HEADER_DIGITS, FoilAuthToken::DEFAULT_DIGITS),
-                ModelData::headerUint64(aMsg, HEADER_COUNTER, FoilAuthToken::DEFAULT_COUNTER),
-                ModelData::headerInt(aMsg, HEADER_TIMESHIFT, FoilAuthToken::DEFAULT_TIMESHIFT),
+                ModelData::headerInt(aMsg, HEADER_DIGITS, DEFAULT_DIGITS),
+                ModelData::headerUint64(aMsg, HEADER_COUNTER, DEFAULT_COUNTER),
+                ModelData::headerInt(aMsg, HEADER_TIMESHIFT, DEFAULT_TIMESHIFT),
                 ModelData::headerAlgorithm(aMsg),
                 ModelData::headerBool(aMsg, HEADER_FAVORITE, false));
 
@@ -1074,6 +1075,7 @@ public:
     void setKeys(FoilPrivateKey*, FoilKey* aPublic = Q_NULLPTR);
     void setFoilState(FoilState);
     void addToken(const FoilAuthToken&, bool aFavorite = true);
+    void addTokens(const QList<FoilAuthToken>&);
     void insertModelData(ModelData*);
     void dataChanged(int , ModelData::Role);
     void dataChanged(QList<int>, ModelData::Role);
@@ -1425,7 +1427,7 @@ FoilAuthModel::Private::needTimer() const
     if (iFoilState == FoilModelReady) {
         const int n = iData.count();
         for (int i = 0; i < n; i++) {
-            if (iData.at(i)->iToken.type() == FoilAuthToken::AuthTypeTOTP) {
+            if (iData.at(i)->iToken.type() == FoilAuthTypes::AuthTypeTOTP) {
                 return true;
             }
         }
@@ -1546,6 +1548,47 @@ FoilAuthModel::Private::addToken(
     insertModelData(data);
     updatePasswords(data);
     encrypt(data);
+}
+
+void
+FoilAuthModel::Private::addTokens(
+    const QList<FoilAuthToken>& aTokens)
+{
+    const int n = aTokens.size();
+    if (n == 1) {
+        addToken(aTokens.at(0), false);
+    } else if (n > 1) {
+        ModelData::List newData;
+        int i;
+
+        for (i = 0; i < n; i++) {
+            FoilAuthToken token(aTokens.at(i));
+
+            if (token.isValid()) {
+                const QString path(FoilAuth::createEmptyFoilFile(iFoilDataDir));
+                ModelData* data = new ModelData(path, token, false);
+
+                // Password calculation and encryption happen asynchronously,
+                // we can start doing it even before the data is inserted into
+                // the model
+                HDEBUG(data->iId << token.secretBase32() << token.label());
+                updatePasswords(data);
+                encrypt(data);
+                newData.append(data);
+            }
+        }
+
+        if (!newData.isEmpty()) {
+            FoilAuthModel* model = parentModel();
+            const int pos = iData.count();
+
+            model->beginInsertRows(QModelIndex(), pos, pos + newData.count() - 1);
+            iData.append(newData);
+            queueSignal(SignalCountChanged);
+            checkTimer();
+            model->endInsertRows();
+        }
+    }
 }
 
 void
@@ -2190,14 +2233,14 @@ FoilAuthModel::setData(
                 }
             }
             break;
-        case ModelData::TimeShiftRole:
+        case ModelData::TimeshiftRole:
             {
                 bool ok;
                 int sec = aValue.toInt(&ok);
                 HDEBUG(row << "timeshift" << sec);
                 if (ok) {
-                    if (data->iToken.timeShift() != sec) {
-                        data->iToken = data->iToken.withTimeShift(sec);
+                    if (data->iToken.timeshift() != sec) {
+                        data->iToken = data->iToken.withTimeshift(sec);
                         iPrivate->encrypt(data);
                         iPrivate->emitQueuedSignals();
                         roles.append(aRole);
@@ -2332,22 +2375,6 @@ FoilAuthModel::unlock(
     return ok;
 }
 
-int
-FoilAuthModel::millisecondsLeft()
-{
-    if (iPrivate->iTimeLeft > 0) {
-        const QDateTime now(QDateTime::currentDateTime());
-        const int msec = now.time().msec();
-        if (msec > 0) {
-            return (iPrivate->iTimeLeft - 1) * 1000 + msec;
-        } else {
-            return iPrivate->iTimeLeft * 1000;
-        }
-    } else {
-        return 0;
-    }
-}
-
 bool
 FoilAuthModel::addToken(
     int aType,
@@ -2383,18 +2410,12 @@ FoilAuthModel::addToken(
     }
 }
 
-bool
-FoilAuthModel::addTokenUri(
-    const QString aUri)
+void
+FoilAuthModel::addTokens(
+    const QList<FoilAuthToken> aTokens)
 {
-    FoilAuthToken token(FoilAuthToken::fromUri(aUri));
-    HDEBUG(aUri);
-    if (token.isValid()) {
-        iPrivate->addToken(token);
-        iPrivate->emitQueuedSignals();
-        return true;
-    }
-    return false;
+    HDEBUG(aTokens);
+    iPrivate->addTokens(aTokens);
 }
 
 void
