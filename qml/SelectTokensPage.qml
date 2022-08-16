@@ -71,7 +71,7 @@ Dialog {
 
                 Label {
                     width: parent.width
-                    color: Theme.highlightColor
+                    color: delegate.itemSelected ? Theme.highlightColor : Theme.secondaryHighlightColor
                     truncationMode: TruncationMode.Fade
                     font.bold: delegate.itemSelected
                     text: model.label
