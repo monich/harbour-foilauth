@@ -58,7 +58,7 @@ public:
     Q_INVOKABLE void setToken(FoilAuthToken);
     Q_INVOKABLE void setTokens(const QList<FoilAuthToken>);
 
-    Q_INVOKABLE FoilAuthToken getToken(int) const;
+    Q_INVOKABLE QVariantMap getToken(int) const;
     Q_INVOKABLE QList<FoilAuthToken> getTokens() const;
     Q_INVOKABLE void setToken(int, int, int, const QString, const QString, const QString, int, int, int);
 

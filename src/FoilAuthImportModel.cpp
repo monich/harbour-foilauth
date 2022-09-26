@@ -284,13 +284,13 @@ FoilAuthImportModel::setTokens(
     iPrivate->setItems(items);
 }
 
-FoilAuthToken
+QVariantMap
 FoilAuthImportModel::getToken(
     int aIndex) const
 {
     const ModelData* entry = iPrivate->dataAt(aIndex);
 
-    return entry ? entry->iToken : FoilAuthToken();
+    return entry ? entry->iToken.toVariantMap() : QVariantMap();
 }
 
 QList<FoilAuthToken>
