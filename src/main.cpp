@@ -142,7 +142,8 @@ int main(int argc, char *argv[])
         tr->load(transFile, transDir)) {
         app->installTranslator(tr);
     } else {
-        HDEBUG("Failed to load translator for" << locale);
+        HDEBUG("Failed to load translator for" << locale <<
+            "from" << qPrintable(transDir));
         delete tr;
     }
 
