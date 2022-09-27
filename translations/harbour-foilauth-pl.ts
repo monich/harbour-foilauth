@@ -195,7 +195,7 @@
     <message id="foilauth-scan-skip_button">
         <source>Skip</source>
         <extracomment>Button label (skip scanning)</extracomment>
-        <translation type="unfinished">Pomiń</translation>
+        <translation>Pomiń</translation>
     </message>
     <message id="foilauth-foil_apps_warning">
         <source>Note that all Foil apps use the same encryption key and password.</source>
@@ -408,7 +408,7 @@
     <message id="foilauth-select_tokens-title-add_tokens">
         <source>Select tokens to add</source>
         <extracomment>Dialog title</extracomment>
-        <translation type="unfinished">Wybierz żądane tokeny</translation>
+        <translation>Wybierz tokeny, które chcesz dodać</translation>
     </message>
     <message id="foilauth-settings_page-header-version">
         <source>Version %1</source>
@@ -418,12 +418,12 @@
     <message id="foilauth-settings_page-autolock-text">
         <source>Automatic locking</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished">Automatyczne blokowanie</translation>
+        <translation>Automatyczne blokowanie</translation>
     </message>
     <message id="foilauth-settings_page-autolock-description">
         <source>Require to enter Foil password after unlocking the screen.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished">Wymagaj podania Foil hasła po odblokowaniu ekranu.</translation>
+        <translation>Wymagaj podania Foil hasła po odblokowaniu ekranu.</translation>
     </message>
     <message id="jail-explanation">
         <source>This application is not designed to function in a sandbox. Try installing the latest version from &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; or &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, it may implement some sort of a workaround. No guarantee, though.</source>
