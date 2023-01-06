@@ -31,6 +31,21 @@ SilicaListView {
         sourceModel: foilModel
     }
 
+    Loader {
+        id: buzzLoader
+
+        active: false
+        source: Qt.resolvedUrl("Buzz.qml")
+    }
+
+    function buzz() {
+        // Load buzzer on demand
+        buzzLoader.active = true
+        if (buzzLoader.item) {
+            buzzLoader.item.play()
+        }
+    }
+
     Notification {
         id: clipboardNotification
 
@@ -318,8 +333,16 @@ SilicaListView {
                 opacity: enabled ? 1 : 0.2
 
                 onFavoriteToggled: model.favorite = !model.favorite
-                onIncrementCounter: model.counter++
-                onDecrementCounter: model.counter--
+                onIncrementCounter: {
+                    model.counter++
+                    copyPassword()
+                    buzz()
+                }
+                onDecrementCounter: {
+                    model.counter--
+                    copyPassword()
+                    buzz()
+                }
 
                 Behavior on color { ColorAnimation { duration: 150 } }
             }
@@ -391,6 +414,11 @@ SilicaListView {
             }
         }
 
+        function copyPassword() {
+            Clipboard.text = model.currentPassword
+            clipboardNotification.publish()
+        }
+
         function updateToken(token) {
             model.type = token.type
             model.issuer = token.issuer
@@ -413,9 +441,8 @@ SilicaListView {
         }
 
         onClicked: {
-            Clipboard.text = model.currentPassword
-            clipboardNotification.publish()
             cancelDrag()
+            copyPassword()
         }
 
         onPressAndHold: cancelDrag()
