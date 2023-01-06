@@ -333,7 +333,7 @@ SilicaListView {
 
             function handleScrolling() {
                 if (dragging) {
-                    var i = Math.floor((y + tokenList.contentY + height/2)/height)
+                    var i = tokenList.indexAt(tokenList.width/2, y + tokenList.contentY + height/2)
                     if (i >= 0 && i !== modelIndex) {
                         // Swap the items
                         tokenList.model.dragPos = i
