@@ -335,7 +335,6 @@ Item {
                         hotp: model.type === FoilAuth.TypeHOTP
                         hotpMinus: model.counter > 0
                         landscape: _isLandscape
-                        color: dragging ? Theme.rgba(Theme.highlightBackgroundColor, 0.2) : "transparent"
                         selected: listItem.down
                         enabled: listItem.enabled
                         opacity: listItem._hidden ? 0 : enabled ? 1 : 0.2
