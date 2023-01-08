@@ -6,14 +6,9 @@ import "harbour"
 Item {
     id: thisPanel
 
-    height: Math.max(deleteButton.height, exportButton.height) + 2 * Theme.paddingMedium
-    y: parent.height - visiblePart
-    visible: visiblePart > 0
-
     property bool active
     property bool canDelete: active
     property bool canExport: active
-    property real visiblePart: active ? height : 0
 
     signal exportSelectedItems()
     signal deleteSelectedItems()
@@ -21,12 +16,17 @@ Item {
     signal showExportHint()
     signal hideHint()
 
-    Behavior on visiblePart { SmoothedAnimation { duration: 250  } }
-
+    height: Math.max(deleteButton.height, exportButton.height) + 2 * Theme.paddingMedium
+    y: parent.height - _visiblePart
+    visible: _visiblePart > 0
     anchors {
         left: parent.left
         right: parent.right
     }
+
+    property real _visiblePart: active ? height : 0
+
+    Behavior on _visiblePart { SmoothedAnimation { duration: 250  } }
 
     HarbourIconTextButton {
         id: deleteButton
