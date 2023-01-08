@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022 Jolla Ltd.
- * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2023 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -33,6 +33,7 @@
 
 #include "FoilAuthDefs.h"
 #include "FoilAuthFavoritesModel.h"
+#include "FoilAuthGroupModel.h"
 #include "FoilAuthImportModel.h"
 #include "FoilAuthModel.h"
 #include "FoilAuthSettings.h"
@@ -78,6 +79,7 @@ static void register_types(const char* uri, int v1 = 1, int v2 = 0)
     REGISTER_SINGLETON_TYPE(uri, v1, v2, FoilAuth);
     REGISTER_SINGLETON_TYPE(uri, v1, v2, SailOTP);
     REGISTER_TYPE(uri, v1, v2, FoilAuthFavoritesModel);
+    REGISTER_TYPE(uri, v1, v2, FoilAuthGroupModel);
     REGISTER_TYPE(uri, v1, v2, FoilAuthImportModel);
     REGISTER_TYPE(uri, v1, v2, HarbourOrganizeListModel);
     REGISTER_TYPE(uri, v1, v2, HarbourQrCodeGenerator);

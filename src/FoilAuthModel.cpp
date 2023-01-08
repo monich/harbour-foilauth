@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022 Jolla Ltd.
- * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2023 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -47,6 +47,7 @@
 #include "foilmsg.h"
 
 #include "gutil_misc.h"
+#include "gutil_strv.h"
 
 #include <QDir>
 #include <QFile>
@@ -86,10 +87,17 @@
 #define INFO_ORDER_HEADER       "Order"
 #define INFO_ORDER_DELIMITER    ','
 #define INFO_ORDER_DELIMITER_S  ","
+#define INFO_GROUPS_HEADER      "Groups"
+#define INFO_GROUPS_DELIMITER   INFO_ORDER_DELIMITER
+#define INFO_GROUPS_DELIMITER_S INFO_ORDER_DELIMITER_S
+#define INFO_GROUP_DELIMITER    ':'
+#define INFO_GROUP_DELIMITER_S  ":"
 
 // Model roles
 #define FOILAUTH_ROLES_(first,role,last) \
     first(ModelId,modelId) \
+    role(GroupHeader,groupHeader) \
+    role(Hidden,hidden) \
     role(Favorite,favorite) \
     role(Type,type) \
     role(Secret,secret) \
@@ -116,7 +124,6 @@ private:
 public:
     static const FoilMsgEncryptOptions* encryptionOptions(FoilMsgEncryptOptions*);
 };
-
 
 const FoilMsgEncryptOptions*
 FoilAuthModel::Util::encryptionOptions(
@@ -155,9 +162,11 @@ public:
         DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM,
         bool aFavorite = true);
     ModelData(const QString, const FoilAuthToken&, bool aFavorite = true);
+    ModelData(const QString, const QString, bool aHidden = false);
 
     QVariant get(Role aRole) const;
-    const QString label() { return iToken.label(); }
+    bool isGroupHeader() const { return !iToken.isValid(); }
+    const QString label() const;
     void setTokenPath(QString aPath);
 
     static AuthType headerAuthType(const FoilMsg*);
@@ -170,6 +179,8 @@ public:
 public:
     QString iPath;
     QString iId;
+    QString iGroupLabel;
+    bool iHidden;
     bool iFavorite;
     FoilAuthToken iToken;
     QString iPrevPassword;
@@ -190,6 +201,7 @@ FoilAuthModel::ModelData::ModelData(
     bool aFavorite) :
     iPath(aPath),
     iId(QFileInfo(aPath).fileName()),
+    iHidden(false),
     iFavorite(aFavorite),
     iToken(aType, aSecret, aLabel, aIssuer, aDigits, aCounter, aTimeShift, aAlgorithm)
 {
@@ -202,10 +214,29 @@ FoilAuthModel::ModelData::ModelData(
     bool aFavorite) :
     iPath(aPath),
     iId(QFileInfo(aPath).fileName()),
+    iHidden(false),
     iFavorite(aFavorite),
     iToken(aToken)
 {
     HDEBUG(iToken.secretBase32() << iToken.label());
+}
+
+FoilAuthModel::ModelData::ModelData(
+    const QString aId,
+    const QString aLabel,
+    bool aHidden) :
+    iId(aId),
+    iGroupLabel(aLabel),
+    iHidden(aHidden),
+    iFavorite(false)
+{
+    HDEBUG("Group" << aLabel);
+}
+
+const QString
+FoilAuthModel::ModelData::label() const
+{
+    return isGroupHeader() ? iGroupLabel : iToken.label();
 }
 
 void
@@ -222,6 +253,8 @@ FoilAuthModel::ModelData::get(
 {
     switch (aRole) {
     case ModelIdRole: return iId;
+    case GroupHeaderRole: return isGroupHeader();
+    case HiddenRole: return iHidden;
     case FavoriteRole: return iFavorite;
     case SecretRole: return iToken.secretBase32();
     case IssuerRole: return iToken.issuer();
@@ -230,7 +263,7 @@ FoilAuthModel::ModelData::get(
     case AlgorithmRole: return (int)iToken.algorithm();
     case CounterRole: return iToken.counter();
     case TimeshiftRole: return iToken.timeshift();
-    case LabelRole: return iToken.label();
+    case LabelRole: return label();
     case PrevPasswordRole: return iPrevPassword;
     case CurrentPasswordRole: return iCurrentPassword;
     case NextPasswordRole: return iNextPassword;
@@ -311,7 +344,7 @@ FoilAuthModel::ModelData::headerBool(
 {
     const char* str = foilmsg_get_value(aMsg, aKey);
     int value = 0;
-    return gutil_parse_int(str, 10, &value) && value;
+    return gutil_parse_int(str, 10, &value) ? (value != 0) : aDefault;
 }
 
 // ==========================================================================
@@ -333,23 +366,34 @@ public:
 
 public:
     QStringList iOrder;
+    QHash<QString,QString> iGroups;
+    QSet<QString> iHiddenGroups;
 };
 
 FoilAuthModel::ModelInfo::ModelInfo(
     const ModelInfo& aInfo) :
-    iOrder(aInfo.iOrder)
+    iOrder(aInfo.iOrder),
+    iGroups(aInfo.iGroups),
+    iHiddenGroups(aInfo.iHiddenGroups)
 {
 }
 
 FoilAuthModel::ModelInfo::ModelInfo(
-const ModelData::List aData)
+    const ModelData::List aData)
 {
     const int n = aData.count();
     if (n > 0) {
         iOrder.reserve(n);
         for (int i = 0; i < n; i++) {
             const ModelData* data = aData.at(i);
-            iOrder.append(QFileInfo(data->iPath).fileName());
+
+            iOrder.append(data->iId);
+            if (data->isGroupHeader()) {
+                iGroups.insert(data->iId, data->iGroupLabel);
+                if (data->iHidden) {
+                    iHiddenGroups.insert(data->iId);
+                }
+            }
         }
     }
 }
@@ -358,13 +402,42 @@ FoilAuthModel::ModelInfo::ModelInfo(
     const FoilMsg* aMsg)
 {
     const char* order = foilmsg_get_value(aMsg, INFO_ORDER_HEADER);
+
     if (order) {
         char** strv = g_strsplit(order, INFO_ORDER_DELIMITER_S, -1);
+
+        HDEBUG(order);
         for (char** ptr = strv; *ptr; ptr++) {
             iOrder.append(g_strstrip(*ptr));
         }
         g_strfreev(strv);
-        HDEBUG(order);
+    }
+
+    const char* groups = foilmsg_get_value(aMsg, INFO_GROUPS_HEADER);
+
+    if (groups) {
+        char** strv = g_strsplit(groups, INFO_GROUPS_DELIMITER_S, -1);
+
+        HDEBUG(groups);
+        for (char** ptr = strv; *ptr; ptr++) {
+            char** info = g_strsplit(g_strstrip(*ptr), INFO_GROUP_DELIMITER_S, -1);
+            const guint n = gutil_strv_length(info);
+
+            if (n >= 2) {
+                guint visible = TRUE;
+
+                QString id(QString::fromLocal8Bit(info[0]));
+                QString label(QString::fromUtf8(QByteArray::fromHex(info[1])));
+                iGroups.insert(id, label);
+                // gutil_parse_uint handles NULL string
+                if (gutil_parse_uint(info[2], 0, &visible) && !visible) {
+                    iHiddenGroups.insert(id);
+                }
+                HDEBUG(qPrintable(id) << label << (visible ? "visible" : "hidden"));
+            }
+            g_strfreev(info);
+        }
+        g_strfreev(strv);
     }
 }
 
@@ -373,6 +446,8 @@ FoilAuthModel::ModelInfo::operator=(
     const ModelInfo& aInfo)
 {
     iOrder = aInfo.iOrder;
+    iGroups = aInfo.iGroups;
+    iHiddenGroups = aInfo.iHiddenGroups;
     return *this;
 }
 
@@ -412,23 +487,55 @@ FoilAuthModel::ModelInfo::save(
     if (out) {
         QString buf;
         const int n = iOrder.count();
-        for (int i = 0; i < n; i++) {
+        int i;
+
+        for (i = 0; i < n; i++) {
             if (!buf.isEmpty()) buf += QChar(INFO_ORDER_DELIMITER);
             buf += iOrder.at(i);
         }
 
+        FoilMsgHeaders headers;
+        FoilMsgHeader header[2];
         const QByteArray order(buf.toUtf8());
+        QByteArray groups;
 
         HDEBUG("Saving" << fname);
-        HDEBUG(INFO_ORDER_HEADER ":" << order.constData());
-
-        FoilMsgHeaders headers;
-        FoilMsgHeader header[1];
         headers.header = header;
         headers.count = 0;
+
+        HDEBUG(INFO_ORDER_HEADER ":" << order.constData());
         header[headers.count].name = INFO_ORDER_HEADER;
         header[headers.count].value = order.constData();
         headers.count++;
+
+        if (!iGroups.isEmpty()) {
+            QString groupBuf;
+
+            buf.resize(0);
+            QHashIterator<QString,QString> it(iGroups);
+            while (it.hasNext()) {
+                it.next();
+
+                const QString id(it.key());
+
+                groupBuf.resize(0);
+                groupBuf.append(id).
+                    append(QChar(INFO_GROUP_DELIMITER)).
+                    append(it.value().toUtf8().toHex()).
+                    append(QChar(INFO_GROUP_DELIMITER)).
+                    append(iHiddenGroups.contains(id) ?
+                    QChar('0') : QChar('1'));
+
+                if (!buf.isEmpty()) buf += QChar(INFO_GROUPS_DELIMITER);
+                buf += groupBuf;
+            }
+
+            groups = buf.toUtf8();
+            HDEBUG(INFO_GROUPS_HEADER ":" << groups.constData());
+            header[headers.count].name = INFO_GROUPS_HEADER;
+            header[headers.count].value = groups.constData();
+            headers.count++;
+        }
 
         FoilBytes data;
         FoilMsgEncryptOptions opt;
@@ -886,24 +993,25 @@ public:
     // Progress destructor. If the signal never reaches the slot, then
     // ModelData is deallocated together with when the last reference
     // to Progress
-    class Progress {
+    class Progress : public QSharedData {
     public:
-        typedef QSharedPointer<Progress> Ptr;
+        typedef QExplicitlySharedDataPointer<Progress> Ptr;
 
-        Progress(ModelData* aModelData, DecryptAllTask* aTask) :
-            iModelData(aModelData), iTask(aTask) {}
+        Progress(ModelData* aModelData, DecryptAllTask* aTask, bool aFront = false) :
+            iModelData(aModelData), iTask(aTask), iFront(aFront) {}
         ~Progress() { delete iModelData; }
 
     public:
         ModelData* iModelData;
         DecryptAllTask* iTask;
+        const bool iFront;
     };
 
     DecryptAllTask(QThreadPool*, const QString, FoilPrivateKey*, FoilKey*);
 
     void performTask() Q_DECL_OVERRIDE;
 
-    bool decryptToken(const QString aPath);
+    bool decryptToken(const QString, bool, bool aFront = false);
 
 Q_SIGNALS:
     void progress(DecryptAllTask::Progress::Ptr);
@@ -930,7 +1038,9 @@ FoilAuthModel::DecryptAllTask::DecryptAllTask(
 
 bool
 FoilAuthModel::DecryptAllTask::decryptToken(
-    const QString aPath)
+    const QString aPath,
+    bool aHidden,
+    bool aFront)
 {
     bool ok = false;
     FoilMsg* aMsg = decryptAndVerify(aPath);
@@ -953,8 +1063,10 @@ FoilAuthModel::DecryptAllTask::decryptToken(
             data->iNextPassword = data->iToken.passwordString(iTaskTime + FoilAuth::PERIOD);
 
             HDEBUG("Loaded secret from" << qPrintable(aPath));
+            data->iHidden = aHidden;
+
             // The Progress takes ownership of ModelData
-            Q_EMIT progress(Progress::Ptr(new Progress(data, this)));
+            Q_EMIT progress(Progress::Ptr(new Progress(data, this, aFront)));
             ok = true;
         }
         foilmsg_free(aMsg);
@@ -976,29 +1088,43 @@ FoilAuthModel::DecryptAllTask::performTask()
         QFileInfoList list = dir.entryInfoList(QDir::Files |
             QDir::Dirs | QDir::NoDotAndDotDot, QDir::NoSort);
 
-        // Restore the order
-        ModelInfo info(ModelInfo::load(iDir, iPrivateKey, iPublicKey));
-
+        // Restore the order and create the groups
+        const ModelInfo info(ModelInfo::load(iDir, iPrivateKey, iPublicKey));
         const QString infoFile(INFO_FILE);
         QHash<QString,QString> fileMap;
+
+        bool hidden = false;
         int i;
+
         for (i = 0; i < list.count(); i++) {
-            const QFileInfo& info = list.at(i);
-            if (info.isFile()) {
-                const QString name(info.fileName());
+            const QFileInfo& file = list.at(i);
+            if (file.isFile()) {
+                const QString name(file.fileName());
                 if (name != infoFile) {
-                    fileMap.insert(name, info.filePath());
+                    fileMap.insert(name, file.filePath());
                 }
             }
         }
 
         // First decrypt files in known order
         for (i = 0; i < info.iOrder.count() && !isCanceled(); i++) {
-            const QString name(info.iOrder.at(i));
-            if (!fileMap.contains(name) ||
-                !decryptToken(fileMap.take(name))) {
+            const QString id(info.iOrder.at(i));
+            if (info.iGroups.contains(id)) {
+                // This is a group
+                hidden = info.iHiddenGroups.contains(id);
+                // The Progress takes ownership of ModelData
+                Q_EMIT progress(Progress::Ptr(new Progress(new ModelData(id,
+                    info.iGroups.value(id), hidden), this)));
+            } else if (fileMap.contains(id)) {
+                // This is a file
+                if (!decryptToken(fileMap.take(id), hidden)) {
+                    // Broken or missing file
+                    HDEBUG(qPrintable(id) << "oops!");
+                    iSaveInfo = true;
+                }
+            } else {
                 // Broken order or something
-                HDEBUG(qPrintable(name) << "oops!");
+                HDEBUG(qPrintable(id) << "is missing");
                 iSaveInfo = true;
             }
         }
@@ -1008,7 +1134,7 @@ FoilAuthModel::DecryptAllTask::performTask()
             const QStringList remainingFiles = fileMap.values();
             HDEBUG("Remaining file(s)" << remainingFiles);
             for (i = 0; i < remainingFiles.count() && !isCanceled(); i++) {
-                if (!decryptToken(remainingFiles.at(i))) {
+                if (!decryptToken(remainingFiles.at(i), false, true)) {
                     HDEBUG(remainingFiles.at(i) << "was not expected");
                     iSaveInfo = true;
                 }
@@ -1027,6 +1153,7 @@ FoilAuthModel::DecryptAllTask::performTask()
     s(Busy,busy) \
     s(KeyAvailable,keyAvailable) \
     s(TimerActive,timerActive) \
+    s(GroupHeaderRows,groupHeaderRows) \
     s(FoilState,foilState) \
     s(TimeLeft,timeLeft)
 
@@ -1065,6 +1192,7 @@ public:
     ModelData* findData(const QString aId) const;
     QList<FoilAuthToken> getTokens(const QList<int> aRows) const;
     int findDataPos(const QString aId) const;
+    int findGroupPos(int) const;
     bool needTimer() const;
     void queueSignal(Signal aSignal);
     void emitQueuedSignals();
@@ -1074,22 +1202,24 @@ public:
     bool changePassword(const QString, const QString);
     void setKeys(FoilPrivateKey*, FoilKey* aPublic = Q_NULLPTR);
     void setFoilState(FoilState);
+    void addGroup(const QString);
     void addToken(const FoilAuthToken&, bool aFavorite = true);
     void addTokens(const QList<FoilAuthToken>&);
-    void insertModelData(ModelData*);
+    void insertModelData(ModelData*, bool aFront);
     void dataChanged(int , ModelData::Role);
     void dataChanged(QList<int>, ModelData::Role);
     void destroyItemAt(int);
-    bool destroyItemAndRemoveFilesAt(int);
-    bool destroyLastItemAndRemoveFiles();
+    bool destroyTokenAndRemoveFilesAt(int);
     void deleteToken(QString);
     void deleteTokens(QStringList);
-    void deleteAll();
     void clearModel();
     bool busy() const;
     void encrypt(const ModelData*);
     void updatePasswords(const ModelData*);
+    void updateGroupHeaderRows();
     void saveInfo();
+    void saveInfoAndQueueBusySignal();
+    void saveInfoAndQueueBusySignal(bool);
     void generate(int, const QString);
     void lock(bool);
     bool unlock(const QString aPassword);
@@ -1099,6 +1229,7 @@ public:
     SignalMask iQueuedSignals;
     Signal iFirstQueuedSignal;
     ModelData::List iData;
+    QList<int> iGroupHeaderRows;
     FoilState iFoilState;
     QString iFoilDataDir;
     QString iFoilKeyDir;
@@ -1300,6 +1431,22 @@ FoilAuthModel::Private::findDataPos(
     return -1;
 }
 
+int
+FoilAuthModel::Private::findGroupPos(
+    int aPos) const
+{
+    if (aPos < iData.count()) {
+        while (aPos >= 0) {
+            if (iData.at(aPos)->isGroupHeader()) {
+                return aPos;
+            } else {
+                aPos--;
+            }
+        }
+    }
+    return -1;
+}
+
 QList<FoilAuthToken>
 FoilAuthModel::Private::getTokens(
     const QList<int> aRows) const
@@ -1493,14 +1640,20 @@ FoilAuthModel::Private::dataChanged(
 
 void
 FoilAuthModel::Private::insertModelData(
-    ModelData* aData)
+    ModelData* aData,
+    bool aFront)
 {
     // Insert it into the model
-    const int pos = iData.count();
+    const int pos = aFront ? 0 : iData.count();
     FoilAuthModel* model = parentModel();
     model->beginInsertRows(QModelIndex(), pos, pos);
-    iData.append(aData);
+    if (aFront) {
+        iData.prepend(aData);
+    } else {
+        iData.append(aData);
+    }
     HDEBUG(aData->iId << aData->iToken.secretBase32() << aData->label());
+    updateGroupHeaderRows();
     queueSignal(SignalCountChanged);
     checkTimer();
     model->endInsertRows();
@@ -1512,7 +1665,7 @@ FoilAuthModel::Private::onDecryptAllProgress(
 {
     if (aProgress && aProgress->iTask == iDecryptAllTask) {
         // Transfer ownership of this ModelData to the model
-        insertModelData(aProgress->iModelData);
+        insertModelData(aProgress->iModelData, aProgress->iFront);
         aProgress->iModelData = NULL;
     }
     emitQueuedSignals();
@@ -1539,13 +1692,41 @@ FoilAuthModel::Private::onDecryptAllTaskDone()
 }
 
 void
+FoilAuthModel::Private::addGroup(
+    const QString aTitle)
+{
+    // Generate unique id
+    GString* dest = g_string_sized_new(8);
+    FoilAuth::generateId(dest);
+    QString id(QString::fromLocal8Bit(dest->str, dest->len));
+    while (findData(id)) {
+        g_string_truncate(dest, 0);
+        FoilAuth::generateId(dest);
+        id = QString::fromLocal8Bit(dest->str, dest->len);
+    }
+    g_string_free(dest, TRUE);
+
+    // Insert the new group to the end of the list
+    ModelData* data = new ModelData(id, aTitle);
+    const int pos = iData.count();
+    FoilAuthModel* model = parentModel();
+    model->beginInsertRows(QModelIndex(), pos, pos);
+    iData.append(data);
+    HDEBUG(data->iId << data->label());
+    queueSignal(SignalCountChanged);
+    saveInfoAndQueueBusySignal();
+    updateGroupHeaderRows();
+    model->endInsertRows();
+}
+
+void
 FoilAuthModel::Private::addToken(
     const FoilAuthToken& aToken,
     bool aFavorite)
 {
     const QString path(FoilAuth::createEmptyFoilFile(iFoilDataDir));
     ModelData* data = new ModelData(path, aToken, aFavorite);
-    insertModelData(data);
+    insertModelData(data, true);
     updatePasswords(data);
     encrypt(data);
 }
@@ -1715,6 +1896,22 @@ FoilAuthModel::Private::saveInfo()
 }
 
 void
+FoilAuthModel::Private::saveInfoAndQueueBusySignal()
+{
+    saveInfoAndQueueBusySignal(busy());
+}
+
+void
+FoilAuthModel::Private::saveInfoAndQueueBusySignal(
+    bool aWasBusy)
+{
+    saveInfo();
+    if (aWasBusy != busy()) {
+        queueSignal(SignalBusyChanged);
+    }
+}
+
+void
 FoilAuthModel::Private::onSaveInfoDone()
 {
     HDEBUG("Done");
@@ -1773,39 +1970,24 @@ void
 FoilAuthModel::Private::destroyItemAt(
     int aIndex)
 {
-    if (aIndex >= 0 && aIndex <= iData.count()) {
-        FoilAuthModel* model = parentModel();
-        HDEBUG(iData.at(aIndex)->label());
-        model->beginRemoveRows(QModelIndex(), aIndex, aIndex);
-        delete iData.takeAt(aIndex);
-        model->endRemoveRows();
-        queueSignal(SignalCountChanged);
-        checkTimer();
-    }
+    // The caller has checked the validity of the index
+    FoilAuthModel* model = parentModel();
+    HDEBUG(iData.at(aIndex)->label());
+    model->beginRemoveRows(QModelIndex(), aIndex, aIndex);
+    delete iData.takeAt(aIndex);
+    model->endRemoveRows();
+    queueSignal(SignalCountChanged);
 }
 
 bool
-FoilAuthModel::Private::destroyItemAndRemoveFilesAt(
+FoilAuthModel::Private::destroyTokenAndRemoveFilesAt(
     int aIndex)
 {
     ModelData* data = dataAt(aIndex);
-    if (data) {
-        QString path(data->iPath);
+    if (data && !data->isGroupHeader()) {
+        const QString path(data->iPath);
         destroyItemAt(aIndex);
-        BaseTask::removeFile(path);
-        return true;
-    }
-    return false;
-}
-
-bool
-FoilAuthModel::Private::destroyLastItemAndRemoveFiles()
-{
-    const int n = iData.count();
-    if (n > 0) {
-        ModelData* data = iData.at(n - 1);
-        QString path(data->iPath);
-        destroyItemAt(n - 1);
+        checkTimer();
         BaseTask::removeFile(path);
         return true;
     }
@@ -1817,12 +1999,9 @@ FoilAuthModel::Private::deleteToken(
     QString aId)
 {
     const bool wasBusy = busy();
-    if (destroyItemAndRemoveFilesAt(findDataPos(aId))) {
-        // saveInfo() doesn't queue BusyChanged signal, we have to do it here
-        saveInfo();
-        if (wasBusy != busy()) {
-            queueSignal(SignalBusyChanged);
-        }
+    if (destroyTokenAndRemoveFilesAt(findDataPos(aId))) {
+        saveInfoAndQueueBusySignal(wasBusy);
+        updateGroupHeaderRows();
     } else {
         HDEBUG("Invalid token id" << aId);
     }
@@ -1837,38 +2016,15 @@ FoilAuthModel::Private::deleteTokens(
     int deleted = 0;
     for (int i = 0; i < n; i++) {
         const QString id(aIds.at(i));
-        if (destroyItemAndRemoveFilesAt(findDataPos(id))) {
+        if (destroyTokenAndRemoveFilesAt(findDataPos(id))) {
             deleted++;
         } else {
             HDEBUG("Invalid token id" << id);
         }
     }
     if (deleted) {
-        saveInfo();
-        // saveInfo() doesn't queue BusyChanged signal, we have to do it here
-        if (wasBusy != busy()) {
-            queueSignal(SignalBusyChanged);
-        }
-    }
-}
-
-void
-FoilAuthModel::Private::deleteAll()
-{
-    const int n = iData.count();
-    if (n > 0) {
-        const bool wasBusy = busy();
-        FoilAuthModel* model = parentModel();
-        model->beginRemoveRows(QModelIndex(), 0, n - 1);
-        while (destroyLastItemAndRemoveFiles());
-        model->endRemoveRows();
-        queueSignal(SignalCountChanged);
-        checkTimer();
-        saveInfo();
-        // saveInfo() doesn't queue BusyChanged signal, we have to do it here
-        if (wasBusy != busy()) {
-            queueSignal(SignalBusyChanged);
-        }
+        saveInfoAndQueueBusySignal(wasBusy);
+        updateGroupHeaderRows();
     }
 }
 
@@ -1916,6 +2072,7 @@ FoilAuthModel::Private::lock(
         iData.clear();
         model->endRemoveRows();
         queueSignal(SignalCountChanged);
+        updateGroupHeaderRows();
         checkTimer();
     }
     if (busy() != wasBusy) {
@@ -2022,7 +2179,11 @@ FoilAuthModel::Private::updateTimer()
         queueSignal(SignalTimeLeftChanged);
         const int n = iData.count();
         for (int i = 0; i < n; i++) {
-            updatePasswords(iData.at(i));
+            const ModelData* data = iData.at(i);
+
+            if (!data->isGroupHeader()) {
+                updatePasswords(data);
+            }
         }
         Q_EMIT parentModel()->timerRestarted();
     } else {
@@ -2040,6 +2201,49 @@ FoilAuthModel::Private::onTimer()
 {
     updateTimer();
     emitQueuedSignals();
+}
+
+void
+FoilAuthModel::Private::updateGroupHeaderRows()
+{
+    int count = 0;
+    const int knownCount = iGroupHeaderRows.count();
+    const int n = iData.count();
+    for (int i = 0; i < n; i++) {
+        if (iData.at(i)->isGroupHeader()) {
+            count++;
+            if (count > knownCount || iGroupHeaderRows.at(count-1) != i) {
+                QList<int> rows;
+
+                // Something has changed
+                rows.reserve(knownCount);
+                rows = iGroupHeaderRows.mid(0, count - 1);
+                rows.append(i++);
+                if (i < n) {
+                    // Search for more groups
+                    for (; i < n; i++) {
+                        if (iData.at(i)->isGroupHeader()) {
+                            rows.append(i);
+                        }
+                    }
+                }
+                HDEBUG(iGroupHeaderRows << "=>" << rows);
+                iGroupHeaderRows = rows;
+                queueSignal(SignalGroupHeaderRowsChanged);
+                return;
+            }
+        }
+    }
+
+    // Everything has matched so far
+    if (count < knownCount) {
+        QList<int> rows(iGroupHeaderRows.mid(0, count));
+
+        // A group has been removed from the end
+        HDEBUG(iGroupHeaderRows << "=>" << rows);
+        iGroupHeaderRows = rows;
+        queueSignal(SignalGroupHeaderRowsChanged);
+    }
 }
 
 // ==========================================================================
@@ -2073,6 +2277,12 @@ int
 FoilAuthModel::favoriteRole()
 {
     return ModelData::FavoriteRole;
+}
+
+int
+FoilAuthModel::groupHeaderRole()
+{
+    return ModelData::GroupHeaderRole;
 }
 
 Qt::ItemFlags
@@ -2120,7 +2330,7 @@ FoilAuthModel::setData(
         QVector<int> roles;
         switch ((ModelData::Role)aRole) {
         case ModelData::FavoriteRole:
-            {
+            if (!data->isGroupHeader()) {
                 const bool favorite = aValue.toBool();
                 HDEBUG(row << "favorite" << favorite);
                 if (data->iFavorite != favorite) {
@@ -2130,10 +2340,58 @@ FoilAuthModel::setData(
                     roles.append(aRole);
                     Q_EMIT dataChanged(aIndex, aIndex, roles);
                 }
+                return true;
+            }
+            break;
+        case ModelData::HiddenRole:
+            {
+                const bool hidden = aValue.toBool();
+                if (data->iHidden != hidden) {
+                    data->iHidden = hidden;
+                    roles.append(aRole);
+
+                    QModelIndex bottom(aIndex);
+                    #if HARBOUR_DEBUG
+                    const char* state = hidden ? "hidden" : "visible";
+                    #endif // HARBOUR_DEBUG
+
+                    if (data->isGroupHeader()) {
+                        const int n = iPrivate->iData.count();
+                        int i;
+
+                        // We can assume that if the group's state has
+                        // changed, then the states of the items which
+                        // belong to this group, have changed too.
+                        HDEBUG(row << "group" << state);
+                        for (i = row + 1; i < n; i++) {
+                            ModelData* otherItem = iPrivate->dataAt(i);
+                            if (!otherItem->isGroupHeader()) {
+                                otherItem->iHidden = hidden;
+                                HDEBUG(i << "item" << state);
+                            } else {
+                                break;
+                            }
+                        }
+                        bottom = index(i - 1);
+                    } else {
+                        HDEBUG(row << "item" << state);
+                    }
+                    Q_EMIT dataChanged(aIndex, bottom, roles);
+                    iPrivate->saveInfoAndQueueBusySignal();
+                }
             }
             return true;
         case ModelData::LabelRole:
-            {
+            if (data->isGroupHeader()) {
+                const QString label = aValue.toString();
+                HDEBUG(row << "section" << label);
+                if (data->iGroupLabel != label) {
+                    data->iGroupLabel = label;
+                    roles.append(aRole);
+                    Q_EMIT dataChanged(aIndex, aIndex, roles);
+                    iPrivate->saveInfoAndQueueBusySignal();
+                }
+            } else {
                 const QString label = aValue.toString();
                 HDEBUG(row << "label" << label);
                 if (data->label() != label) {
@@ -2146,7 +2404,7 @@ FoilAuthModel::setData(
             }
             return true;
         case ModelData::SecretRole:
-            {
+            if (!data->isGroupHeader()) {
                 const QString base32(aValue.toString().toLower());
                 const QByteArray secret(HarbourBase32::fromBase32(base32));
                 HDEBUG(row << "secret" << base32 << "->" << secret.size() << "bytes");
@@ -2164,7 +2422,7 @@ FoilAuthModel::setData(
             }
             break;
         case ModelData::DigitsRole:
-            {
+            if (!data->isGroupHeader()) {
                 bool ok;
                 const int digits = aValue.toInt(&ok);
                 HDEBUG(row << "digits" << digits);
@@ -2181,7 +2439,7 @@ FoilAuthModel::setData(
             }
             break;
         case ModelData::TypeRole:
-            {
+            if (!data->isGroupHeader()) {
                 bool ok;
                 const FoilAuthTypes::AuthType type =
                     (FoilAuthTypes::AuthType) aValue.toInt(&ok);
@@ -2199,7 +2457,7 @@ FoilAuthModel::setData(
             }
             break;
         case ModelData::AlgorithmRole:
-            {
+            if (!data->isGroupHeader()) {
                 bool ok;
                 const FoilAuthTypes::DigestAlgorithm alg =
                     (FoilAuthTypes::DigestAlgorithm) aValue.toInt(&ok);
@@ -2217,7 +2475,7 @@ FoilAuthModel::setData(
             }
             break;
         case ModelData::CounterRole:
-            {
+            if (!data->isGroupHeader()) {
                 bool ok;
                 const quint64 counter = aValue.toULongLong(&ok);
                 HDEBUG(row << "counter" << counter);
@@ -2234,7 +2492,7 @@ FoilAuthModel::setData(
             }
             break;
         case ModelData::TimeshiftRole:
-            {
+            if (!data->isGroupHeader()) {
                 bool ok;
                 int sec = aValue.toInt(&ok);
                 HDEBUG(row << "timeshift" << sec);
@@ -2253,6 +2511,7 @@ FoilAuthModel::setData(
         // No default to make sure that we get "warning: enumeration value
         // not handled in switch" if we forget to handle a real role.
         case ModelData::ModelIdRole:
+        case ModelData::GroupHeaderRole:
         case ModelData::IssuerRole:
         case ModelData::PrevPasswordRole:
         case ModelData::CurrentPasswordRole:
@@ -2285,10 +2544,37 @@ FoilAuthModel::moveRows(
         iPrivate->iData.move(aSrcRow, aDestRow);
         endMoveRows();
 
-        iPrivate->saveInfo();
-        if (!wasBusy) {
-            iPrivate->queueSignal(Private::SignalBusyChanged);
+        if (aDestRow > 0) {
+            int i = iPrivate->findGroupPos(aDestRow);
+            ModelData* group = iPrivate->dataAt(i); // Handles invalid index
+
+            // If we are moving token into a group, expand that group
+            if (group && group->iHidden) {
+                const QVector<int> roles(1, ModelData::HiddenRole);
+                const int n = iPrivate->iData.count();
+
+                HDEBUG("Expanding" << qPrintable(group->iId) <<
+                    group->iGroupLabel);
+                group->iHidden = false;
+
+                // The token being moved is normally already visible
+                // but it's OK to include it into the dataChanged range
+                const QModelIndex top(index(i));
+                for (i++; i < n; i++) {
+                    ModelData* data = iPrivate->dataAt(i);
+                    if (!data->isGroupHeader()) {
+                        data->iHidden = false;
+                        HDEBUG(i << "item" << "visible");
+                    } else {
+                        break;
+                    }
+                }
+                Q_EMIT dataChanged(top, index(i - 1), roles);
+            }
         }
+
+        iPrivate->saveInfoAndQueueBusySignal(wasBusy);
+        iPrivate->updateGroupHeaderRows();
         iPrivate->emitQueuedSignals();
         return true;
     } else {
@@ -2324,6 +2610,12 @@ bool
 FoilAuthModel::timerActive() const
 {
     return iPrivate->iTimer->isActive();
+}
+
+QList<int>
+FoilAuthModel::groupHeaderRows() const
+{
+    return iPrivate->iGroupHeaderRows;
 }
 
 FoilAuthModel::FoilState
@@ -2375,6 +2667,15 @@ FoilAuthModel::unlock(
     return ok;
 }
 
+void
+FoilAuthModel::addGroup(
+    const QString aTitle)
+{
+    HDEBUG(aTitle);
+    iPrivate->addGroup(aTitle);
+    iPrivate->emitQueuedSignals();
+}
+
 bool
 FoilAuthModel::addToken(
     int aType,
@@ -2419,6 +2720,25 @@ FoilAuthModel::addTokens(
 }
 
 void
+FoilAuthModel::deleteGroupItem(
+    const QString aId)
+{
+    HDEBUG(aId);
+    const int pos = iPrivate->findDataPos(aId);
+    if (pos >= 0) {
+        ModelData* data = iPrivate->dataAt(pos);
+        if (data->isGroupHeader()) {
+            const bool wasBusy = iPrivate->busy();
+            iPrivate->destroyItemAt(pos);
+            iPrivate->saveInfoAndQueueBusySignal(wasBusy);
+            iPrivate->emitQueuedSignals();
+            return;
+        }
+    }
+    HDEBUG("Invalid group id" << aId);
+}
+
+void
 FoilAuthModel::deleteToken(
     const QString aId)
 {
@@ -2436,14 +2756,6 @@ FoilAuthModel::deleteTokens(
     iPrivate->emitQueuedSignals();
 }
 
-void
-FoilAuthModel::deleteAll()
-{
-    HDEBUG("deleting all tokena");
-    iPrivate->deleteAll();
-    iPrivate->emitQueuedSignals();
-}
-
 QStringList
 FoilAuthModel::getIdsAt(
     const QList<int> aRows) const
@@ -2458,6 +2770,25 @@ FoilAuthModel::getIdsAt(
         }
     }
     return ids;
+}
+
+QList<int>
+FoilAuthModel::itemRowsForGroupAt(
+    int aRow) const
+{
+    QList<int> rows;
+    ModelData* data = iPrivate->dataAt(aRow);
+    if (data->isGroupHeader()) {
+        const int n = iPrivate->rowCount();
+        for (int i = aRow + 1; i < n; i++) {
+            if (iPrivate->dataAt(i)->isGroupHeader()) {
+                break;
+            } else {
+                rows.append(i);
+            }
+        }
+    }
+    return rows;
 }
 
 int

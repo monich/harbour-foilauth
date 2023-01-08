@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022 Jolla Ltd.
- * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2023 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -219,6 +219,17 @@ FoilAuth::stringListRemove(
     return aList;
 }
 
+const char*
+FoilAuth::generateId(
+    GString* aString)
+{
+    guint8 data[8];
+    foil_random_generate(FOIL_RANDOM_DEFAULT, data, sizeof(data));
+    g_string_append_printf(aString, "%02X%02X%02X%02X%02X%02X%02X%02X",
+        data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
+    return aString->str;
+}
+
 FoilOutput*
 FoilAuth::createFoilFile(
     const QString aDestDir,
@@ -233,12 +244,8 @@ FoilAuth::createFoilFile(
     g_string_append_c(aOutPath, '/');
     const gsize prefix_len = aOutPath->len;
     for (int i = 0; i < 100 && !out; i++) {
-        guint8 data[8];
-        foil_random_generate(FOIL_RANDOM_DEFAULT, data, sizeof(data));
         g_string_truncate(aOutPath, prefix_len);
-        g_string_append_printf(aOutPath, "%02X%02X%02X%02X%02X%02X%02X%02X",
-            data[0],data[1],data[2],data[3],data[4],data[5],data[6],data[7]);
-        out = foil_output_file_new_open(aOutPath->str);
+        out = foil_output_file_new_open(generateId(aOutPath));
     }
     HASSERT(out);
     return out;

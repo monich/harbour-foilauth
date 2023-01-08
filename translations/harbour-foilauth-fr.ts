@@ -247,10 +247,10 @@
         <extracomment>Pulley menu item, changes Foil password</extracomment>
         <translation>Modifier le mot de passe</translation>
     </message>
-    <message id="foilauth-menu-lock">
-        <source>Lock</source>
-        <extracomment>Pulley menu item, locks the tokens</extracomment>
-        <translation>Verrouiller</translation>
+    <message id="foilauth-menu-organize">
+        <source>Organize</source>
+        <extracomment>Pulley menu item, opens organize page</extracomment>
+        <translation type="unfinished">Organiser</translation>
     </message>
     <message id="foilauth-menu-new_auth_token">
         <source>Add token</source>
@@ -406,6 +406,51 @@
         <source>Select tokens to add</source>
         <extracomment>Dialog title</extracomment>
         <translation type="unfinished">Sélectionnez les jetons à ajouter</translation>
+    </message>
+    <message id="foilauth-organize-groups-title">
+        <source>Manage groups</source>
+        <extracomment>Page header title</extracomment>
+        <translation type="unfinished">Gérer les groupes</translation>
+    </message>
+    <message id="foilauth-organize-groups-description">
+        <source>Create, delete and rename groups</source>
+        <extracomment>Page header descriptions</extracomment>
+        <translation type="unfinished">Créer, supprimer et renommer des groupes</translation>
+    </message>
+    <message id="foilauth-organize-groups-menu-rename">
+        <source>Rename</source>
+        <extracomment>Context menu item</extracomment>
+        <translation type="unfinished">Renommer</translation>
+    </message>
+    <message id="foilauth-organize-groups-menu-delete">
+        <source>Delete</source>
+        <extracomment>Context menu item</extracomment>
+        <translation type="unfinished">Supprimer</translation>
+    </message>
+    <message id="foilauth-organize-groups-remorse-deleting">
+        <source>Deleting</source>
+        <extracomment>Remorse item label</extracomment>
+        <translation type="unfinished">Suppression</translation>
+    </message>
+    <message id="foilauth-organize-groups-add_group">
+        <source>Add group</source>
+        <extracomment>List footer button label</extracomment>
+        <translation type="unfinished">Ajouter un groupe</translation>
+    </message>
+    <message id="foilauth-organize-groups-new_group">
+        <source>New group</source>
+        <extracomment>Default name for the new group</extracomment>
+        <translation type="unfinished">Nouveau groupe</translation>
+    </message>
+    <message id="foilauth-organize-tokens-title">
+        <source>Organize tokens</source>
+        <extracomment>Page header title</extracomment>
+        <translation type="unfinished">Organiser les jetons</translation>
+    </message>
+    <message id="foilauth-organize-tokens-description">
+        <source>Press, hold and drag to reorder</source>
+        <extracomment>Page header descriptions</extracomment>
+        <translation type="unfinished">Appuyez, maintenez et faites glisser pour réorganiser</translation>
     </message>
     <message id="foilauth-settings_page-header-version">
         <source>Version %1</source>

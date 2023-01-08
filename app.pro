@@ -80,6 +80,7 @@ HEADERS += \
     src/FoilAuth.h \
     src/FoilAuthDefs.h \
     src/FoilAuthFavoritesModel.h \
+    src/FoilAuthGroupModel.h \
     src/FoilAuthImportModel.h \
     src/FoilAuthModel.h \
     src/FoilAuthSettings.h \
@@ -92,6 +93,7 @@ HEADERS += \
 SOURCES += \
     src/FoilAuth.cpp \
     src/FoilAuthFavoritesModel.cpp \
+    src/FoilAuthGroupModel.cpp \
     src/FoilAuthImportModel.cpp \
     src/FoilAuthModel.cpp \
     src/FoilAuthSettings.cpp \
@@ -169,11 +171,13 @@ SOURCES += \
     $${HARBOUR_LIB_SRC}/HarbourTask.cpp
 
 HARBOUR_QML_COMPONENTS = \
+    $${HARBOUR_LIB_QML}/HarbourBadge.qml \
     $${HARBOUR_LIB_QML}/HarbourFitLabel.qml \
     $${HARBOUR_LIB_QML}/HarbourHighlightIcon.qml \
     $${HARBOUR_LIB_QML}/HarbourIconTextButton.qml \
     $${HARBOUR_LIB_QML}/HarbourHintIconButton.qml \
     $${HARBOUR_LIB_QML}/HarbourPasswordInputField.qml \
+    $${HARBOUR_LIB_QML}/HarbourPressEffect.qml \
     $${HARBOUR_LIB_QML}/HarbourShakeAnimation.qml \
     $${HARBOUR_LIB_QML}/HarbourTextFlip.qml
 

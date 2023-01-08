@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022 Jolla Ltd.
- * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2023 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -86,6 +86,7 @@ public:
     static QSize toSize(QVariant);
     static QString toBase32(QByteArray, bool aLowerCase = true);
     static QByteArray toByteArray(GBytes*);
+    static const char* generateId(GString*);
     static FoilOutput* createFoilFile(const QString, GString*);
     static QString createEmptyFoilFile(const QString);
     static QString migrationUri(const QByteArray);

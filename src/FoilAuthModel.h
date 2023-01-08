@@ -1,6 +1,6 @@
 /*
  * Copyright (C) 2019-2022 Jolla Ltd.
- * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2023 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -53,6 +53,7 @@ class FoilAuthModel : public QAbstractListModel {
     Q_PROPERTY(bool busy READ busy NOTIFY busyChanged)
     Q_PROPERTY(bool keyAvailable READ keyAvailable NOTIFY keyAvailableChanged)
     Q_PROPERTY(bool timerActive READ timerActive NOTIFY timerActiveChanged)
+    Q_PROPERTY(QList<int> groupHeaderRows READ groupHeaderRows NOTIFY groupHeaderRowsChanged)
     Q_PROPERTY(FoilState foilState READ foilState NOTIFY foilStateChanged)
     Q_DISABLE_COPY(FoilAuthModel)
 
@@ -61,7 +62,6 @@ class FoilAuthModel : public QAbstractListModel {
     class ModelData;
     class BaseTask;
     class SaveInfoTask;
-    class SaveTokenTask;
     class GenerateKeyTask;
     class DecryptTask;
     class EncryptTask;
@@ -87,12 +87,14 @@ public:
 
     static int typeRole();
     static int favoriteRole();
+    static int groupHeaderRole();
 
     int period() const;
     int timeLeft() const;
     bool busy() const;
     bool keyAvailable() const;
     bool timerActive() const;
+    QList<int> groupHeaderRows() const;
     FoilState foilState() const;
 
     int indexOf(FoilAuthToken) const;
@@ -106,13 +108,15 @@ public:
     Q_INVOKABLE void lock(bool aTimeout);
     Q_INVOKABLE bool unlock(const QString aPassword);
 
+    Q_INVOKABLE void addGroup(const QString);
     Q_INVOKABLE bool addToken(int aType, const QString aTokenBase32,
         const QString aLabel, const QString aIssuer, int aDigits,
         int aCounter, int aTimeShift, int aAlgorithm);
     Q_INVOKABLE void addTokens(const QList<FoilAuthToken>);
+    Q_INVOKABLE void deleteGroupItem(const QString);
     Q_INVOKABLE void deleteToken(const QString);
     Q_INVOKABLE void deleteTokens(const QStringList);
-    Q_INVOKABLE void deleteAll();
+    Q_INVOKABLE QList<int> itemRowsForGroupAt(int) const;
     Q_INVOKABLE QStringList getIdsAt(const QList<int>) const;
     Q_INVOKABLE QStringList generateMigrationUris(const QList<int>) const;
 
@@ -132,6 +136,7 @@ Q_SIGNALS:
     void busyChanged();
     void keyAvailableChanged();
     void timerActiveChanged();
+    void groupHeaderRowsChanged();
     void foilStateChanged();
     void timeLeftChanged();
     void keyGenerated();

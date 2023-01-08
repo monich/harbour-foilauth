@@ -248,10 +248,10 @@
         <extracomment>Pulley menu item, changes Foil password</extracomment>
         <translation>Ändra lösenord</translation>
     </message>
-    <message id="foilauth-menu-lock">
-        <source>Lock</source>
-        <extracomment>Pulley menu item, locks the tokens</extracomment>
-        <translation>Lås</translation>
+    <message id="foilauth-menu-organize">
+        <source>Organize</source>
+        <extracomment>Pulley menu item, opens organize page</extracomment>
+        <translation>Organisera</translation>
     </message>
     <message id="foilauth-menu-new_auth_token">
         <source>Add token</source>
@@ -407,6 +407,51 @@
         <source>Select tokens to add</source>
         <extracomment>Dialog title</extracomment>
         <translation type="unfinished">Välj tokens att lägga till</translation>
+    </message>
+    <message id="foilauth-organize-groups-title">
+        <source>Manage groups</source>
+        <extracomment>Page header title</extracomment>
+        <translation type="unfinished">Hantera grupper</translation>
+    </message>
+    <message id="foilauth-organize-groups-description">
+        <source>Create, delete and rename groups</source>
+        <extracomment>Page header descriptions</extracomment>
+        <translation type="unfinished">Skapa, ta bort och byt namn på grupper</translation>
+    </message>
+    <message id="foilauth-organize-groups-menu-rename">
+        <source>Rename</source>
+        <extracomment>Context menu item</extracomment>
+        <translation type="unfinished">Döp om</translation>
+    </message>
+    <message id="foilauth-organize-groups-menu-delete">
+        <source>Delete</source>
+        <extracomment>Context menu item</extracomment>
+        <translation type="unfinished">Ta bort</translation>
+    </message>
+    <message id="foilauth-organize-groups-remorse-deleting">
+        <source>Deleting</source>
+        <extracomment>Remorse item label</extracomment>
+        <translation type="unfinished">Tar bort</translation>
+    </message>
+    <message id="foilauth-organize-groups-add_group">
+        <source>Add group</source>
+        <extracomment>List footer button label</extracomment>
+        <translation type="unfinished">Lägg till grupp</translation>
+    </message>
+    <message id="foilauth-organize-groups-new_group">
+        <source>New group</source>
+        <extracomment>Default name for the new group</extracomment>
+        <translation type="unfinished">Ny grupp</translation>
+    </message>
+    <message id="foilauth-organize-tokens-title">
+        <source>Organize tokens</source>
+        <extracomment>Page header title</extracomment>
+        <translation type="unfinished">Organisera tokens</translation>
+    </message>
+    <message id="foilauth-organize-tokens-description">
+        <source>Press, hold and drag to reorder</source>
+        <extracomment>Page header descriptions</extracomment>
+        <translation type="unfinished">Tryck, håll och dra för att ändra ordning</translation>
     </message>
     <message id="foilauth-settings_page-header-version">
         <source>Version %1</source>

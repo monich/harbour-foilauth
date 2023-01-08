@@ -250,10 +250,10 @@
         <extracomment>Pulley menu item, changes Foil password</extracomment>
         <translation>Поменять пароль</translation>
     </message>
-    <message id="foilauth-menu-lock">
-        <source>Lock</source>
-        <extracomment>Pulley menu item, locks the tokens</extracomment>
-        <translation>Заблокировать</translation>
+    <message id="foilauth-menu-organize">
+        <source>Organize</source>
+        <extracomment>Pulley menu item, opens organize page</extracomment>
+        <translation>Упорядочить</translation>
     </message>
     <message id="foilauth-menu-select_tokens">
         <source>Select</source>
@@ -409,6 +409,51 @@
         <source>Select tokens to add</source>
         <extracomment>Dialog title</extracomment>
         <translation>Выберите нужные коды</translation>
+    </message>
+    <message id="foilauth-organize-groups-title">
+        <source>Manage groups</source>
+        <extracomment>Page header title</extracomment>
+        <translation>Управление группами</translation>
+    </message>
+    <message id="foilauth-organize-groups-description">
+        <source>Create, delete and rename groups</source>
+        <extracomment>Page header descriptions</extracomment>
+        <translation>Создание, удаление и переименование</translation>
+    </message>
+    <message id="foilauth-organize-groups-menu-rename">
+        <source>Rename</source>
+        <extracomment>Context menu item</extracomment>
+        <translation>Переименовать</translation>
+    </message>
+    <message id="foilauth-organize-groups-menu-delete">
+        <source>Delete</source>
+        <extracomment>Context menu item</extracomment>
+        <translation>Удалить</translation>
+    </message>
+    <message id="foilauth-organize-groups-remorse-deleting">
+        <source>Deleting</source>
+        <extracomment>Remorse item label</extracomment>
+        <translation>Удаление</translation>
+    </message>
+    <message id="foilauth-organize-groups-add_group">
+        <source>Add group</source>
+        <extracomment>List footer button label</extracomment>
+        <translation>Добавить группу</translation>
+    </message>
+    <message id="foilauth-organize-groups-new_group">
+        <source>New group</source>
+        <extracomment>Default name for the new group</extracomment>
+        <translation>Новая группа</translation>
+    </message>
+    <message id="foilauth-organize-tokens-title">
+        <source>Organize tokens</source>
+        <extracomment>Page header title</extracomment>
+        <translation>Поменять порядок</translation>
+    </message>
+    <message id="foilauth-organize-tokens-description">
+        <source>Press, hold and drag to reorder</source>
+        <extracomment>Page header descriptions</extracomment>
+        <translation>Жмите на всё и таскайте с места на место</translation>
     </message>
     <message id="foilauth-settings_page-header-version">
         <source>Version %1</source>

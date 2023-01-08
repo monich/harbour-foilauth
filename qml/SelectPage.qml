@@ -5,7 +5,7 @@ import harbour.foilauth 1.0
 Page {
     id: thisPage
 
-    property alias sourceModel: selectionModel.sourceModel
+    property var foilModel
     property Item toolPanel
 
     signal deleteRows(var rows)
@@ -36,7 +36,7 @@ Page {
             function updateMenuItems() {
                 if (!active) {
                     selectNoneMenuItem.visible = selectionModel.selectionCount > 0
-                    selectAllMenuItem.visible = selectionModel.selectionCount < selectionModel.count
+                    selectAllMenuItem.visible = selectionModel.selectionCount < selectionModel.selectableCount
                 }
             }
             MenuItem {
@@ -61,8 +61,10 @@ Page {
             model: HarbourSelectionListModel {
                 id: selectionModel
 
+                sourceModel: foilModel
+                nonSelectableRows: foilModel.groupHeaderRows
                 onSelectionCountChanged: pullDownMenu.updateMenuItems()
-                onCountChanged: pullDownMenu.updateMenuItems()
+                onSelectableCountChanged: pullDownMenu.updateMenuItems()
             }
 
             header: PageHeader {
@@ -72,21 +74,50 @@ Page {
             }
 
             delegate: ListItem {
-                TokenListItem {
-                    anchors.fill: parent
-                    interactive: false
-                    description: model.label
-                    prevPassword: model.prevPassword
-                    currentPassword: model.currentPassword
-                    nextPassword: model.nextPassword
-                    favorite: model.favorite
-                    hotp: model.type === FoilAuth.TypeHOTP
-                    hotpMinus: model.counter > 0
-                    landscape: thisPage.isLandscape
-                    color: model.selected ? Theme.rgba(Theme.highlightBackgroundColor, 0.2) : "transparent"
-                    selected: model.selected
+                id: listItem
+
+                Loader {
+                    active: !model.groupHeader
+                    width: listItem.width
+                    height: listItem.contentHeight
+                    sourceComponent: Component {
+                        TokenListItem {
+                            anchors.fill: parent
+                            interactive: false
+                            description: model.label
+                            prevPassword: model.prevPassword
+                            currentPassword: model.currentPassword
+                            nextPassword: model.nextPassword
+                            favorite: model.favorite
+                            hotp: model.type === FoilAuth.TypeHOTP
+                            hotpMinus: model.counter > 0
+                            landscape: thisPage.isLandscape
+                            color: model.selected ? Theme.rgba(Theme.highlightBackgroundColor, 0.2) : "transparent"
+                            selected: model.selected
+                        }
+                    }
                 }
-                onClicked: model.selected = !model.selected
+
+                Loader {
+                    active: model.groupHeader
+                    width: listItem.width
+                    height: listItem.contentHeight
+                    sourceComponent: Component {
+                        GroupHeader {
+                            title: model.label
+                        }
+                    }
+                }
+
+                onClicked: {
+                    if (model.groupHeader) {
+                        var rows = foilModel.itemRowsForGroupAt(index)
+                        console.log(index,"=>",rows)
+                        selectionModel.toggleRows(rows)
+                    } else {
+                        model.selected = !model.selected
+                    }
+                }
             }
 
             VerticalScrollDecorator { }
@@ -106,7 +137,7 @@ Page {
     SelectToolPanel {
         id: toolPanel
 
-        readonly property var exportList: sourceModel.generateMigrationUris(selectionModel.selectedRows)
+        readonly property var exportList: foilModel.generateMigrationUris(selectionModel.selectedRows)
 
         active: selectionModel.selectionCount > 0
         canExport: exportList.length > 0
