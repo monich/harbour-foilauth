@@ -114,12 +114,12 @@
     <message id="foilauth-token-digest_algorithm-label">
         <source>Digest algorithm</source>
         <extracomment>Combo box label</extracomment>
-        <translation type="unfinished">Sammandrag algoritm</translation>
+        <translation>Sammandragsalgoritm</translation>
     </message>
     <message id="foilauth-token-digest_algorithm-default">
         <source>%1 (default)</source>
         <extracomment>Menu item for the default digest algorithm</extracomment>
-        <translation type="unfinished">%1 (standard)</translation>
+        <translation>%1 (standard)</translation>
     </message>
     <message id="foilauth-token-digits-text">
         <source>Digits</source>
@@ -145,22 +145,22 @@
         <source>Counter value</source>
         <oldsource>Сounter value</oldsource>
         <extracomment>Text field label (HOTP counter value)</extracomment>
-        <translation type="unfinished">Räknarvärde</translation>
+        <translation>Räknarvärde</translation>
     </message>
     <message id="foilauth-token-type-label">
         <source>Type</source>
         <extracomment>Combo box label</extracomment>
-        <translation type="unfinished">Typ</translation>
+        <translation>Typ</translation>
     </message>
     <message id="foilauth-token-type-totp">
         <source>Time-based (TOTP)</source>
         <extracomment>Menu item for time based token</extracomment>
-        <translation type="unfinished">Tidsbaserad (TOTP)</translation>
+        <translation>Tidsbaserad (TOTP)</translation>
     </message>
     <message id="foilauth-token-type-hotp">
         <source>Counter-based (HOTP)</source>
         <extracomment>Menu item for counter based token</extracomment>
-        <translation type="unfinished">Räknarbaserad (HOTP)</translation>
+        <translation>Räknarbaserad (HOTP)</translation>
     </message>
     <message id="foilauth-token-scan-button">
         <source>Scan QR code</source>
@@ -175,7 +175,7 @@
     <message id="foilauth-scan-title">
         <source>Scan QR code</source>
         <extracomment>Page title (suggestion to scan QR code)</extracomment>
-        <translation type="unfinished">Skanna QR-kod</translation>
+        <translation>Skanna QR-kod</translation>
     </message>
     <message id="foilauth-scan-zoom_label">
         <source>Zoom</source>
@@ -195,7 +195,7 @@
     <message id="foilauth-scan-skip_button">
         <source>Skip</source>
         <extracomment>Button label (skip scanning)</extracomment>
-        <translation type="unfinished">Hoppa över</translation>
+        <translation>Hoppa över</translation>
     </message>
     <message id="foilauth-foil_apps_warning">
         <source>Note that all Foil apps use the same encryption key and password.</source>
@@ -215,26 +215,26 @@
     <message id="foilauth-import-first_one">
         <source>FoilAuth has found 1 unencrypted SailOTP token on your device. Would you like to import and encrypt it?</source>
         <extracomment>Text for SailOTP import page (first import, one token)</extracomment>
-        <translation type="unfinished">FoilAuth har hittat en okrypterad SailOTP-token på din enhet. Vill du importera och kryptera det?</translation>
+        <translation>FoilAuth har hittat en okrypterad SailOTP-token på din enhet. Vill du importera och kryptera den?</translation>
     </message>
     <message id="foilauth-import-first_many" numerus="yes">
         <source>FoilAuth has found %0 unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
         <extracomment>Text for SailOTP import page (first import, multiple tokens)</extracomment>
-        <translation type="unfinished">
-            <numerusform>FoilAuth har hittat %0 okrypterade SailOTP-tokens på din enhet. Vill du importera och kryptera dem?</numerusform>
+        <translation>
+            <numerusform>FoilAuth har hittat %0 okrypterad SailOTP-token på din enhet. Vill du importera och kryptera den?</numerusform>
             <numerusform>FoilAuth har hittat %0 okrypterade SailOTP-tokens på din enhet. Vill du importera och kryptera dem?</numerusform>
         </translation>
     </message>
     <message id="foilauth-import-new_one">
         <source>FoilAuth has found 1 new unencrypted SailOTP token on your device. Would you like to import and encrypt it?</source>
         <extracomment>Text for SailOTP import page (one new token is found)</extracomment>
-        <translation type="unfinished">FoilAuth har hittat en ny okrypterad SailOTP-token på din enhet. Vill du importera och kryptera det?</translation>
+        <translation>FoilAuth har hittat en ny okrypterad SailOTP-token på din enhet. Vill du importera och kryptera den?</translation>
     </message>
     <message id="foilauth-import-new_many" numerus="yes">
         <source>FoilAuth has found %0 new unencrypted SailOTP token(s) on your device. Would you like to import and encrypt them?</source>
         <extracomment>Text for SailOTP import page (multiple new tokens were found)</extracomment>
-        <translation type="unfinished">
-            <numerusform>FoilAuth har hittat %0 nya okrypterade SailOTP-tokens på din enhet. Vill du importera och kryptera dem?</numerusform>
+        <translation>
+            <numerusform>FoilAuth har hittat %0 ny okrypterad SailOTP-tokens på din enhet. Vill du importera och kryptera den?</numerusform>
             <numerusform>FoilAuth har hittat %0 nya okrypterade SailOTP-tokens på din enhet. Vill du importera och kryptera dem?</numerusform>
         </translation>
     </message>
@@ -261,7 +261,7 @@
     <message id="foilauth-menu-copy_password">
         <source>Copy password</source>
         <extracomment>Context menu item (copy password to clipboard)</extracomment>
-        <translation type="unfinished">Kopiera lösenord</translation>
+        <translation>Kopiera lösenord</translation>
     </message>
     <message id="foilauth-menu-show_qr_code">
         <source>Show QR code</source>
@@ -326,7 +326,7 @@
     <message id="foilauth-confirm_password-description">
         <source>Make sure you don&apos;t forget your password. It&apos;s impossible to either recover it or to access the encrypted tokens without knowing it. Better take it seriously.</source>
         <extracomment>Password confirmation description</extracomment>
-        <translation type="unfinished">Tillse att du inte glömmer ditt lösenord. Det går inte att återställa lösenordet, eller att få tillgång till de krypterade tokens utan det. Seriöst alltså.</translation>
+        <translation>Tillse att du inte glömmer ditt lösenord. Det går inte att återställa lösenordet, eller att få tillgång till de krypterade tokens utan det. Seriöst alltså.</translation>
     </message>
     <message id="foilauth-confirm_password-placeholder-new_password">
         <source>New password again</source>
@@ -346,12 +346,12 @@
     <message id="foilauth-add_token-title">
         <source>Add token</source>
         <extracomment>Dialog title</extracomment>
-        <translation type="unfinished">Lägg till token</translation>
+        <translation>Lägg till token</translation>
     </message>
     <message id="foilauth-edit_token-title">
         <source>Edit token</source>
         <extracomment>Dialog title</extracomment>
-        <translation type="unfinished">Redigera token</translation>
+        <translation>Redigera token</translation>
     </message>
     <message id="foilauth-edit_token-save">
         <source>Save</source>
@@ -361,97 +361,97 @@
     <message id="foilauth-menu-select_tokens">
         <source>Select</source>
         <extracomment>Pulley menu item, opens selection page</extracomment>
-        <translation type="unfinished">Markera</translation>
+        <translation>Välj</translation>
     </message>
     <message id="foilauth-select_page-header">
         <source>Select tokens</source>
         <extracomment>Page title</extracomment>
-        <translation type="unfinished">Välj tokens</translation>
+        <translation>Välj tokens</translation>
     </message>
     <message id="foilauth-menu-select_none">
         <source>Deselect all</source>
         <extracomment>Pulley menu item</extracomment>
-        <translation type="unfinished">Välj ingen</translation>
+        <translation>Välj ingen</translation>
     </message>
     <message id="foilauth-menu-select_all">
         <source>Select all</source>
         <extracomment>Pulley menu item, selects all tokens</extracomment>
-        <translation type="unfinished">Välj alla</translation>
+        <translation>Välj alla</translation>
     </message>
     <message id="foilauth-remorse-deleting_selected_tokens">
         <source>Deleting selected tokens</source>
         <extracomment>Remorse popup text (multiple tokens selected)</extracomment>
-        <translation type="unfinished">Tar bort valda tokens</translation>
+        <translation>Tar bort valda tokens</translation>
     </message>
     <message id="foilauth-remorse-deleting_selected_token">
         <source>Deleting selected token</source>
         <extracomment>Remorse popup text (single token selected)</extracomment>
-        <translation type="unfinished">Tar bort valda token</translation>
+        <translation>Tar bort vald token</translation>
     </message>
     <message id="foilauth-select_page-hint_delete_selected">
         <source>Delete selected tokens</source>
         <extracomment>Hint text</extracomment>
-        <translation type="unfinished">Ta bort valda tokens</translation>
+        <translation>Ta bort valda tokens</translation>
     </message>
     <message id="foilauth-select_page-hint_export_selected">
         <source>Export selected tokens via QR code</source>
         <extracomment>Hint text</extracomment>
-        <translation type="unfinished">Exportera utvalda tokens via QR -kod</translation>
+        <translation>Exportera valda tokens via QR -kod</translation>
     </message>
     <message id="foilauth-export_page-title">
         <source>Code %1 of %2</source>
         <extracomment>Page header</extracomment>
-        <translation type="unfinished">Kod %1/%2</translation>
+        <translation>Kod %1 av %2</translation>
     </message>
     <message id="foilauth-select_tokens-title-add_tokens">
         <source>Select tokens to add</source>
         <extracomment>Dialog title</extracomment>
-        <translation type="unfinished">Välj tokens att lägga till</translation>
+        <translation>Välj tokens att lägga till</translation>
     </message>
     <message id="foilauth-organize-groups-title">
         <source>Manage groups</source>
         <extracomment>Page header title</extracomment>
-        <translation type="unfinished">Hantera grupper</translation>
+        <translation>Hantera grupper</translation>
     </message>
     <message id="foilauth-organize-groups-description">
         <source>Create, delete and rename groups</source>
         <extracomment>Page header descriptions</extracomment>
-        <translation type="unfinished">Skapa, ta bort och byt namn på grupper</translation>
+        <translation>Skapa, ta bort och byt namn på grupper</translation>
     </message>
     <message id="foilauth-organize-groups-menu-rename">
         <source>Rename</source>
         <extracomment>Context menu item</extracomment>
-        <translation type="unfinished">Döp om</translation>
+        <translation>Byt namn</translation>
     </message>
     <message id="foilauth-organize-groups-menu-delete">
         <source>Delete</source>
         <extracomment>Context menu item</extracomment>
-        <translation type="unfinished">Ta bort</translation>
+        <translation>Ta bort</translation>
     </message>
     <message id="foilauth-organize-groups-remorse-deleting">
         <source>Deleting</source>
         <extracomment>Remorse item label</extracomment>
-        <translation type="unfinished">Tar bort</translation>
+        <translation>Tar bort</translation>
     </message>
     <message id="foilauth-organize-groups-add_group">
         <source>Add group</source>
         <extracomment>List footer button label</extracomment>
-        <translation type="unfinished">Lägg till grupp</translation>
+        <translation>Lägg till grupp</translation>
     </message>
     <message id="foilauth-organize-groups-new_group">
         <source>New group</source>
         <extracomment>Default name for the new group</extracomment>
-        <translation type="unfinished">Ny grupp</translation>
+        <translation>Ny grupp</translation>
     </message>
     <message id="foilauth-organize-tokens-title">
         <source>Organize tokens</source>
         <extracomment>Page header title</extracomment>
-        <translation type="unfinished">Organisera tokens</translation>
+        <translation>Organisera tokens</translation>
     </message>
     <message id="foilauth-organize-tokens-description">
         <source>Press, hold and drag to reorder</source>
         <extracomment>Page header descriptions</extracomment>
-        <translation type="unfinished">Tryck, håll och dra för att ändra ordning</translation>
+        <translation>Tryck, håll och dra för att ändra ordning</translation>
     </message>
     <message id="foilauth-settings_page-header-version">
         <source>Version %1</source>
@@ -461,22 +461,22 @@
     <message id="foilauth-settings_page-autolock-text">
         <source>Automatic locking</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished">Automatisk låsning</translation>
+        <translation>Automatisk låsning</translation>
     </message>
     <message id="foilauth-settings_page-autolock-description">
         <source>Require to enter Foil password after unlocking the screen.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished">Kräv att ange Foil lösenord efter att ha låst upp skärmen.</translation>
+        <translation>Kräv  Foil-lösenord efter att skärmen låsts upp.</translation>
     </message>
     <message id="jail-explanation">
         <source>This application is not designed to function in a sandbox. Try installing the latest version from &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; or &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, it may implement some sort of a workaround. No guarantee, though.</source>
         <extracomment>Label text explaining the sandbox situation</extracomment>
-        <translation type="unfinished">Denna applikation är inte utformad för att fungera i en sandlåda. Prova att installera den senaste versionen från &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; eller &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, den kan implementera någon form av lösning. Ingen garanti, dock.</translation>
+        <translation>Denna applikation är inte utformad för att fungera i en sandlåda. Prova att installera den senaste versionen från &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; eller &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, den kan implementera någon form av lösning. Ingen garanti, dock.</translation>
     </message>
     <message id="jail-terminal_hint">
         <source>If you have developer mode enabled, you may also try running &lt;b&gt;%1&lt;/b&gt; from the terminal. Sorry for the inconvenience!</source>
         <extracomment>Hint suggesting to run the app from the terminal</extracomment>
-        <translation type="unfinished">Om du har aktiverat utvecklarläge kan du också försöka köra &lt;b&gt;%1&lt;/b&gt; från terminalen. Beklagar olägenheten!</translation>
+        <translation>Om du har aktiverat utvecklarläge kan du också försöka köra &lt;b&gt;%1&lt;/b&gt; från terminalen. Beklagar olägenheten!</translation>
     </message>
 </context>
 </TS>
