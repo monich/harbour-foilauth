@@ -543,6 +543,9 @@ FoilAuthModel::ModelInfo::save(
         foilmsg_encrypt(out, &data, NULL, &headers, aPrivate, aPublic,
             Util::encryptionOptions(&opt), NULL);
         foil_output_unref(out);
+        if (chmod(fname, ENCRYPT_FILE_MODE) < 0) {
+            HWARN("Failed to chmod" << fname << strerror(errno));
+        }
     } else {
         HWARN("Failed to open" << fname);
     }
