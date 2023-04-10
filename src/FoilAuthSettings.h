@@ -1,6 +1,6 @@
 /*
+ * Copyright (C) 2019-2023 Slava Monich <slava@monich.com>
  * Copyright (C) 2019-2022 Jolla Ltd.
- * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -34,18 +34,30 @@
 #ifndef FOILAUTH_SETTINGS_H
 #define FOILAUTH_SETTINGS_H
 
-#include <QtQml>
+#include <QObject>
+#include <QSize>
+#include <QStringList>
+
+class QQmlEngine;
+class QJSEngine;
 
 // Note that sailotpImportedTokens stores SHA1 hash of the secrets
 // imported from SailOTP, not the actual secrets. In other words,
 // it's not much of a security flaw.
 
-class FoilAuthSettings : public QObject {
+class FoilAuthSettings :
+    public QObject
+{
     Q_OBJECT
     Q_PROPERTY(int qrCodeEcLevel READ qrCodeEcLevel WRITE setQrCodeEcLevel NOTIFY qrCodeEcLevelChanged)
-    Q_PROPERTY(qreal scanZoom READ scanZoom WRITE setScanZoom NOTIFY scanZoomChanged)
     Q_PROPERTY(qreal maxZoom READ maxZoom WRITE setMaxZoom NOTIFY maxZoomChanged)
+    Q_PROPERTY(qreal scanZoom READ scanZoom WRITE setScanZoom NOTIFY scanZoomChanged)
+    Q_PROPERTY(bool volumeZoom READ volumeZoom WRITE setVolumeZoom NOTIFY volumeZoomChanged)
     Q_PROPERTY(bool scanWideMode READ scanWideMode WRITE setScanWideMode NOTIFY scanWideModeChanged)
+    Q_PROPERTY(qreal wideCameraRatio READ wideCameraRatio CONSTANT)
+    Q_PROPERTY(qreal narrowCameraRatio READ narrowCameraRatio CONSTANT)
+    Q_PROPERTY(QSize wideCameraResolution READ wideCameraResolution WRITE setWideCameraResolution NOTIFY wideCameraResolutionChanged)
+    Q_PROPERTY(QSize narrowCameraResolution READ narrowCameraResolution WRITE setNarrowCameraResolution NOTIFY narrowCameraResolutionChanged)
     Q_PROPERTY(bool sharedKeyWarning READ sharedKeyWarning WRITE setSharedKeyWarning NOTIFY sharedKeyWarningChanged)
     Q_PROPERTY(bool sharedKeyWarning2 READ sharedKeyWarning2 WRITE setSharedKeyWarning2 NOTIFY sharedKeyWarning2Changed)
     Q_PROPERTY(bool autoLock READ autoLock WRITE setAutoLock NOTIFY autoLockChanged)
@@ -58,42 +70,57 @@ public:
     explicit FoilAuthSettings(QObject* aParent = Q_NULLPTR);
     ~FoilAuthSettings();
 
-    static QObject* createSingleton(QQmlEngine* aEngine, QJSEngine* aScript);
+    // Callback for qmlRegisterSingletonType<FoilAuthSettings>
+    static QObject* createSingleton(QQmlEngine*, QJSEngine*);
 
     int qrCodeEcLevel() const;
-    void setQrCodeEcLevel(int aValue);
-
-    qreal scanZoom() const;
-    void setScanZoom(qreal aValue);
+    void setQrCodeEcLevel(int);
 
     qreal maxZoom() const;
-    void setMaxZoom(qreal aValue);
+    void setMaxZoom(qreal);
+
+    qreal scanZoom() const;
+    void setScanZoom(qreal);
+
+    bool volumeZoom() const;
+    void setVolumeZoom(bool);
 
     bool scanWideMode() const;
-    void setScanWideMode(bool aValue);
+    void setScanWideMode(bool);
+
+    qreal wideCameraRatio() const;
+    QSize wideCameraResolution() const;
+    void setWideCameraResolution(QSize);
+
+    qreal narrowCameraRatio() const;
+    QSize narrowCameraResolution() const;
+    void setNarrowCameraResolution(QSize);
 
     bool sharedKeyWarning() const;
     bool sharedKeyWarning2() const;
-    void setSharedKeyWarning(bool aValue);
-    void setSharedKeyWarning2(bool aValue);
+    void setSharedKeyWarning(bool);
+    void setSharedKeyWarning2(bool);
 
     bool autoLock() const;
-    void setAutoLock(bool aValue);
+    void setAutoLock(bool);
 
     int autoLockTime() const;
-    void setAutoLockTime(int aValue);
+    void setAutoLockTime(int);
 
     bool sailotpImportDone() const;
-    void setSailotpImportDone(bool aValue);
+    void setSailotpImportDone(bool);
 
     QStringList sailotpImportedTokens() const;
-    void setSailotpImportedTokens(QStringList aValue);
+    void setSailotpImportedTokens(QStringList);
 
 Q_SIGNALS:
     void qrCodeEcLevelChanged();
     void maxZoomChanged();
     void scanZoomChanged();
+    void volumeZoomChanged();
     void scanWideModeChanged();
+    void wideCameraResolutionChanged();
+    void narrowCameraResolutionChanged();
     void sharedKeyWarningChanged();
     void sharedKeyWarning2Changed();
     void autoLockChanged();

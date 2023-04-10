@@ -1,6 +1,6 @@
 /*
+ * Copyright (C) 2019-2023 Slava Monich <slava@monich.com>
  * Copyright (C) 2019-2022 Jolla Ltd.
- * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -40,9 +40,12 @@
 #include <MGConfItem>
 
 #define DCONF_KEY(x)                FOILAUTH_DCONF_ROOT x
+#define KEY_RESOLUTION_4_3          DCONF_KEY("resolution_4_3")  // Width is stored
+#define KEY_RESOLUTION_16_9         DCONF_KEY("resolution_16_9") // Width is stored
 #define KEY_QRCODE_ECLEVEL          DCONF_KEY("qrCodeEcLevel")
 #define KEY_MAX_ZOOM                DCONF_KEY("maxZoom")
 #define KEY_SCAN_ZOOM               DCONF_KEY("scanZoom")
+#define KEY_VOLUME_ZOOM             DCONF_KEY("volumeZoom")
 #define KEY_SCAN_WIDE_MODE          DCONF_KEY("scanWideMode")
 #define KEY_SHARED_KEY_WARNING      DCONF_KEY("sharedKeyWarning")
 #define KEY_SHARED_KEY_WARNING2     DCONF_KEY("sharedKeyWarning2")
@@ -54,25 +57,43 @@
 #define DEFAULT_QRCODE_ECLEVEL      ((int)HarbourQrCodeGenerator::ECLevelLowest)
 #define DEFAULT_MAX_ZOOM            10.f
 #define DEFAULT_SCAN_ZOOM           3.f
+#define DEFAULT_VOLUME_ZOOM         true
 #define DEFAULT_SCAN_WIDE_MODE      false
 #define DEFAULT_SHARED_KEY_WARNING  true
 #define DEFAULT_AUTO_LOCK           true
 #define DEFAULT_AUTO_LOCK_TIME      15000
 
+// Camera configuration (got removed at some point)
+#define CAMERA_DCONF_PATH_(x)           "/apps/jolla-camera/primary/image/" x
+#define CAMERA_DCONF_RESOLUTION_4_3     CAMERA_DCONF_PATH_("viewfinderResolution_4_3")
+#define CAMERA_DCONF_RESOLUTION_16_9    CAMERA_DCONF_PATH_("viewfinderResolution_16_9")
+
 // ==========================================================================
 // FoilAuthSettings::Private
 // ==========================================================================
 
-class FoilAuthSettings::Private {
+class FoilAuthSettings::Private
+{
 public:
-    Private(FoilAuthSettings* aParent);
+    Private(FoilAuthSettings*);
 
-    static int validateQrCodeEcLevel(int aValue);
+    static int validateQrCodeEcLevel(int);
+    static QSize toSize(const QVariant);
+    static QSize size_4_3(int);
+    static QSize size_16_9(int);
+
+    QSize resolution_4_3();
+    QSize resolution_16_9();
 
 public:
+    const int iDefaultResolution_4_3;
+    const int iDefaultResolution_16_9;
+    MGConfItem* iResolution_4_3;
+    MGConfItem* iResolution_16_9;
     MGConfItem* iQrCodeEcLevel;
     MGConfItem* iMaxZoom;
     MGConfItem* iScanZoom;
+    MGConfItem* iVolumeZoom;
     MGConfItem* iScanWideMode;
     MGConfItem* iSharedKeyWarning;
     MGConfItem* iSharedKeyWarning2;
@@ -82,10 +103,16 @@ public:
     MGConfItem* iSailotpImportedTokens;
 };
 
-FoilAuthSettings::Private::Private(FoilAuthSettings* aParent) :
+FoilAuthSettings::Private::Private(
+    FoilAuthSettings* aParent) :
+    iDefaultResolution_4_3(toSize(MGConfItem(CAMERA_DCONF_RESOLUTION_4_3).value()).width()),
+    iDefaultResolution_16_9(toSize(MGConfItem(CAMERA_DCONF_RESOLUTION_16_9).value()).width()),
+    iResolution_4_3(new MGConfItem(KEY_RESOLUTION_4_3, aParent)),
+    iResolution_16_9(new MGConfItem(KEY_RESOLUTION_16_9, aParent)),
     iQrCodeEcLevel(new MGConfItem(KEY_QRCODE_ECLEVEL, aParent)),
     iMaxZoom(new MGConfItem(KEY_MAX_ZOOM, aParent)),
     iScanZoom(new MGConfItem(KEY_SCAN_ZOOM, aParent)),
+    iVolumeZoom(new MGConfItem(KEY_VOLUME_ZOOM, aParent)),
     iScanWideMode(new MGConfItem(KEY_SCAN_WIDE_MODE, aParent)),
     iSharedKeyWarning(new MGConfItem(KEY_SHARED_KEY_WARNING, aParent)),
     iSharedKeyWarning2(new MGConfItem(KEY_SHARED_KEY_WARNING2, aParent)),
@@ -94,26 +121,21 @@ FoilAuthSettings::Private::Private(FoilAuthSettings* aParent) :
     iSailotpImportDone(new MGConfItem(KEY_SAILOTP_IMPORT_DONE, aParent)),
     iSailotpImportedTokens(new MGConfItem(KEY_SAILOTP_IMPORTED_TOKENS, aParent))
 {
-    QObject::connect(iQrCodeEcLevel, SIGNAL(valueChanged()),
-        aParent, SIGNAL(qrCodeEcLevelChanged()));
-    QObject::connect(iMaxZoom, SIGNAL(valueChanged()),
-        aParent, SIGNAL(maxZoomChanged()));
-    QObject::connect(iScanZoom, SIGNAL(valueChanged()),
-        aParent, SIGNAL(scanZoomChanged()));
-    QObject::connect(iScanWideMode, SIGNAL(valueChanged()),
-        aParent, SIGNAL(scanWideModeChanged()));
-    QObject::connect(iSharedKeyWarning, SIGNAL(valueChanged()),
-        aParent, SIGNAL(sharedKeyWarningChanged()));
-    QObject::connect(iSharedKeyWarning2, SIGNAL(valueChanged()),
-        aParent, SIGNAL(sharedKeyWarning2Changed()));
-    QObject::connect(iAutoLock, SIGNAL(valueChanged()),
-        aParent, SIGNAL(autoLockChanged()));
-    QObject::connect(iAutoLockTime, SIGNAL(valueChanged()),
-        aParent, SIGNAL(autoLockTimeChanged()));
-    QObject::connect(iSailotpImportDone, SIGNAL(valueChanged()),
-        aParent, SIGNAL(sailotpImportDoneChanged()));
-    QObject::connect(iSailotpImportedTokens, SIGNAL(valueChanged()),
-        aParent, SIGNAL(sailotpImportedTokensChanged()));
+    connect(iResolution_4_3, SIGNAL(valueChanged()), aParent, SIGNAL(wideCameraResolutionChanged()));
+    connect(iResolution_16_9, SIGNAL(valueChanged()), aParent, SIGNAL(narrowCameraResolutionChanged()));
+    connect(iQrCodeEcLevel, SIGNAL(valueChanged()), aParent, SIGNAL(qrCodeEcLevelChanged()));
+    connect(iMaxZoom, SIGNAL(valueChanged()), aParent, SIGNAL(maxZoomChanged()));
+    connect(iScanZoom, SIGNAL(valueChanged()), aParent, SIGNAL(scanZoomChanged()));
+    connect(iVolumeZoom, SIGNAL(valueChanged()), aParent, SIGNAL(volumeZoomChanged()));
+    connect(iScanWideMode, SIGNAL(valueChanged()), aParent, SIGNAL(scanWideModeChanged()));
+    connect(iSharedKeyWarning, SIGNAL(valueChanged()), aParent, SIGNAL(sharedKeyWarningChanged()));
+    connect(iSharedKeyWarning2, SIGNAL(valueChanged()), aParent, SIGNAL(sharedKeyWarning2Changed()));
+    connect(iAutoLock, SIGNAL(valueChanged()), aParent, SIGNAL(autoLockChanged()));
+    connect(iAutoLockTime, SIGNAL(valueChanged()), aParent, SIGNAL(autoLockTimeChanged()));
+    connect(iSailotpImportDone, SIGNAL(valueChanged()), aParent, SIGNAL(sailotpImportDoneChanged()));
+    connect(iSailotpImportedTokens, SIGNAL(valueChanged()), aParent, SIGNAL(sailotpImportedTokensChanged()));
+    HDEBUG("Default 4:3 resolution" << size_4_3(iDefaultResolution_4_3));
+    HDEBUG("Default 16:9 resolution" << size_16_9(iDefaultResolution_16_9));
 }
 
 inline int
@@ -125,11 +147,59 @@ FoilAuthSettings::Private::validateQrCodeEcLevel(
             aValue : DEFAULT_QRCODE_ECLEVEL;
 }
 
+QSize
+FoilAuthSettings::Private::toSize(
+    const QVariant aVariant)
+{
+    // e.g. "1920x1080"
+    if (aVariant.isValid()) {
+        const QStringList values(aVariant.toString().split('x'));
+        if (values.count() == 2) {
+            bool ok = false;
+            int width = values.at(0).toInt(&ok);
+            if (ok && width > 0) {
+                int height = values.at(1).toInt(&ok);
+                if (ok && height > 0) {
+                    return QSize(width, height);
+                }
+            }
+        }
+    }
+    return QSize(0, 0);
+}
+
+QSize
+FoilAuthSettings::Private::size_4_3(
+    int aWidth)
+{
+    return QSize(aWidth, aWidth * 3 / 4);
+}
+
+QSize
+FoilAuthSettings::Private::size_16_9(
+    int aWidth)
+{
+    return QSize(aWidth, aWidth * 9 / 16);
+}
+
+QSize
+FoilAuthSettings::Private::resolution_4_3()
+{
+    return size_4_3(qMax(iResolution_4_3->value(iDefaultResolution_4_3).toInt(), 0));
+}
+
+QSize
+FoilAuthSettings::Private::resolution_16_9()
+{
+    return size_16_9(qMax(iResolution_16_9->value(iDefaultResolution_16_9).toInt(), 0));
+}
+
 // ==========================================================================
 // FoilAuthSettings
 // ==========================================================================
 
-FoilAuthSettings::FoilAuthSettings(QObject* aParent) :
+FoilAuthSettings::FoilAuthSettings(
+    QObject* aParent) :
     QObject(aParent),
     iPrivate(new Private(this))
 {
@@ -143,8 +213,8 @@ FoilAuthSettings::~FoilAuthSettings()
 // Callback for qmlRegisterSingletonType<FoilAuthSettings>
 QObject*
 FoilAuthSettings::createSingleton(
-    QQmlEngine* aEngine,
-    QJSEngine* aScript)
+    QQmlEngine*,
+    QJSEngine*)
 {
     return new FoilAuthSettings;
 }
@@ -166,22 +236,6 @@ FoilAuthSettings::setQrCodeEcLevel(
     iPrivate->iQrCodeEcLevel->set(Private::validateQrCodeEcLevel(aValue));
 }
 
-// scanZoom
-
-qreal
-FoilAuthSettings::scanZoom() const
-{
-    return iPrivate->iScanZoom->value(DEFAULT_SCAN_ZOOM).toFloat();
-}
-
-void
-FoilAuthSettings::setScanZoom(
-    qreal aValue)
-{
-    HDEBUG(aValue);
-    iPrivate->iScanZoom->set(aValue);
-}
-
 // maxZoom
 
 qreal
@@ -198,6 +252,38 @@ FoilAuthSettings::setMaxZoom(
     iPrivate->iMaxZoom->set(aValue);
 }
 
+// scanZoom
+
+qreal
+FoilAuthSettings::scanZoom() const
+{
+    return iPrivate->iScanZoom->value(DEFAULT_SCAN_ZOOM).toFloat();
+}
+
+void
+FoilAuthSettings::setScanZoom(
+    qreal aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iScanZoom->set(aValue);
+}
+
+// volumeZoom
+
+bool
+FoilAuthSettings::volumeZoom() const
+{
+    return iPrivate->iVolumeZoom->value(DEFAULT_VOLUME_ZOOM).toBool();
+}
+
+void
+FoilAuthSettings::setVolumeZoom(
+    bool aValue)
+{
+    HDEBUG(aValue);
+    iPrivate->iVolumeZoom->set(aValue);
+}
+
 // scanWideMode
 
 bool
@@ -212,6 +298,52 @@ FoilAuthSettings::setScanWideMode(
 {
     HDEBUG(aValue);
     iPrivate->iScanWideMode->set(aValue);
+}
+
+// wideCameraRatio
+
+qreal
+FoilAuthSettings::wideCameraRatio() const
+{
+    return 4./3;
+}
+
+// wideCameraResolution
+
+QSize
+FoilAuthSettings::wideCameraResolution() const
+{
+    return iPrivate->resolution_4_3();
+}
+
+void
+FoilAuthSettings::setWideCameraResolution(
+    QSize aSize)
+{
+    HDEBUG(aSize);
+    iPrivate->iResolution_4_3->set(aSize.width());
+}
+
+// narrowCameraRatio
+
+qreal
+FoilAuthSettings::narrowCameraRatio() const
+{
+    return 16./9;
+}
+
+QSize
+FoilAuthSettings::narrowCameraResolution() const
+{
+    return iPrivate->resolution_16_9();
+}
+
+void
+FoilAuthSettings::setNarrowCameraResolution(
+    QSize aSize)
+{
+    HDEBUG(aSize);
+    iPrivate->iResolution_16_9->set(aSize.width());
 }
 
 // sharedKeyWarning

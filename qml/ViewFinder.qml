@@ -12,11 +12,11 @@ VideoOutput {
     property alias beepSource: beep.source
     property bool playingBeep: false
     property size viewfinderResolution
-    property bool completed
     property real digitalZoom: 1.0
+    property size supportedWideResolution: Qt.size(0,0) // 4:3
+    property size supportedNarrowResolution: Qt.size(0,0) // 16:9
 
     readonly property bool cameraActive: camera.cameraState === Camera.ActiveState
-    readonly property bool tapFocusActive: focusTimer.running
     readonly property bool flashOn: camera.flash.mode !== Camera.FlashOff
     // Not sure why not just camera.orientation but this makes the camera
     // behave similar to what it does for Jolla Camera
@@ -25,6 +25,12 @@ VideoOutput {
     // Camera doesn't know its maximumDigitalZoom until cameraStatus becomes
     // Camera.ActiveStatus and doesn't emit maximumDigitalZoomChanged signal
     signal maximumDigitalZoom(var value)
+
+    // Internal properties
+    readonly property bool _tapFocusActive: focusTimer.running
+    readonly property real _ratio_4_3: 4./3.
+    readonly property real _ratio_16_9: 16./9.
+    property bool _completed
 
     onOrientationChanged: {
         if (camera.cameraState !== Camera.UnloadedState) {
@@ -52,7 +58,7 @@ VideoOutput {
         if (viewfinderResolution) {
             camera.viewfinder.resolution = viewfinderResolution
         }
-        completed = true
+        _completed = true
     }
 
     function turnFlashOn() {
@@ -140,15 +146,15 @@ VideoOutput {
         imageProcessing.whiteBalanceMode: flashOn ?
             CameraImageProcessing.WhiteBalanceFlash :
             CameraImageProcessing.WhiteBalanceTungsten
-        cameraState: (completed && !reloadTimer.running) ?
+        cameraState: (_completed && !reloadTimer.running) ?
             Camera.ActiveState : Camera.UnloadedState
         exposure {
             exposureCompensation: 1.0
             exposureMode: Camera.ExposureAuto
         }
         focus {
-            focusMode: tapFocusActive ? Camera.FocusAuto : Camera.FocusContinuous
-            focusPointMode: tapFocusActive ? Camera.FocusPointCustom : Camera.FocusPointAuto
+            focusMode: _tapFocusActive ? Camera.FocusAuto : Camera.FocusContinuous
+            focusPointMode: _tapFocusActive ? Camera.FocusPointCustom : Camera.FocusPointAuto
         }
         onCameraStatusChanged: {
             if (cameraStatus === Camera.ActiveStatus) {
@@ -156,6 +162,7 @@ VideoOutput {
                 viewFinder.maximumDigitalZoom(maximumDigitalZoom)
                 digitalZoom = viewFinder.digitalZoom
             }
+            updateSupportedResolutions()
         }
         onCameraStateChanged: {
             if (cameraState === Camera.ActiveState) {
@@ -165,6 +172,32 @@ VideoOutput {
                     viewFinder.viewfinderResolution !== viewfinder.resolution) {
                     viewfinder.resolution = viewFinder.viewfinderResolution
                 }
+            }
+        }
+        function updateSupportedResolutions() {
+            var list = camera.supportedViewfinderResolutions()
+            var max_4_3 = Qt.size(0,0)
+            var max_16_9 = Qt.size(0,0)
+            for (var i = 0; i < list.length; i++) {
+                var size = list[i]
+                var ratio = size.width / size.height
+                if (ratio === _ratio_4_3) {
+                    if (size.width > max_4_3.width) {
+                        max_4_3 = size
+                    }
+                } else if (ratio === _ratio_16_9) {
+                    if (size.width > max_16_9.width) {
+                        max_16_9 = size
+                    }
+                }
+            }
+            if (supportedWideResolution.width !== max_4_3.width &&
+                supportedWideResolution.height !== max_4_3.height) {
+                supportedWideResolution = Qt.size(max_4_3.width, max_4_3.height)
+            }
+            if (supportedNarrowResolution.width !== max_16_9.width &&
+                supportedNarrowResolution.height !== max_16_9.height) {
+                supportedNarrowResolution = Qt.size(max_16_9.width, max_16_9.height)
             }
         }
     }
