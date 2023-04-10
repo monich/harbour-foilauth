@@ -253,6 +253,11 @@ Page {
                     }
                 }
             }
+            onItemChanged: {
+                if (item) {
+                    item.requestFocus()
+                }
+            }
             Behavior on opacity { FadeAnimation { } }
         }
 
