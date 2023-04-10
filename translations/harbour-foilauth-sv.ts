@@ -466,7 +466,7 @@
     <message id="foilauth-settings_page-autolock-description">
         <source>Require to enter Foil password after unlocking the screen.</source>
         <extracomment>Text switch description</extracomment>
-        <translation>Kräv  Foil-lösenord efter att skärmen låsts upp.</translation>
+        <translation>Kräv Foil-lösenord efter att skärmen låsts upp.</translation>
     </message>
     <message id="jail-explanation">
         <source>This application is not designed to function in a sandbox. Try installing the latest version from &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; or &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, it may implement some sort of a workaround. No guarantee, though.</source>
