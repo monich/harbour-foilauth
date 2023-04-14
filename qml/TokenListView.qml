@@ -276,6 +276,8 @@ Item {
                         onClicked: {
                             pageStack.push(Qt.resolvedUrl("QRCodePage.qml"), {
                                 allowedOrientations: mainPage.allowedOrientations,
+                                label: model.label,
+                                issuer: model.issuer,
                                 uri: FoilAuth.toUri(model.type, model.secret, model.label, model.issuer,
                                     model.digits, model.counter, model.timeshift, model.algorithm)
                             })
