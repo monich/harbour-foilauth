@@ -26,7 +26,7 @@ Page {
                 description: applicationName ?
                     //: Settings page header description (app version)
                     //% "Version %1"
-                    qsTrId("foilauth-settings_page-header-version").arg("1.1.5") : ""
+                    qsTrId("foilauth-settings_page-header-version").arg("1.1.6") : ""
 
                 Image {
                     id: appIcon
