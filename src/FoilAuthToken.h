@@ -1,6 +1,6 @@
 /*
+ * Copyright (C) 2019-2023 Slava Monich <slava@monich.com>
  * Copyright (C) 2019-2022 Jolla Ltd.
- * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -82,7 +82,7 @@ public:
     static const QString TYPE_HOTP;
 
     FoilAuthToken();
-    FoilAuthToken(const FoilAuthToken& aToken);
+    FoilAuthToken(const FoilAuthToken&);
     FoilAuthToken(FoilAuthTypes::AuthType, QByteArray, QString, QString,
         int aDigits = FoilAuthTypes::DEFAULT_DIGITS,
         quint64 aCounter = FoilAuthTypes::DEFAULT_COUNTER,
@@ -100,9 +100,9 @@ public:
     Q_REQUIRED_RESULT FoilAuthToken withDigits(int) const;
     Q_REQUIRED_RESULT FoilAuthToken withTimeshift(int) const;
 
-    FoilAuthToken& operator=(const FoilAuthToken& aToken);
-    bool operator==(const FoilAuthToken& aToken) const;
-    bool operator!=(const FoilAuthToken& aToken) const;
+    FoilAuthToken& operator=(const FoilAuthToken&);
+    bool operator==(const FoilAuthToken&) const;
+    bool operator!=(const FoilAuthToken&) const;
     bool equals(const FoilAuthToken&) const;
 
     bool isValid() const;
@@ -116,6 +116,7 @@ public:
     int digits() const;
     int timeshift() const;
     uint password(quint64 aTime) const;
+
     Q_REQUIRED_RESULT QString passwordString(quint64) const;
     Q_REQUIRED_RESULT QString toUri() const;
     Q_REQUIRED_RESULT QVariantMap toVariantMap() const;

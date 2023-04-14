@@ -1,6 +1,6 @@
 /*
+ * Copyright (C) 2019-2023 Slava Monich <slava@monich.com>
  * Copyright (C) 2019-2022 Jolla Ltd.
- * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of BSD license as follows:
  *
@@ -244,15 +244,15 @@ public:
 
 public:
     QAtomicInt iRef;
-    AuthType iType;
-    DigestAlgorithm iAlgorithm;
-    QByteArray iSecret;
-    QString iSecretBase32;
-    QString iLabel;
-    QString iIssuer;
-    quint64 iCounter;
-    int iDigits;
-    int iTimeshift; // Seconds
+    const AuthType iType;
+    const DigestAlgorithm iAlgorithm;
+    const QByteArray iSecret;
+    const QString iSecretBase32;
+    const QString iLabel;
+    const QString iIssuer;
+    const quint64 iCounter;
+    const int iDigits;
+    const int iTimeshift; // Seconds
 };
 
 FoilAuthToken::Private::Private(
@@ -758,7 +758,6 @@ FoilAuthToken::toVariantMap() const
     }
     return out;
 }
-
 
 QList<FoilAuthToken>
 FoilAuthToken::fromProtoBuf(
