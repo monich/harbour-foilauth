@@ -252,11 +252,11 @@ Item {
 
             showMenuOnPressAndHold: !model.groupHeader
             enabled: !disabledItems || !disabledItems.length || disabledItems.indexOf(tokenId) < 0
-            height: _hidden ? 0 : implicitHeight
-            clip: height < implicitHeight
+            contentHeight: _hidden ? 0 : Theme.itemSizeSmall
+            clip: contentHeight < implicitHeight
             visible: height > 0
 
-            Behavior on height {
+            Behavior on contentHeight {
                 enabled: !listItem.menuOpen
                 SmoothedAnimation { duration: 200 }
             }
