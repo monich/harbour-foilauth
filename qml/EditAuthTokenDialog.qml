@@ -119,6 +119,7 @@ Dialog {
                     placeholderText: qsTrId("foilauth-token-digits-placeholder")
                     text: FoilAuthDefaultDigits
                     validator: IntValidator { bottom: 1 }
+                    inputMethodHints: Qt.ImhDigitsOnly
                     enabled: !qrCodeOnly
 
                     EnterKey.iconSource: "image://theme/icon-m-enter-next"
@@ -135,6 +136,7 @@ Dialog {
                     placeholderText: label
                     text: FoilAuthDefaultCounter
                     validator: IntValidator {}
+                    inputMethodHints: Qt.ImhDigitsOnly
                     enabled: !qrCodeOnly
                     visible: type === FoilAuth.TypeHOTP
 
@@ -154,6 +156,7 @@ Dialog {
                     placeholderText: qsTrId("foilauth-token-timeshift-placeholder")
                     text: FoilAuthDefaultTimeShift
                     validator: IntValidator {}
+                    inputMethodHints: Qt.ImhDigitsOnly
                     enabled: !qrCodeOnly
                     visible: type === FoilAuth.TypeTOTP
 
