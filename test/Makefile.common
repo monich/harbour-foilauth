@@ -18,7 +18,7 @@ SRC ?= $(EXE).cpp
 # Required packages
 #
 
-PKGS += Qt5Core Qt5Quick libcrypto gobject-2.0 glib-2.0
+PKGS += Qt5Core libcrypto gobject-2.0 glib-2.0
 
 #
 # Default target
