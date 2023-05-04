@@ -30,6 +30,10 @@ equals(QT_ARCH, arm64){
     PKGCONFIG += libcrypto
 }
 
+# Fix libfoil compilation warnings:
+DEFINES += GLIB_VERSION_MAX_ALLOWED=GLIB_VERSION_2_32
+DEFINES += GLIB_VERSION_MIN_REQUIRED=GLIB_VERSION_MAX_ALLOWED
+
 # Directories
 FOIL_UI_REL = foil-ui
 FOIL_UI_DIR = $${_PRO_FILE_PWD_}/$${FOIL_UI_REL}
