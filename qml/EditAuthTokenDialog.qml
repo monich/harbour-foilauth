@@ -51,7 +51,7 @@ Dialog {
 
         anchors.fill: parent
         contentHeight: column.height
-        visible: opacity > 0
+        interactive: opacity > 0
         Behavior on opacity { FadeAnimation { } }
 
         Column {
@@ -232,7 +232,7 @@ Dialog {
                 QRCodeImage {
                     id: qrcodeImage
 
-                    anchors.centerIn: parent
+                    anchors.horizontalCenter: parent.horizontalCenter
                     qrcode: generator.qrcode
 
                     MouseArea {
@@ -262,6 +262,7 @@ Dialog {
         State {
             name: "qrcode"
             when: qrCodeOnly
+
             ParentChange {
                 target: qrcodeImage
                 parent: fullScreenQrcodeContainer
@@ -274,6 +275,7 @@ Dialog {
         State {
             name: "normal"
             when: !qrCodeOnly
+
             PropertyChanges {
                 target: flickable
                 opacity: 1
@@ -281,6 +283,32 @@ Dialog {
             ParentChange {
                 target: qrcodeImage
                 parent: flickableQrcodeContainer
+            }
+        }
+    ]
+
+    transitions: [
+        Transition {
+            to: "qrcode"
+
+            NumberAnimation {
+                target: qrcodeImage
+                property: "y"
+                from: flickableQrcodeContainer.mapToItem(fullScreenQrcodeContainer, 0, 0).y
+                to: 0
+                duration: 200
+            }
+        },
+        Transition {
+            from: "qrcode"
+            to: "normal"
+
+            NumberAnimation {
+                target: qrcodeImage
+                property: "y"
+                from: fullScreenQrcodeContainer.mapToItem(flickableQrcodeContainer, 0, 0).y
+                to: 0
+                duration: 200
             }
         }
     ]
