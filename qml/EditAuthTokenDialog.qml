@@ -2,6 +2,8 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.foilauth 1.0
 
+import "harbour"
+
 Dialog {
     id: thisDialog
 
@@ -236,13 +238,20 @@ Dialog {
                     qrcode: generator.qrcode
 
                     MouseArea {
+                        id: qrcodeMouseArea
+
                         enabled: !qrCodeOnly
                         anchors.fill: parent
+                        onPressAndHold: ;
                         onClicked: {
                             qrCodeOnly = true
                             flickable.focus = true
                         }
                     }
+
+                    layer.effect: HarbourPressEffect { source: qrcodeImage }
+                    layer.enabled: (qrcodeMouseArea.pressed && qrcodeMouseArea.containsMouse) ||
+                        (fullScreenQrcodeMouseArea.pressed && fullScreenQrcodeMouseArea.containsMouse)
                 }
             }
 
@@ -253,8 +262,11 @@ Dialog {
     }
 
     MouseArea {
+        id: fullScreenQrcodeMouseArea
+
         enabled: qrCodeOnly
         anchors.fill: parent
+        onPressAndHold: ;
         onClicked: qrCodeOnly = false
     }
 
