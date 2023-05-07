@@ -224,8 +224,9 @@ public:
         }
         static OtpType encodeOtpType(AuthType aType) {
             switch (aType) {
-            case AuthTypeHOTP: return OTP_TYPE_HOTP;
+            case AuthTypeSteam:
             case AuthTypeTOTP: return OTP_TYPE_TOTP;
+            case AuthTypeHOTP: return OTP_TYPE_HOTP;
             }
             return OTP_TYPE_UNSPECIFIED;
         }
@@ -242,7 +243,7 @@ public:
     static bool parseOtpParameters(GUtilRange*, OtpParameters*);
     static void encodeTrailer(QByteArray*, uint, uint, quint64);
 
-    uint password(quint64 aTime);
+    QString password(quint64 aTime);
 
 public:
     QAtomicInt iRef;
@@ -284,19 +285,32 @@ FoilAuthToken::Private::~Private()
 {
 }
 
-uint
+QString
 FoilAuthToken::Private::password(
     quint64 aTime)
 {
-    uint maxPass = 10;
+    if (iType == AuthTypeSteam) {
+        static const QString ALPHABET("23456789BCDFGHJKMNPQRTVWXY");
+        uint hash = FoilAuth::hash(iSecret, aTime, iAlgorithm);
+        QString pass;
 
-    for (int i = 1; i < iDigits; i++) {
-        maxPass *= 10;
+        for (int i = 0; i < iDigits; i++) {
+            pass.append(ALPHABET.at(hash % ALPHABET.size()));
+            hash /= ALPHABET.size();
+        }
+
+        return pass;
+    } else {
+        uint maxPass = 10;
+
+        for (int i = 1; i < iDigits; i++) {
+            maxPass *= 10;
+        }
+
+        return QString().sprintf("%0*u", iDigits, (iType == AuthTypeHOTP) ?
+            FoilAuth::HOTP(iSecret, iCounter, maxPass, iAlgorithm) :
+            FoilAuth::TOTP(iSecret, aTime, maxPass, iAlgorithm));
     }
-
-    return (iType == AuthTypeHOTP) ?
-        FoilAuth::HOTP(iSecret, iCounter, maxPass, iAlgorithm) :
-        FoilAuth::TOTP(iSecret, aTime, maxPass, iAlgorithm);
 }
 
 bool
@@ -546,20 +560,11 @@ FoilAuthToken::timeshift() const
     return iPrivate ? iPrivate->iTimeshift : 0;
 }
 
-uint
-FoilAuthToken::password(
-    quint64 aTime) const
-{
-    return iPrivate ? iPrivate->password(aTime) : 0;
-}
-
 QString
 FoilAuthToken::passwordString(
     quint64 aTime) const
 {
-    return iPrivate ?
-        QString().sprintf("%0*u", iPrivate->iDigits, password(aTime)) :
-        QString();
+    return iPrivate ? iPrivate->password(aTime) : QString();
 }
 
 int
@@ -575,9 +580,10 @@ FoilAuthTypes::AuthType
 FoilAuthToken::validType(
     int aType)
 {
-    switch (aType) {
+    switch ((FoilAuthTypes::AuthType) aType) {
     case FoilAuthTypes::AuthTypeTOTP:
     case FoilAuthTypes::AuthTypeHOTP:
+    case FoilAuthTypes::AuthTypeSteam:
         return (FoilAuthTypes::AuthType) aType;
     }
     return FoilAuthTypes::DEFAULT_AUTH_TYPE;
@@ -587,7 +593,7 @@ FoilAuthTypes::DigestAlgorithm
 FoilAuthToken::validAlgorithm(
     int aAlgorithm)
 {
-    switch (aAlgorithm) {
+    switch ((FoilAuthTypes::DigestAlgorithm) aAlgorithm) {
     case FoilAuthTypes::DigestAlgorithmSHA1:
     case FoilAuthTypes::DigestAlgorithmSHA256:
     case FoilAuthTypes::DigestAlgorithmSHA512:
@@ -661,9 +667,14 @@ FoilAuthToken::fromUri(
 
             if (!bytes.isEmpty()) {
                 FoilAuthTypes::DigestAlgorithm alg = FoilAuthTypes::DEFAULT_ALGORITHM;
-                int dig = FoilAuthTypes::DEFAULT_DIGITS;
                 int imf = FoilAuthTypes::DEFAULT_COUNTER;
                 int timeshift = FoilAuthTypes::DEFAULT_TIMESHIFT;
+
+                static const QByteArray ISSUER_STEAM("Steam");
+                const QString tokenIssuer(QUrl::fromPercentEncoding(issuer));
+                int dig = (tokenIssuer == ISSUER_STEAM) ?
+                    FoilAuthTypes::DEFAULT_STEAM_DIGITS :
+                    FoilAuthTypes::DEFAULT_DIGITS;
 
                 if (!digits.isEmpty()) {
                     bool ok;
@@ -692,8 +703,7 @@ FoilAuthToken::fromUri(
                 }
                 return FoilAuthToken(type, bytes,
                     QUrl::fromPercentEncoding(label),
-                    QUrl::fromPercentEncoding(issuer),
-                    dig, imf, timeshift, alg);
+                    tokenIssuer, dig, imf, timeshift, alg);
             }
         }
     }
@@ -705,6 +715,7 @@ FoilAuthToken::toUri() const
 {
     if (isValid()) {
         QString buf(FOILAUTH_SCHEME "://");
+        // AuthTypeSteam is also TOTP
         buf.append(iPrivate->iType == FoilAuthTypes::AuthTypeHOTP ? TYPE_HOTP : TYPE_TOTP);
         buf.append(QChar('/'));
         buf.append(QUrl::toPercentEncoding(iPrivate->iLabel, "@"));
@@ -727,6 +738,7 @@ FoilAuthToken::toUri() const
             break;
         }
         switch (iPrivate->iType) {
+        case FoilAuthTypes::AuthTypeSteam:
         case FoilAuthTypes::AuthTypeTOTP:
             if (iPrivate->iTimeshift != FoilAuthTypes::DEFAULT_TIMESHIFT) {
                 buf.append("&" FOILAUTH_KEY_TIMESHIFT "=");

@@ -80,6 +80,8 @@ public:
 #undef LAST
     };
 
+    static ModelData* import(FoilAuthToken);
+
     ModelData(FoilAuthToken);
 
     QVariant get(Role) const;
@@ -88,6 +90,21 @@ public:
     bool iSelected;
     FoilAuthToken iToken;
 };
+
+FoilAuthImportModel::ModelData*
+FoilAuthImportModel::ModelData::import(
+    FoilAuthToken aToken)
+{
+    static const QString ISSUER_STEAM("Steam");
+
+    if (aToken.type() == FoilAuthTypes::AuthTypeTOTP &&
+        aToken.issuer() == ISSUER_STEAM) {
+        // Assume it's a Steam token
+        return new ModelData(aToken.withType(FoilAuthTypes::AuthTypeSteam));
+    }
+
+    return new ModelData(aToken);
+}
 
 FoilAuthImportModel::ModelData::ModelData(
     FoilAuthToken aToken) :
@@ -239,14 +256,14 @@ FoilAuthImportModel::setUri(
     FoilAuthToken singleToken(FoilAuth::parseUri(uri));
 
     if (singleToken.isValid()) {
-        items.append(new ModelData(singleToken));
+        items.append(ModelData::import(singleToken));
         HDEBUG("single token" << singleToken);
     } else {
         const QList<FoilAuthToken> tokens(FoilAuth::parseMigrationUri(uri));
         const int n = tokens.count();
 
         for (int i = 0; i < n; i++) {
-            items.append(new ModelData(tokens.at(i)));
+            items.append(ModelData::import(tokens.at(i)));
         }
     }
 

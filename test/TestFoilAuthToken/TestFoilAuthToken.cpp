@@ -156,7 +156,6 @@ test_invalid(
     g_assert_cmpint(invalid.timeshift(), == ,0);
     g_assert_cmpint(invalid.counter(), == ,0);
     g_assert_cmpint(invalid.digits(), == ,0);
-    g_assert_cmpint(invalid.password(123456789), == ,0);
     g_assert(invalid.passwordString(123456789).isEmpty());
 
     g_assert(invalid.withType(FoilAuthTypes::DEFAULT_AUTH_TYPE) == invalid);

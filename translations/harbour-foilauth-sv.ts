@@ -162,6 +162,11 @@
         <extracomment>Menu item for counter based token</extracomment>
         <translation>Räknarbaserad (HOTP)</translation>
     </message>
+    <message id="foilauth-token-type-steam">
+        <source>Steam</source>
+        <extracomment>Menu item for time based token</extracomment>
+        <translation type="unfinished">Steam</translation>
+    </message>
     <message id="foilauth-token-scan-button">
         <source>Scan QR code</source>
         <extracomment>Button label, opens QR code scan window</extracomment>

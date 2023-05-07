@@ -114,7 +114,6 @@ public:
     quint64 counter() const;
     int digits() const;
     int timeshift() const;
-    uint password(quint64 aTime) const;
 
     Q_REQUIRED_RESULT QString passwordString(quint64) const;
     Q_REQUIRED_RESULT QString toUri() const;

@@ -74,6 +74,7 @@ public:
     enum Type {
         TypeTOTP = AuthTypeTOTP,
         TypeHOTP = AuthTypeHOTP,
+        TypeSteam = AuthTypeSteam,
         DefaultType = DEFAULT_AUTH_TYPE
     };
 

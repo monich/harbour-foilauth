@@ -49,7 +49,8 @@ class FoilAuthTypes {
 public:
     enum AuthType {
         AuthTypeTOTP,
-        AuthTypeHOTP
+        AuthTypeHOTP,
+        AuthTypeSteam
     };
 
     enum DigestAlgorithm {
@@ -63,6 +64,7 @@ public:
 
     static const int MIN_DIGITS = 1;
     static const int MAX_DIGITS = 9;
+    static const int DEFAULT_STEAM_DIGITS = 5;
     static const int DEFAULT_DIGITS = 6;
 
     static const int DEFAULT_COUNTER = 0;

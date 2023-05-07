@@ -163,7 +163,7 @@ Dialog {
                     validator: IntValidator {}
                     inputMethodHints: Qt.ImhDigitsOnly
                     enabled: !qrCodeOnly
-                    visible: type === FoilAuth.TypeTOTP
+                    visible: type === FoilAuth.TypeTOTP || type === FoilAuth.TypeSteam
 
                     EnterKey.iconSource: "image://theme/icon-m-enter-accept"
                     EnterKey.onClicked: thisDialog.accept()
@@ -205,6 +205,9 @@ Dialog {
                         //: Menu item for counter based token
                         //% "Counter-based (HOTP)"
                         MenuItem { text: qsTrId("foilauth-token-type-hotp") }
+                        //: Menu item for time based token
+                        //% "Steam"
+                        MenuItem { text: qsTrId("foilauth-token-type-steam") }
                     }
                     Component.onCompleted: currentIndex = type
                     onCurrentIndexChanged: type = currentIndex

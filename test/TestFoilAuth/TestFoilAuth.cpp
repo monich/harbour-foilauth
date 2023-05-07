@@ -176,6 +176,7 @@ test_totp(
     void)
 {
     const QByteArray secret(HarbourBase32::fromBase32("VHIIKTVJC6MEOFTJ"));
+    g_assert_cmpuint(FoilAuth::hash(secret, 1548529350), == ,936036598);
     g_assert_cmpuint(FoilAuth::TOTP(secret, 1548529350, 1000000), == ,38068);
 }
 
@@ -193,18 +194,46 @@ test_hotp(
         (FoilAuth::DigestAlgorithm)-1 /* DigestAlgorithmSHA1 */), == ,207601);
     g_assert_cmpuint(FoilAuth::HOTP(secret, 1, 1000000,
         (FoilAuth::DigestAlgorithm)-1 /* DigestAlgorithmSHA1 */), == ,444239);
+    g_assert_cmpuint(FoilAuth::hash(secret, 0,
+        FoilAuth::DigestAlgorithmSHA1), == , 738207601);
     g_assert_cmpuint(FoilAuth::HOTP(secret, 0, 1000000,
-        FoilAuth::DigestAlgorithmSHA1), == ,207601);
+        FoilAuth::DigestAlgorithmSHA1), == ,    207601);
+    g_assert_cmpuint(FoilAuth::hash(secret, 1,
+        FoilAuth::DigestAlgorithmSHA1), == , 845444239);
     g_assert_cmpuint(FoilAuth::HOTP(secret, 1, 1000000,
-        FoilAuth::DigestAlgorithmSHA1), == ,444239);
-    g_assert_cmpuint(FoilAuth::HOTP(secret, 0, 1000000,
-        FoilAuth::DigestAlgorithmSHA256), == , 367047);
-    g_assert_cmpuint(FoilAuth::HOTP(secret, 1, 1000000,
-        FoilAuth::DigestAlgorithmSHA256), == , 714922);
-    g_assert_cmpuint(FoilAuth::HOTP(secret, 0, 1000000,
-        FoilAuth::DigestAlgorithmSHA512), == , 308534);
-    g_assert_cmpuint(FoilAuth::HOTP(secret, 1, 1000000,
-        FoilAuth::DigestAlgorithmSHA512), == , 899828);
+        FoilAuth::DigestAlgorithmSHA1), == ,    444239);
+    g_assert_cmpuint(FoilAuth::hash(secret, 0,
+        FoilAuth::DigestAlgorithmSHA256), == , 1874367047);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 0,    1000000,
+        FoilAuth::DigestAlgorithmSHA256), == ,     367047);
+    g_assert_cmpuint(FoilAuth::hash(secret, 1,
+        FoilAuth::DigestAlgorithmSHA256), == , 943714922);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1,    1000000,
+        FoilAuth::DigestAlgorithmSHA256), == ,     714922);
+    g_assert_cmpuint(FoilAuth::hash(secret, 0,
+        FoilAuth::DigestAlgorithmSHA512), == , 1432308534);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 0,    1000000,
+        FoilAuth::DigestAlgorithmSHA512), == ,     308534);
+    g_assert_cmpuint(FoilAuth::hash(secret, 1,
+        FoilAuth::DigestAlgorithmSHA512), == , 1775899828);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1, 1000000000,
+        FoilAuth::DigestAlgorithmSHA512), == ,  775899828);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1,  100000000,
+        FoilAuth::DigestAlgorithmSHA512), == ,   75899828);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1,   10000000,
+        FoilAuth::DigestAlgorithmSHA512), == ,    5899828);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1,    1000000,
+        FoilAuth::DigestAlgorithmSHA512), == ,     899828);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1,     100000,
+        FoilAuth::DigestAlgorithmSHA512), == ,      99828);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1,      10000,
+        FoilAuth::DigestAlgorithmSHA512), == ,       9828);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1,       1000,
+        FoilAuth::DigestAlgorithmSHA512), == ,        828);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1,        100,
+        FoilAuth::DigestAlgorithmSHA512), == ,         28);
+    g_assert_cmpuint(FoilAuth::HOTP(secret, 1,         10,
+        FoilAuth::DigestAlgorithmSHA512), == ,          8);
 }
 
 /*==========================================================================*
