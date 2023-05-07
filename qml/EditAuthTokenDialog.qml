@@ -120,7 +120,10 @@ Dialog {
                     //% "Number of password digits"
                     placeholderText: qsTrId("foilauth-token-digits-placeholder")
                     text: FoilAuthDefaultDigits
-                    validator: IntValidator { bottom: 1 }
+                    validator: IntValidator {
+                        bottom: FoilAuthMinDigits
+                        top: FoilAuthMaxDigits
+                    }
                     inputMethodHints: Qt.ImhDigitsOnly
                     enabled: !qrCodeOnly
 
