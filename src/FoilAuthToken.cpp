@@ -291,7 +291,7 @@ FoilAuthToken::Private::password(
 {
     if (iType == AuthTypeSteam) {
         static const QString ALPHABET("23456789BCDFGHJKMNPQRTVWXY");
-        uint hash = FoilAuth::hash(iSecret, aTime, iAlgorithm);
+        uint hash = FoilAuth::hash(iSecret, aTime + iTimeshift, iAlgorithm);
         QString pass;
 
         for (int i = 0; i < iDigits; i++) {
@@ -309,7 +309,7 @@ FoilAuthToken::Private::password(
 
         return QString().sprintf("%0*u", iDigits, (iType == AuthTypeHOTP) ?
             FoilAuth::HOTP(iSecret, iCounter, maxPass, iAlgorithm) :
-            FoilAuth::TOTP(iSecret, aTime, maxPass, iAlgorithm));
+            FoilAuth::TOTP(iSecret, aTime + iTimeshift, maxPass, iAlgorithm));
     }
 }
 
