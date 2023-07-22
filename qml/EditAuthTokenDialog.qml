@@ -153,6 +153,7 @@ Dialog {
                     id: timeshiftField
 
                     width: parent.columnWidth
+                    textRightMargin: Theme.paddingLarge/2 + timeshiftEditButton.width + textMargin
                     //: Text field label (number of password digits)
                     //% "Time shift (seconds)"
                     label: qsTrId("foilauth-token-timeshift-text")
@@ -167,6 +168,39 @@ Dialog {
 
                     EnterKey.iconSource: "image://theme/icon-m-enter-accept"
                     EnterKey.onClicked: thisDialog.accept()
+
+                    MouseArea {
+                        id: timeshiftEditButton
+
+                        parent: timeshiftField
+                        x: parent.width - width - parent.textMargin
+                        width: textEllipsis.implicitWidth + Theme.paddingLarge/2
+                        height: parent.height - Theme.paddingLarge
+
+                        Text {
+                            id: textEllipsis
+
+                            anchors {
+                                top: parent.top
+                                topMargin: timeshiftField.textTopMargin
+                                horizontalCenter: parent.horizontalCenter
+                            }
+                            font.pixelSize: Theme.fontSizeMedium
+                            text: "…"
+                            textFormat: Text.PlainText
+                            color: parent.pressed && parent.containsMouse ? Theme.highlightColor : Theme.primaryColor
+                        }
+
+                        onClicked: {
+                            var editor = pageStack.push(Qt.resolvedUrl("TimeShiftDialog.qml"), {
+                                allowedOrientations: thisDialog.allowedOrientations,
+                                timeshift: thisDialog.timeshift / 60
+                            })
+                            editor.accepted.connect(function() {
+                                thisDialog.timeshift = editor.timeshift * 60
+                            })
+                        }
+                    }
                 }
 
                 ComboBox {
