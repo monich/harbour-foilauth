@@ -27,7 +27,7 @@ CoverBackground {
         color: Theme.primaryColor
         opacity: 0.1
 
-        readonly property bool active: list.model.needTimer && foilModel.timerActive && displayOn
+        readonly property bool active: foilModel.timerActive && displayOn
         readonly property real value: (foilModel.timeLeft - 1)/(foilModel.period - 1)
 
         Behavior on width {
