@@ -883,13 +883,13 @@ FoilAuthModel::EncryptTask::performTask()
             unlink(dest->str);
         }
 
-        if ((iTime || iToken.type() != FoilAuth::AuthTypeTOTP) && !isCanceled()) {
+        if ((iTime || iToken.type() == FoilAuth::AuthTypeHOTP) && !isCanceled()) {
             iCurrentPassword = iToken.passwordString(iTime);
-            if (iToken.type() == FoilAuth::AuthTypeTOTP) {
+            if (iToken.type() == FoilAuth::AuthTypeHOTP) {
+                iPrevPassword = iNextPassword = iCurrentPassword;
+            } else {
                 iPrevPassword = iToken.passwordString(iTime - FoilAuth::PERIOD);
                 iNextPassword = iToken.passwordString(iTime + FoilAuth::PERIOD);
-            } else {
-                iPrevPassword = iNextPassword = iCurrentPassword;
             }
             HDEBUG(qPrintable(iPrevPassword) << qPrintable(iCurrentPassword) <<
                 qPrintable(iNextPassword));
@@ -1587,7 +1587,7 @@ FoilAuthModel::Private::needTimer() const
     if (iFoilState == FoilModelReady) {
         const int n = iData.count();
         for (int i = 0; i < n; i++) {
-            if (iData.at(i)->iToken.type() == FoilAuthTypes::AuthTypeTOTP) {
+            if (iData.at(i)->iToken.type() != FoilAuthTypes::AuthTypeHOTP) {
                 return true;
             }
         }
