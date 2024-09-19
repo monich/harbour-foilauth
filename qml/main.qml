@@ -9,6 +9,13 @@ ApplicationWindow {
     initialPage: HarbourProcessState.jailedApp ? jailPageComponent : mainPageComponent
     cover: Component {  CoverPage { } }
 
+    function resetAutoLock() {
+        lockTimer.stop()
+        if (FoilAuthSettings.autoLock && HarbourSystemState.locked) {
+            lockTimer.start()
+        }
+    }
+
     Component {
         id: mainPageComponent
 
@@ -29,45 +36,16 @@ ApplicationWindow {
         id: lockTimer
 
         interval: FoilAuthSettings.autoLockTime
-        onTriggered: FoilAuthModel.lock(true);
+        onTriggered: FoilAuthModel.lock(false);
     }
 
     Connections {
         target: HarbourSystemState
-
-        property bool wasDimmed
-
-        onDisplayStatusChanged: {
-            if (target.displayStatus === HarbourSystemState.MCE_DISPLAY_DIM) {
-                wasDimmed = true
-            } else if (target.displayStatus === HarbourSystemState.MCE_DISPLAY_ON) {
-                wasDimmed = false
-            }
-        }
-        onLockedChanged: {
-            lockTimer.stop()
-            if (FoilAuthSettings.autoLock && target.locked) {
-                if (wasDimmed) {
-                    // Give the user some time to wake up the screen and
-                    // avoid re-entering the password.
-                    lockTimer.start()
-                } else {
-                    FoilAuthModel.lock(false);
-                }
-            }
-        }
+        onLockedChanged: resetAutoLock()
     }
 
     Connections {
         target: FoilAuthSettings
-
-        onAutoLockChanged: {
-            lockTimer.stop()
-            // It's so unlikely that settings change when the device is locked
-            // But it's possible!
-            if (target.autoLock && HarbourSystemState.locked) {
-                FoilAuthModel.lock(false);
-            }
-        }
+        onAutoLockChanged: resetAutoLock()
     }
 }

@@ -16,6 +16,9 @@ Item {
 
     readonly property bool _isLandscape: mainPage && mainPage.isLandscape
 
+    // 400 ms is the pulley menu bounce-back duration
+    Behavior on opacity { FadeAnimation { duration: 400 } }
+
     SilicaListView {
         id: tokenList
 
@@ -95,6 +98,18 @@ Item {
         }
 
         PullDownMenu {
+            id: pullDownMenu
+
+            property var _deferredAction: null
+
+            onActiveChanged: {
+                if (!active && _deferredAction) {
+                    var action = _deferredAction
+                    _deferredAction = null
+                    action()
+                }
+            }
+
             MenuItem {
                 //: Pulley menu item, changes Foil password
                 //% "Change password"
@@ -116,6 +131,19 @@ Item {
                     //% "Change password"
                     buttonText: qsTrId("foilauth-change_password_page-button-change_password")
                 })
+            }
+            MenuItem {
+                //: Pulley menu item, locks the secrets
+                //% "Lock"
+                text: qsTrId("foilauth-menu-lock")
+                visible: mainPage.isPortrait // Max 4 items in landscape
+                onClicked: {
+                    thisItem.opacity = 0 // with a 400 ms animation
+                    pullDownMenu._deferredAction = action
+                }
+                function action() {
+                    foilModel.lock(false)
+                }
             }
             MenuItem {
                 //: Pulley menu item, opens organize page

@@ -3,12 +3,13 @@ import Sailfish.Silica 1.0
 import org.nemomobile.configuration 1.0
 
 Page {
-    readonly property string rootPath: "/apps/harbour-foilauth/"
     property alias title: pageHeader.title
 
     // jolla-settings expects these properties:
     property var applicationName
     property var applicationIcon
+
+    readonly property string _rootPath: "/apps/harbour-foilauth/"
 
     SilicaFlickable {
         anchors.fill: parent
@@ -56,8 +57,45 @@ Page {
                 ConfigurationValue {
                     id: autoLockConfig
 
-                    key: rootPath + "autoLock"
+                    key: _rootPath + "autoLock"
                     defaultValue: true
+                }
+            }
+
+            Slider {
+                readonly property int min: value /60
+                readonly property int sec: value  % 60
+
+                visible: opacity > 0
+                opacity: autoLockConfig.value ? 1.0 : 0.0
+                width: parent.width
+                minimumValue: 0
+                maximumValue: 300
+                value: autoLockTimeConfig.value / 1000
+                stepSize: 5
+                //: Slider label
+                //% "Locking delay"
+                label: qsTrId("foilauth-settings_page-autolock_delay-label")
+                valueText: !value ?
+                    //: Slider value (no delay)
+                    //% "No delay"
+                    qsTrId("foilauth-settings_page-autolock_delay-value-no_delay") :
+                    //: Slider value
+                    //% "%1 sec"
+                    !min ? qsTrId("foilauth-settings_page-autolock_delay-value-sec",value).arg(sec) :
+                    //: Slider value
+                    //% "%1 min"
+                    !sec ? qsTrId("foilauth-settings_page-autolock_delay-value-min",value).arg(min) :
+                    qsTrId("foilauth-settings_page-autolock_delay-value-min",value).arg(min) + " " +
+                    qsTrId("foilauth-settings_page-autolock_delay-value-sec",value).arg(sec)
+                onSliderValueChanged: autoLockTimeConfig.value = value * 1000
+                FadeAnimation on opacity { }
+
+                ConfigurationValue {
+                    id: autoLockTimeConfig
+
+                    key: _rootPath + "autoLockTime"
+                    defaultValue: 15000
                 }
             }
         }

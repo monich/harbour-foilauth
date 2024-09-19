@@ -253,6 +253,11 @@
         <extracomment>Pulley menu item, changes Foil password</extracomment>
         <translation>Ändra lösenord</translation>
     </message>
+    <message id="foilauth-menu-lock">
+        <source>Lock</source>
+        <extracomment>Pulley menu item, locks the secrets</extracomment>
+        <translation type="unfinished">Låsa</translation>
+    </message>
     <message id="foilauth-menu-organize">
         <source>Organize</source>
         <extracomment>Pulley menu item, opens organize page</extracomment>
@@ -458,6 +463,16 @@
         <extracomment>Page header descriptions</extracomment>
         <translation>Tryck, håll och dra för att ändra ordning</translation>
     </message>
+    <message id="jail-explanation">
+        <source>This application is not designed to function in a sandbox. Try installing the latest version from &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; or &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, it may implement some sort of a workaround. No guarantee, though.</source>
+        <extracomment>Label text explaining the sandbox situation</extracomment>
+        <translation>Denna applikation är inte utformad för att fungera i en sandlåda. Prova att installera den senaste versionen från &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; eller &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, den kan implementera någon form av lösning. Ingen garanti, dock.</translation>
+    </message>
+    <message id="jail-terminal_hint">
+        <source>If you have developer mode enabled, you may also try running &lt;b&gt;%1&lt;/b&gt; from the terminal. Sorry for the inconvenience!</source>
+        <extracomment>Hint suggesting to run the app from the terminal</extracomment>
+        <translation>Om du har aktiverat utvecklarläge kan du också försöka köra &lt;b&gt;%1&lt;/b&gt; från terminalen. Beklagar olägenheten!</translation>
+    </message>
     <message id="foilauth-settings_page-header-version">
         <source>Version %1</source>
         <extracomment>Settings page header description (app version)</extracomment>
@@ -473,15 +488,31 @@
         <extracomment>Text switch description</extracomment>
         <translation>Kräv Foil-lösenord efter att skärmen låsts upp.</translation>
     </message>
-    <message id="jail-explanation">
-        <source>This application is not designed to function in a sandbox. Try installing the latest version from &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; or &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, it may implement some sort of a workaround. No guarantee, though.</source>
-        <extracomment>Label text explaining the sandbox situation</extracomment>
-        <translation>Denna applikation är inte utformad för att fungera i en sandlåda. Prova att installera den senaste versionen från &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; eller &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, den kan implementera någon form av lösning. Ingen garanti, dock.</translation>
+    <message id="foilauth-settings_page-autolock_delay-label">
+        <source>Locking delay</source>
+        <extracomment>Slider label</extracomment>
+        <translation type="unfinished">Låsningsfördröjning</translation>
     </message>
-    <message id="jail-terminal_hint">
-        <source>If you have developer mode enabled, you may also try running &lt;b&gt;%1&lt;/b&gt; from the terminal. Sorry for the inconvenience!</source>
-        <extracomment>Hint suggesting to run the app from the terminal</extracomment>
-        <translation>Om du har aktiverat utvecklarläge kan du också försöka köra &lt;b&gt;%1&lt;/b&gt; från terminalen. Beklagar olägenheten!</translation>
+    <message id="foilauth-settings_page-autolock_delay-value-no_delay">
+        <source>No delay</source>
+        <extracomment>Slider value (no delay)</extracomment>
+        <translation type="unfinished">Ingen försening</translation>
+    </message>
+    <message id="foilauth-settings_page-autolock_delay-value-sec" numerus="yes">
+        <source>%1 sec</source>
+        <extracomment>Slider value</extracomment>
+        <translation type="unfinished">
+            <numerusform>%1 min</numerusform>
+            <numerusform>%1 min</numerusform>
+        </translation>
+    </message>
+    <message id="foilauth-settings_page-autolock_delay-value-min" numerus="yes">
+        <source>%1 min</source>
+        <extracomment>Slider value</extracomment>
+        <translation type="unfinished">
+            <numerusform>%1 sek</numerusform>
+            <numerusform>%1 sek</numerusform>
+        </translation>
     </message>
 </context>
 </TS>

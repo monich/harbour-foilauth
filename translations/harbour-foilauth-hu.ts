@@ -249,6 +249,11 @@
         <extracomment>Pulley menu item, changes Foil password</extracomment>
         <translation>Jelszóváltoztatás</translation>
     </message>
+    <message id="foilauth-menu-lock">
+        <source>Lock</source>
+        <extracomment>Pulley menu item, locks the secrets</extracomment>
+        <translation type="unfinished">Zár</translation>
+    </message>
     <message id="foilauth-menu-organize">
         <source>Organize</source>
         <extracomment>Pulley menu item, opens organize page</extracomment>
@@ -454,6 +459,16 @@
         <extracomment>Page header descriptions</extracomment>
         <translation type="unfinished">Nyomja meg, tartsa lenyomva és húzza az átrendezéshez</translation>
     </message>
+    <message id="jail-explanation">
+        <source>This application is not designed to function in a sandbox. Try installing the latest version from &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; or &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, it may implement some sort of a workaround. No guarantee, though.</source>
+        <extracomment>Label text explaining the sandbox situation</extracomment>
+        <translation type="unfinished">Ezt az alkalmazást nem úgy tervezték, hogy homokozóban működjön. Próbálja meg telepíteni a legfrissebb verziót a &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; vagy &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt; címről, ez valamiféle megoldást valósíthat meg. Pedig nincs garancia.</translation>
+    </message>
+    <message id="jail-terminal_hint">
+        <source>If you have developer mode enabled, you may also try running &lt;b&gt;%1&lt;/b&gt; from the terminal. Sorry for the inconvenience!</source>
+        <extracomment>Hint suggesting to run the app from the terminal</extracomment>
+        <translation type="unfinished">Ha engedélyezte a fejlesztői módot, akkor próbálja meg futtatni az &lt;b&gt;%1&lt;/b&gt; fájlt a terminálról. Elnézést a kellemetlenségért!</translation>
+    </message>
     <message id="foilauth-settings_page-header-version">
         <source>Version %1</source>
         <extracomment>Settings page header description (app version)</extracomment>
@@ -469,15 +484,29 @@
         <extracomment>Text switch description</extracomment>
         <translation type="unfinished">A képernyő feloldása után meg kell adnia a Foil jelszót.</translation>
     </message>
-    <message id="jail-explanation">
-        <source>This application is not designed to function in a sandbox. Try installing the latest version from &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; or &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, it may implement some sort of a workaround. No guarantee, though.</source>
-        <extracomment>Label text explaining the sandbox situation</extracomment>
-        <translation type="unfinished">Ezt az alkalmazást nem úgy tervezték, hogy homokozóban működjön. Próbálja meg telepíteni a legfrissebb verziót a &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; vagy &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt; címről, ez valamiféle megoldást valósíthat meg. Pedig nincs garancia.</translation>
+    <message id="foilauth-settings_page-autolock_delay-label">
+        <source>Locking delay</source>
+        <extracomment>Slider label</extracomment>
+        <translation type="unfinished">Késleltetés a reteszelés előtt</translation>
     </message>
-    <message id="jail-terminal_hint">
-        <source>If you have developer mode enabled, you may also try running &lt;b&gt;%1&lt;/b&gt; from the terminal. Sorry for the inconvenience!</source>
-        <extracomment>Hint suggesting to run the app from the terminal</extracomment>
-        <translation type="unfinished">Ha engedélyezte a fejlesztői módot, akkor próbálja meg futtatni az &lt;b&gt;%1&lt;/b&gt; fájlt a terminálról. Elnézést a kellemetlenségért!</translation>
+    <message id="foilauth-settings_page-autolock_delay-value-no_delay">
+        <source>No delay</source>
+        <extracomment>Slider value (no delay)</extracomment>
+        <translation type="unfinished">Nincs késés</translation>
+    </message>
+    <message id="foilauth-settings_page-autolock_delay-value-sec" numerus="yes">
+        <source>%1 sec</source>
+        <extracomment>Slider value</extracomment>
+        <translation type="unfinished">
+            <numerusform>%1 mp</numerusform>
+        </translation>
+    </message>
+    <message id="foilauth-settings_page-autolock_delay-value-min" numerus="yes">
+        <source>%1 min</source>
+        <extracomment>Slider value</extracomment>
+        <translation type="unfinished">
+            <numerusform>%1 perc</numerusform>
+        </translation>
     </message>
 </context>
 </TS>
