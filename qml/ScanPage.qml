@@ -34,6 +34,8 @@ Page {
         if (canShowViewFinder) {
             _viewFinder = viewFinderComponent.createObject(viewFinderContainer, {
                 viewfinderResolution: viewFinderContainer.viewfinderResolution,
+                showFocusArea: !scanner.grabbing,
+                frontCamera: FoilAuthSettings.frontCamera,
                 digitalZoom: FoilAuthSettings.scanZoom,
                 orientation: orientationAngle()
             })
@@ -102,6 +104,7 @@ Page {
 
         property string lastInvalidCode
         viewFinderItem: viewFinderContainer
+        mirrored: _viewFinder && _viewFinder.mirrored
         rotation: orientationAngle()
 
         onScanFinished: {
@@ -391,6 +394,8 @@ Page {
 
     HarbourSingleImageProvider {
         id: markImageProvider
+
+        mirrorHorizontally: FoilAuthSettings.frontCamera
     }
 
     MediaKey{

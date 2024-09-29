@@ -1,34 +1,40 @@
 /*
+ * Copyright (C) 2019-2024 Slava Monich <slava@monich.com>
  * Copyright (C) 2019-2022 Jolla Ltd.
- * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
  *
- * You may use this file under the terms of BSD license as follows:
+ * You may use this file under the terms of the BSD license as follows:
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   1. Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer
- *      in the documentation and/or other materials provided with the
- *      distribution.
- *   3. Neither the names of the copyright holders nor the names of its
- *      contributors may be used to endorse or promote products derived
- *      from this software without specific prior written permission.
+ *  1. Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer
+ *     in the documentation and/or other materials provided with the
+ *     distribution.
+ *
+ *  3. Neither the names of the copyright holders nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
  * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The views and conclusions contained in the software and documentation
+ * are those of the authors and should not be interpreted as representing
+ * any official policies, either expressed or implied.
  */
 
 #include "QrCodeScanner.h"
@@ -37,11 +43,10 @@
 #include "HarbourDebug.h"
 
 #include <QtConcurrent>
+#include <QtGui/QBrush>
+#include <QtGui/QPainter>
 #include <QtQuick/QQuickItem>
-#include <QPainter>
-#include <QBrush>
 #include <QtQuick/QQuickWindow>
-#include <QtQuick/QQuickPaintedItem>
 
 #ifdef HARBOUR_DEBUG
 #include <QStandardPaths>
@@ -61,42 +66,45 @@ static void saveDebugImage(QImage aImage, QString aFileName)
 // QrCodeScanner::Private
 // ==========================================================================
 
-class QrCodeScanner::Private : public QObject
+class QrCodeScanner::Private :
+    public QObject
 {
     Q_OBJECT
 public:
-    Private(QrCodeScanner* aParent);
+    Private(QrCodeScanner*);
     ~Private();
 
     QrCodeScanner* scanner();
-    void scanThread(uint aScanId);
+    void scanThread(uint);
     void start();
     void stop();
     void requestStop();
-    void setRotation(int aDegrees);
-    void setTryRotated(bool aTryRotated);
-    void setViewFinderRect(const QRect& aRect);
-    void setViewFinderItem(QQuickItem* aItem);
+    void setRotation(int);
+    void setTryRotated(bool);
+    void setViewFinderRect(const QRect&);
+    void setViewFinderItem(QQuickItem*);
 
 Q_SIGNALS:
-    void scanDone(uint aScanId, QImage aImage, QrCodeDecoder::Result aResult);
-    void decodingFinished(QVariantMap Result);
+    void scanDone(uint, QImage, QrCodeDecoder::Result);
     void needImage();
 
 public Q_SLOTS:
-    void onScanDone(uint aScanId, QImage aImage, QrCodeDecoder::Result aResult);
+    void onScanDone(uint, QImage, QrCodeDecoder::Result);
     void onGrabImage();
 
 public:
     QrCodeDecoder* iDecoder;
-    QQuickItem* iViewFinderItem;
-    QImage iCaptureImage;
-    int iRotation;
+    int iRotation; // Degrees
     bool iTryRotated;
+    bool iMirrored;
     bool iGrabbing;
     bool iStopScan;
     uint iCurrentScanId;
     uint iNextScanId;
+
+    QQuickItem* iViewFinderItem;
+    QImage iCaptureImage;
+    bool iCaptureImageMirrored;
 
     QMutex iScanMutex;
     QWaitCondition iScanEvent;
@@ -106,15 +114,18 @@ public:
     QColor iMarkerColor;
 };
 
-QrCodeScanner::Private::Private(QrCodeScanner* aParent) :
+QrCodeScanner::Private::Private(
+    QrCodeScanner* aParent) :
     QObject(aParent),
     iDecoder(new QrCodeDecoder),
-    iViewFinderItem(NULL),
     iRotation(0),
     iTryRotated(false),
+    iMirrored(false),
     iGrabbing(false),
     iCurrentScanId(0),
     iNextScanId(1),
+    iViewFinderItem(Q_NULLPTR),
+    iCaptureImageMirrored(false),
     iMarkerColor(QColor(0, 255, 0)) // default green
 {
     // Handled on the main thread
@@ -136,12 +147,14 @@ QrCodeScanner::Private::~Private()
     delete iDecoder;
 }
 
-inline QrCodeScanner* QrCodeScanner::Private::scanner()
+inline QrCodeScanner*
+QrCodeScanner::Private::scanner()
 {
     return qobject_cast<QrCodeScanner*>(parent());
 }
 
-void QrCodeScanner::Private::onGrabImage()
+void
+QrCodeScanner::Private::onGrabImage()
 {
     if (iViewFinderItem && !iStopScan) {
         QQuickWindow* window = iViewFinderItem->window();
@@ -159,6 +172,7 @@ void QrCodeScanner::Private::onGrabImage()
                 HDEBUG(image);
                 iScanMutex.lock();
                 iCaptureImage = image;
+                iCaptureImageMirrored = iMirrored;
                 iScanEvent.wakeAll();
                 iScanMutex.unlock();
             }
@@ -166,7 +180,9 @@ void QrCodeScanner::Private::onGrabImage()
     }
 }
 
-void QrCodeScanner::Private::scanThread(uint aScanId)
+void
+QrCodeScanner::Private::scanThread(
+    uint aScanId)
 {
     HDEBUG("scan started");
 
@@ -174,6 +190,7 @@ void QrCodeScanner::Private::scanThread(uint aScanId)
     QImage image;
     qreal scale = 1;
     bool rotated = false;
+    bool mirrored = false;
     int scaledWidth = 0;
 
     const int maxWidth = 600;
@@ -201,9 +218,11 @@ void QrCodeScanner::Private::scanThread(uint aScanId)
         tryRotated = iTryRotated;
         if (!iStopScan) {
             image = iCaptureImage;
+            mirrored = iCaptureImageMirrored;
             iCaptureImage = QImage();
         } else {
             image = QImage();
+            mirrored = false;
         }
         iScanMutex.unlock();
 
@@ -256,6 +275,10 @@ void QrCodeScanner::Private::scanThread(uint aScanId)
 
             HDEBUG("extracted" << image);
             saveDebugImage(image, "debug_cropped.bmp");
+            if (mirrored) {
+                image = image.mirrored(true, false);
+                saveDebugImage(image, "debug_screenshot_transformed.bmp");
+            }
 
             QImage scaledImage;
             if (image.width() > maxWidth || image.height() > maxHeight) {
@@ -346,7 +369,10 @@ void QrCodeScanner::Private::scanThread(uint aScanId)
     emit scanDone(aScanId, image, result);
 }
 
-void QrCodeScanner::Private::onScanDone(uint aScanId, QImage aImage,
+void
+QrCodeScanner::Private::onScanDone(
+    uint aScanId,
+    QImage aImage,
     QrCodeDecoder::Result aResult)
 {
     if (aScanId == iCurrentScanId) {
@@ -364,7 +390,8 @@ void QrCodeScanner::Private::onScanDone(uint aScanId, QImage aImage,
     }
 }
 
-void QrCodeScanner::Private::requestStop()
+void
+QrCodeScanner::Private::requestStop()
 {
     if (!iStopScan) {
         iScanMutex.lock();
@@ -374,7 +401,8 @@ void QrCodeScanner::Private::requestStop()
     }
 }
 
-void QrCodeScanner::Private::start()
+void
+QrCodeScanner::Private::start()
 {
     if (!iCurrentScanId) {
         if (iScanFuture.isStarted() && !iScanFuture.isFinished()) {
@@ -391,7 +419,8 @@ void QrCodeScanner::Private::start()
     }
 }
 
-void QrCodeScanner::Private::stop()
+void
+QrCodeScanner::Private::stop()
 {
     if (iCurrentScanId) {
         HDEBUG("stopping scan" << iCurrentScanId);
@@ -401,14 +430,18 @@ void QrCodeScanner::Private::stop()
     }
 }
 
-void QrCodeScanner::Private::setViewFinderRect(const QRect& aRect)
+void
+QrCodeScanner::Private::setViewFinderRect(
+    const QRect& aRect)
 {
     iScanMutex.lock();
     iViewFinderRect = aRect;
     iScanMutex.unlock();
 }
 
-void QrCodeScanner::Private::setViewFinderItem(QQuickItem* aItem)
+void
+QrCodeScanner::Private::setViewFinderItem(
+    QQuickItem* aItem)
 {
     iScanMutex.lock();
     iViewFinderItem = aItem;
@@ -418,14 +451,18 @@ void QrCodeScanner::Private::setViewFinderItem(QQuickItem* aItem)
     iScanMutex.unlock();
 }
 
-void QrCodeScanner::Private::setRotation(int aRotation)
+void
+QrCodeScanner::Private::setRotation(
+    int aRotation)
 {
     iScanMutex.lock();
     iRotation = aRotation;
     iScanMutex.unlock();
 }
 
-void QrCodeScanner::Private::setTryRotated(bool aTryRotated)
+void
+QrCodeScanner::Private::setTryRotated(
+    bool aTryRotated)
 {
     iScanMutex.lock();
     iTryRotated = aTryRotated;
@@ -436,7 +473,8 @@ void QrCodeScanner::Private::setTryRotated(bool aTryRotated)
 // QrCodeScanner
 // ==========================================================================
 
-QrCodeScanner::QrCodeScanner(QObject* aParent) :
+QrCodeScanner::QrCodeScanner(
+    QObject* aParent) :
     QObject(aParent),
     iPrivate(new Private(this))
 {
@@ -449,26 +487,32 @@ QrCodeScanner::~QrCodeScanner()
     delete iPrivate;
 }
 
-int QrCodeScanner::rotation() const
+int
+QrCodeScanner::rotation() const
 {
     return iPrivate->iRotation;
 }
 
-void QrCodeScanner::setRotation(int aRotation)
+void
+QrCodeScanner::setRotation(
+    int aDegrees)
 {
-    if (iPrivate->iRotation != aRotation) {
-        HDEBUG(aRotation);
-        iPrivate->setRotation(aRotation);
+    if (iPrivate->iRotation != aDegrees) {
+        HDEBUG(aDegrees);
+        iPrivate->setRotation(aDegrees);
         Q_EMIT rotationChanged();
     }
 }
 
-bool QrCodeScanner::tryRotated() const
+bool
+QrCodeScanner::tryRotated() const
 {
     return iPrivate->iTryRotated;
 }
 
-void QrCodeScanner::setTryRotated(bool aTryRotated)
+void
+QrCodeScanner::setTryRotated(
+    bool aTryRotated)
 {
     if (iPrivate->iTryRotated != aTryRotated) {
         HDEBUG(aTryRotated);
@@ -477,32 +521,44 @@ void QrCodeScanner::setTryRotated(bool aTryRotated)
     }
 }
 
-bool QrCodeScanner::grabbing() const
+bool
+QrCodeScanner::grabbing() const
 {
     return iPrivate->iGrabbing;
 }
 
-bool QrCodeScanner::scanning() const
+bool
+QrCodeScanner::scanning() const
 {
     return iPrivate->iCurrentScanId != 0;
 }
 
-void QrCodeScanner::start()
+bool
+QrCodeScanner::mirrored() const
 {
-    iPrivate->start();
+    return iPrivate->iMirrored;
 }
 
-void QrCodeScanner::stop()
+void
+QrCodeScanner::setMirrored(
+    bool aMirrored)
 {
-    iPrivate->stop();
+    if (iPrivate->iMirrored!= aMirrored) {
+        HDEBUG(aMirrored);
+        iPrivate->iMirrored = aMirrored;
+        Q_EMIT mirroredChanged();
+    }
 }
 
-const QRect& QrCodeScanner::viewFinderRect() const
+QRect
+QrCodeScanner::viewFinderRect() const
 {
     return iPrivate->iViewFinderRect;
 }
 
-void QrCodeScanner::setViewFinderRect(const QRect& aRect)
+void
+QrCodeScanner::setViewFinderRect(
+    const QRect& aRect)
 {
     if (iPrivate->iViewFinderRect != aRect) {
         HDEBUG(aRect);
@@ -511,12 +567,15 @@ void QrCodeScanner::setViewFinderRect(const QRect& aRect)
     }
 }
 
-QObject* QrCodeScanner::viewFinderItem() const
+QObject*
+QrCodeScanner::viewFinderItem() const
 {
     return iPrivate->iViewFinderItem;
 }
 
-void QrCodeScanner::setViewFinderItem(QObject* aItem)
+void
+QrCodeScanner::setViewFinderItem(
+    QObject* aItem)
 {
     QQuickItem* item = qobject_cast<QQuickItem*>(aItem);
     if (iPrivate->iViewFinderItem != item) {
@@ -525,18 +584,33 @@ void QrCodeScanner::setViewFinderItem(QObject* aItem)
     }
 }
 
-const QColor& QrCodeScanner::markerColor() const
+QColor
+QrCodeScanner::markerColor() const
 {
     return iPrivate->iMarkerColor;
 }
 
-void QrCodeScanner::setMarkerColor(const QColor& aColor)
+void
+QrCodeScanner::setMarkerColor(
+    const QColor& aColor)
 {
     if (iPrivate->iMarkerColor != aColor) {
         iPrivate->iMarkerColor = aColor;
         HDEBUG(qPrintable(aColor.name()));
         Q_EMIT markerColorChanged();
     }
+}
+
+void
+QrCodeScanner::start()
+{
+    iPrivate->start();
+}
+
+void
+QrCodeScanner::stop()
+{
+    iPrivate->stop();
 }
 
 #include "QrCodeScanner.moc"

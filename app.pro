@@ -66,6 +66,7 @@ LIBS +=  libqrencode.a -ldl
 
 OTHER_FILES += \
     *.desktop \
+    qml/*.js \
     qml/*.qml \
     qml/images/*.svg \
     qml/images/*.png \
@@ -179,6 +180,7 @@ HARBOUR_QML_COMPONENTS = \
     $${HARBOUR_LIB_QML}/HarbourFitLabel.qml \
     $${HARBOUR_LIB_QML}/HarbourHighlightIcon.qml \
     $${HARBOUR_LIB_QML}/HarbourIconTextButton.qml \
+    $${HARBOUR_LIB_QML}/HarbourInvertEffect.qml \
     $${HARBOUR_LIB_QML}/HarbourHintIconButton.qml \
     $${HARBOUR_LIB_QML}/HarbourPasswordInputField.qml \
     $${HARBOUR_LIB_QML}/HarbourPressEffect.qml \

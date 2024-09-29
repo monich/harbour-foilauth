@@ -2,17 +2,24 @@ import QtQuick 2.0
 import QtMultimedia 5.4
 import Sailfish.Silica 1.0
 
+import "harbour"
+import "ViewFinder.js" as Utils
+
 VideoOutput {
     id: viewFinder
 
-    layer.enabled: true
     anchors.fill: parent
     fillMode: VideoOutput.Stretch
 
     property alias beepSource: beep.source
     property bool playingBeep: false
     property size viewfinderResolution
+    property bool showFocusArea: true
     property real digitalZoom: 1.0
+    property bool invert
+    property bool frontCamera
+    readonly property bool mirrored: frontCamera && camera.deviceId == Utils.frontCameraId
+
     property size supportedWideResolution: Qt.size(0,0) // 4:3
     property size supportedNarrowResolution: Qt.size(0,0) // 16:9
 
@@ -31,6 +38,12 @@ VideoOutput {
     readonly property real _ratio_4_3: 4./3.
     readonly property real _ratio_16_9: 16./9.
     property bool _completed
+    property bool _cameraSelected
+
+    layer.enabled: invert
+    layer.effect: HarbourInvertEffect {
+        source: viewFinder
+    }
 
     onOrientationChanged: {
         if (camera.cameraState !== Camera.UnloadedState) {
@@ -158,6 +171,23 @@ VideoOutput {
         }
         onCameraStatusChanged: {
             if (cameraStatus === Camera.ActiveStatus) {
+                if (!_cameraSelected) {
+                    _cameraSelected = true
+                    // Normally we use the default camera
+                    if (frontCamera) {
+                        for (var i = 0; i < QtMultimedia.availableCameras.length; i++) {
+                            var device = QtMultimedia.availableCameras[i]
+                            if (device.position === Camera.FrontFace) {
+                                Utils.frontCameraId = device.deviceId
+                                if (camera.deviceId !== device.deviceId) {
+                                    camera.deviceId = device.deviceId
+                                    reloadTimer.restart()
+                                }
+                                break
+                            }
+                        }
+                    }
+                }
                 // Camera doesn't emit maximumDigitalZoomChanged signal
                 viewFinder.maximumDigitalZoom(maximumDigitalZoom)
                 digitalZoom = viewFinder.digitalZoom
@@ -172,6 +202,11 @@ VideoOutput {
                     viewFinder.viewfinderResolution !== viewfinder.resolution) {
                     viewfinder.resolution = viewFinder.viewfinderResolution
                 }
+            }
+        }
+        Component.onCompleted: {
+            if (frontCamera && Utils.frontCameraId) {
+                deviceId = Utils.frontCameraId
             }
         }
         function updateSupportedResolutions() {
@@ -211,7 +246,7 @@ VideoOutput {
     Repeater {
         model: camera.focus.focusZones
         delegate: Rectangle {
-            visible: !scanner.grabbing &&
+            visible: viewFinder.showFocusArea &&
                      status !== Camera.FocusAreaUnused &&
                      camera.focus.focusPointMode === Camera.FocusPointCustom &&
                      camera.cameraStatus === Camera.ActiveStatus
