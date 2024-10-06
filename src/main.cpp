@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2023 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2024 Slava Monich <slava@monich.com>
  * Copyright (C) 2019-2022 Jolla Ltd.
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -10,23 +10,27 @@
  *
  *  1. Redistributions of source code must retain the above copyright
  *     notice, this list of conditions and the following disclaimer.
+ *
  *  2. Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer
  *     in the documentation and/or other materials provided with the
  *     distribution.
+ *
  *  3. Neither the names of the copyright holders nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) ARISING
- * IN ANY WAY OUT OF THE USE OR INABILITY TO USE THIS SOFTWARE, EVEN
- * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * The views and conclusions contained in the software and documentation
  * are those of the authors and should not be interpreted as representing
@@ -41,17 +45,17 @@
 #include "FoilAuthSettings.h"
 #include "FoilAuthToken.h"
 #include "FoilAuth.h"
-#include "SailOTP.h"
 
+#include "SailOTP.h"
 #include "QrCodeScanner.h"
-#include "HarbourQrCodeGenerator.h"
-#include "HarbourQrCodeImageProvider.h"
-#include "HarbourOrganizeListModel.h"
-#include "HarbourProcessState.h"
-#include "HarbourSelectionListModel.h"
-#include "HarbourSingleImageProvider.h"
 
 #include "HarbourDebug.h"
+#include "HarbourOrganizeListModel.h"
+#include "HarbourProcessState.h"
+#include "HarbourQrCodeGenerator.h"
+#include "HarbourQrCodeImageProvider.h"
+#include "HarbourSelectionListModel.h"
+#include "HarbourSingleImageProvider.h"
 #include "HarbourSystemState.h"
 
 #include <sailfishapp.h>
@@ -60,8 +64,8 @@
 
 #include <MGConfItem>
 
-#include <QCameraExposure>
-#include <QGuiApplication>
+#include <QtGui/QGuiApplication>
+#include <QtMultimedia/QCameraExposure>
 #include <QtQuick>
 
 #define CAMERA_DCONF_KEY(name) "/apps/jolla-camera/primary/image/" name
@@ -125,13 +129,6 @@ int main(int argc, char *argv[])
         }
     }
 
-    // Available 4/3 and 16/9 resolutions
-    QString key_4_3(CAMERA_DCONF_KEY("viewfinderResolution_4_3"));
-    QString key_16_9(CAMERA_DCONF_KEY("viewfinderResolution_16_9"));
-    QSize res_4_3(FoilAuth::toSize(MGConfItem(key_4_3).value()));
-    QSize res_16_9(FoilAuth::toSize(MGConfItem(key_16_9).value()));
-    HDEBUG("Resolutions" << res_4_3 << res_16_9);
-
     // Load translations
     QLocale locale;
     QTranslator* tr = new QTranslator(app);
@@ -180,12 +177,6 @@ int main(int argc, char *argv[])
         QVariant::fromValue((int)FoilAuthTypes::DEFAULT_COUNTER));
     context->setContextProperty("FoilAuthDefaultTimeShift",
         QVariant::fromValue((int)FoilAuthTypes::DEFAULT_TIMESHIFT));
-    if (res_4_3.isValid()) {
-        context->setContextProperty("ViewfinderResolution_4_3", res_4_3);
-    }
-    if (res_16_9.isValid()) {
-        context->setContextProperty("ViewfinderResolution_16_9", res_16_9);
-    }
 
     // Initialize the view and show it
     view->setTitle(qtTrId("foilauth-app_name"));
