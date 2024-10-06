@@ -57,6 +57,7 @@
 #include "HarbourSelectionListModel.h"
 #include "HarbourSingleImageProvider.h"
 #include "HarbourSystemState.h"
+#include "HarbourWakeupTimer.h"
 
 #include <sailfishapp.h>
 
@@ -91,6 +92,7 @@ static void register_types(const char* uri, int v1 = 1, int v2 = 0)
     REGISTER_TYPE(uri, v1, v2, HarbourQrCodeGenerator);
     REGISTER_TYPE(uri, v1, v2, HarbourSelectionListModel);
     REGISTER_TYPE(uri, v1, v2, HarbourSingleImageProvider);
+    REGISTER_TYPE(uri, v1, v2, HarbourWakeupTimer);
     REGISTER_TYPE(uri, v1, v2, QrCodeScanner);
     qRegisterMetaType<FoilAuthToken>();
     qRegisterMetaType<QList<FoilAuthToken> >();
