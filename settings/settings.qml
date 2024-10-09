@@ -59,7 +59,7 @@ Page {
                     id: frontCameraConfig
 
                     key: _rootPath + "frontCamera"
-                    defaultValue: true
+                    defaultValue: false
                 }
             }
 
