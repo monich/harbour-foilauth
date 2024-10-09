@@ -17,6 +17,7 @@ Page {
 
         Column {
             id: content
+
             width: parent.width
 
             PageHeader {
@@ -40,6 +41,25 @@ Page {
                     sourceSize: Qt.size(size,size)
                     source: applicationIcon ? applicationIcon : ""
                     visible: appIcon.status === Image.Ready
+                }
+            }
+
+            TextSwitch {
+                //: Text switch label
+                //% "Use the front camera"
+                text: qsTrId("foilauth-settings_page-front_camera-text")
+                //: Text switch description
+                //% "You can use the front camera for scanning QR codes in case if your back camera is scratched."
+                description: qsTrId("foilauth-settings_page-front_camera-description")
+                automaticCheck: false
+                checked: frontCameraConfig.value
+                onClicked: frontCameraConfig.value = !frontCameraConfig.value
+
+                ConfigurationValue {
+                    id: frontCameraConfig
+
+                    key: _rootPath + "frontCamera"
+                    defaultValue: true
                 }
             }
 

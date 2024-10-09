@@ -474,6 +474,16 @@
         <extracomment>Settings page header description (app version)</extracomment>
         <translation type="unfinished">Verzió %1</translation>
     </message>
+    <message id="foilauth-settings_page-front_camera-text">
+        <source>Use the front camera</source>
+        <extracomment>Text switch label</extracomment>
+        <translation type="unfinished">Használja az előlapi kamerát</translation>
+    </message>
+    <message id="foilauth-settings_page-front_camera-description">
+        <source>You can use the front camera for scanning QR codes in case if your back camera is scratched.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation type="unfinished">Az elülső kamerát QR-kódok beolvasására használhatja arra az esetre, ha a hátsó kamerája megkarcolódik.</translation>
+    </message>
     <message id="foilauth-settings_page-autolock-text">
         <source>Automatic locking</source>
         <extracomment>Text switch label</extracomment>

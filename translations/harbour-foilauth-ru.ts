@@ -480,6 +480,17 @@
         <extracomment>Settings page header description (app version)</extracomment>
         <translation>Версия %1</translation>
     </message>
+    <message id="foilauth-settings_page-front_camera-text">
+        <source>Use the front camera</source>
+        <oldsource>Use the front camera for scanning QR codes</oldsource>
+        <extracomment>Text switch label</extracomment>
+        <translation>Использовать фронтальную камеру</translation>
+    </message>
+    <message id="foilauth-settings_page-front_camera-description">
+        <source>You can use the front camera for scanning QR codes in case if your back camera is scratched.</source>
+        <extracomment>Text switch description</extracomment>
+        <translation type="unfinished">Если не получается отсканировать QR-код основной камерой, то можно попробовать сделать это фронтальной камерой.</translation>
+    </message>
     <message id="foilauth-settings_page-autolock-text">
         <source>Automatic locking</source>
         <extracomment>Text switch label</extracomment>
