@@ -62,6 +62,7 @@
 #include <QDateTime>
 #include <QThreadPool>
 #include <QSharedPointer>
+#include <QStandardPaths>
 
 #include <unistd.h>
 #include <string.h>
@@ -85,8 +86,8 @@
 #define MAX_HEADERS             9
 
 // Directories relative to home
-#define FOIL_AUTH_DIR           "Documents/FoilAuth"
-#define FOIL_KEY_DIR            ".local/share/foil"
+#define FOIL_AUTH_DIR           "FoilAuth"
+#define FOIL_KEY_DIR            "foil"
 #define FOIL_KEY_FILE           "foil.key"
 
 #define INFO_FILE               ".info"
@@ -1269,8 +1270,8 @@ FoilAuthModel::Private::Private(FoilAuthModel* aParent) :
     iQueuedSignals(0),
     iFirstQueuedSignal(SignalCount),
     iFoilState(FoilKeyMissing),
-    iFoilDataDir(QDir::homePath() + "/" FOIL_AUTH_DIR),
-    iFoilKeyDir(QDir::homePath() + "/" FOIL_KEY_DIR),
+    iFoilDataDir(QStandardPaths::writableLocation(QStandardPaths::DocumentsLocation) + "/" FOIL_AUTH_DIR),
+    iFoilKeyDir(QStandardPaths::writableLocation(QStandardPaths::GenericDataLocation) + "/" FOIL_KEY_DIR),
     iFoilKeyFile(iFoilKeyDir + "/" + FOIL_KEY_FILE),
     iPrivateKey(NULL),
     iPublicKey(NULL),
