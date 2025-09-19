@@ -10,3 +10,4 @@ supported.
 
 The format of encrypted files is described
 [here](https://github.com/monich/foil/blob/master/libfoilmsg/README).
+# dodane po forkowaniu
