@@ -1,56 +1,10 @@
-<?xml version="1.0" encoding="UTF-8" standalone="no"?>
-<svg
-   xmlns:svg="http://www.w3.org/2000/svg"
-   xmlns="http://www.w3.org/2000/svg"
-   xmlns:xlink="http://www.w3.org/1999/xlink"
-   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
-   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
-   version="1.1"
-   x="0px"
-   y="0px"
-   viewBox="0 0 1000 1000"
-   enable-background="new 0 0 1000 1000"
-   xml:space="preserve"
-   sodipodi:docname="jail.svg"
-   inkscape:version="0.92.5 (2060ec1f9f, 2020-04-08)">
+<?xml version="1.0" encoding="utf-8" standalone="no"?>
+<svg version="1.1" viewBox="0 0 1000 1000" xmlns="http://www.w3.org/2000/svg">
   <defs>
-    <linearGradient
-        inkscape:collect="always"
-        id="linearGradient826"><stop
-        style="stop-color:#ffffff;stop-opacity:1"
-        offset="0"
-        id="stop822" /><stop
-        style="stop-color:#cccccc;stop-opacity:1"
-        offset="1"
-        id="stop824"/>
+    <linearGradient id="gradient" x1="134" y1="10" x2="868" y2="990" gradientUnits="userSpaceOnUse">
+      <stop style="stop-color:#ffffff;stop-opacity:1" offset="0"/>
+      <stop style="stop-color:#cccccc;stop-opacity:1" offset="1"/>
     </linearGradient>
-    <linearGradient
-        inkscape:collect="always"
-        xlink:href="#linearGradient826"
-        id="linearGradient828"
-        x1="1340"
-        y1="110"
-        x2="8660"
-        y2="110"
-        gradientUnits="userSpaceOnUse"/>
-    <linearGradient
-        inkscape:collect="always"
-        xlink:href="#linearGradient826"
-        id="linearGradient830"
-        gradientUnits="userSpaceOnUse"
-        x1="1424.7457"
-        y1="4855.7627"
-        x2="8575.2539"
-        y2="-4762.8813"/>
   </defs>
-  <g
-      transform="translate(0.000000,511.000000) scale(0.100000,-0.100000)"
-      id="g4"
-      style="fill-opacity:1;fill:url(#linearGradient828)">
-    <path
-        d="M 2680,4850 V 3490 H 1500 l -160,-160 160,-160 H 2680 V 1350 H 1500 l -160,-160 160,-160 H 2680 V -810 H 1500 l -160,-160 160,-160 H 2680 V -2970 H 1500 l -160,-160 160,-160 h 1180 v -1340 l 160,-160 160,160 v 1340 h 1840 v -1340 l 155.2317,-160 164.7683,160 v 1340 h 1840 v -1340 l 153.4488,-160 166.5512,160 v 1340 h 1180 l 160,160 -160,160 H 7320 v 1840 h 1240 c 37.9357,32.5695 62.0192,67.4831 100,100 V 109 1250 c -37.9977,32.4972 -62.0474,67.4502 -100,100 H 7320 v 1820 h 1180 l 160,160 -160,160 H 7320 V 4850 L 7154.3,5010 7000,4850 V 3490 H 5160 V 4850 L 4998.7,5010 4840,4850 V 3490 H 3000 v 1360 l -156.9,160 z M 4840,1350 H 3000 v 1820 h 1840 z m 2160,0 H 5160 V 3170 H 7000 Z M 4840,-810 H 3000 v 1840 h 1840 z m 2160,0 H 5160 V 1030 H 7000 Z M 8163.1,306.5 C 8157.7583,107.39926 8009.887,51.977584 8010.5,50 l 99.6,-321.3 H 7723.7 L 7823.4,50 c 0,0 -140.1864,66.69761 -152.5,256.5 -1.0881,154.23401 127.2336,253.60867 246.1,250 118.8664,-3.60867 242.0786,-88.35194 246.1,-250 z M 4840,-2970 H 3000 v 1840 h 1840 z m 2160,0 H 5160 v 1840 h 1840 z"
-        inkscape:connector-curvature="0"
-        sodipodi:nodetypes="cccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccccczccccccccccc"
-        style="stroke:none;fill:url(#linearGradient830);fill-opacity:1"/>
-  </g>
+  <path style="fill:url(#gradient)" d="M 268,26 V 162 H 150 l -16,16 16,16 H 268 V 376 H 150 l -16,16 16,16 H 268 V 592 H 150 l -16,16 16,16 H 268 V 808 H 150 l -16,16 16,16 h 118 v 134 l 16,16 16,-16 V 840 H 484 V 974 L 499.52317,990 516,974 V 840 h 184 v 134 l 15,16 17,-16 V 840 h 118 l 16,-16 -16,-16 H 732 V 624 h 124 c 3.8,-3.3 6.2,-6.7 10,-10 V 500 386 c -3.8,-3.25 -6.2,-6.75 -10,-10 H 732 V 194 h 118 l 16,-16 -16,-16 H 732 V 26 L 715.43,10 700,26 V 162 H 516 V 26 L 500,10 484,26 V 162 H 300 V 26 L 284.31,10 Z M 484,376 H 300 V 194 h 184 z m 216,0 H 516 V 194 H 700 Z M 484,592 H 300 V 408 h 184 z m 216,0 H 516 V 408 H 700 Z M 816.31,481 c 0,20.2 -15.4,24.8 -15.31,25 l 10,32 h -38 l 9,-32 c 0,0 -14.9,-6.7971 -14.91,-25 0,-15.5 12.4,-25.65 24.61,-25.65 12.2,0 24.2,9.5 24.61,25.65 z M 484,808 H 300 V 624 h 184 z m 216,0 H 516 V 624 h 184 z"/>
 </svg>
