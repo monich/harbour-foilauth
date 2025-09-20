@@ -11,8 +11,7 @@ ApplicationWindow {
 
     function resetAutoLock() {
         lockTimer.stop()
-        if (FoilAuthModel.foilState === FoilAuthModel.FoilModelReady &&
-            FoilAuthSettings.autoLock && HarbourSystemState.locked) {
+        if (FoilAuthModel.keyAvailable && FoilAuthSettings.autoLock && HarbourSystemState.locked) {
             lockTimer.start()
         }
     }
@@ -52,6 +51,6 @@ ApplicationWindow {
 
     Connections {
         target: FoilAuthModel
-        onFoilStateChanged: resetAutoLock()
+        onKeyAvailableChanged: resetAutoLock()
     }
 }
