@@ -1,6 +1,6 @@
 Name:           harbour-foilauth
-Summary:        HMAC-Based One-Time Password generator
-Version:        1.1.10
+Summary:        Secure TOTP/HOTP authenticator
+Version:        1.1.11
 Release:        1
 License:        BSD
 Group:          Applications/Internet
@@ -26,8 +26,7 @@ BuildRequires:  qt5-qttools-linguist
 %{?qtc_builddir:%define _builddir %qtc_builddir}
 
 %description
-HMAC-Based One-Time Password generator compatible with Google
-One-Time Password authentication mechanism.
+One-Time Password generator which keeps your secrets encrypted
 
 %if "%{?vendor}" == "chum"
 Categories:
