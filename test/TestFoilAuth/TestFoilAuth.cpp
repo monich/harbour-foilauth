@@ -1,34 +1,40 @@
 /*
  * Copyright (C) 2019-2022 Jolla Ltd.
- * Copyright (C) 2019-2022 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2025 Slava Monich <slava@monich.com>
  *
- * You may use this file under the terms of BSD license as follows:
+ * You may use this file under the terms of the BSD license as follows:
  *
  * Redistribution and use in source and binary forms, with or without
  * modification, are permitted provided that the following conditions
  * are met:
  *
- *   1. Redistributions of source code must retain the above copyright
- *      notice, this list of conditions and the following disclaimer.
- *   2. Redistributions in binary form must reproduce the above copyright
- *      notice, this list of conditions and the following disclaimer in
- *      the documentation and/or other materials provided with the
- *      distribution.
- *   3. Neither the names of the copyright holders nor the names of its
- *      contributors may be used to endorse or promote products derived
- *      from this software without specific prior written permission.
+ *  1. Redistributions of source code must retain the above copyright
+ *     notice, this list of conditions and the following disclaimer.
+ *
+ *  2. Redistributions in binary form must reproduce the above copyright
+ *     notice, this list of conditions and the following disclaimer
+ *     in the documentation and/or other materials provided with the
+ *     distribution.
+ *
+ *  3. Neither the names of the copyright holders nor the names of its
+ *     contributors may be used to endorse or promote products derived
+ *     from this software without specific prior written permission.
  *
  * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
  * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
  * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
  * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
- * OWNER OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
  * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
  * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
  * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
  * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
  * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ *
+ * The views and conclusions contained in the software and documentation
+ * are those of the authors and should not be interpreted as representing
+ * any official policies, either expressed or implied.
  */
 
 #include "FoilAuth.h"
@@ -91,21 +97,40 @@ test_isValidBase32(
 {
     g_assert(FoilAuth::isValidBase32("AEBAGBAFAYDQQCIKBMGA2DQPCAIREEYUCULBOGI2DMOB2HQ7"));
     g_assert(FoilAuth::isValidBase32("aebagbaf aydqqcik bmga2dqp caireeyu culbogi2 dmob2hq7"));
+
+    // Padding
+    g_assert(FoilAuth::isValidBase32("ae======"));
+    g_assert(FoilAuth::isValidBase32("aeba===="));
+    g_assert(FoilAuth::isValidBase32("aebag==="));
+    g_assert(FoilAuth::isValidBase32("aebagba="));
+    g_assert(FoilAuth::isValidBase32("aebagbaf"));
+    g_assert(FoilAuth::isValidBase32("aeba gbaf")); // Space is ignored inside base32
+    g_assert(FoilAuth::isValidBase32("ae ======")); // before the padding
+    g_assert(FoilAuth::isValidBase32("ae= =====")); // and inside the padding
+
+    // No padding
     g_assert(FoilAuth::isValidBase32("ae"));
-    g_assert(!FoilAuth::isValidBase32("aeb"));
     g_assert(FoilAuth::isValidBase32("aeba"));
     g_assert(FoilAuth::isValidBase32("aebag"));
-    g_assert(!FoilAuth::isValidBase32("aebagb"));
     g_assert(FoilAuth::isValidBase32("aebagba"));
-    g_assert(FoilAuth::isValidBase32("aebagbaf"));
-    g_assert(FoilAuth::isValidBase32("aebagbafa"));
-    g_assert(FoilAuth::isValidBase32("aebagbafay"));
+
+
+    g_assert(!FoilAuth::isValidBase32("af")); // Unused bits not 0
+    g_assert(!FoilAuth::isValidBase32("ae=====")); // Not enough padding
+    g_assert(!FoilAuth::isValidBase32("ae=======")); // Too much padding
+    g_assert(!FoilAuth::isValidBase32("ae======a")); // Unexpected char
+    g_assert(!FoilAuth::isValidBase32("aebagbaf========")); // Unexpected padding
+    g_assert(!FoilAuth::isValidBase32("aeb"));
+    g_assert(!FoilAuth::isValidBase32("aebagb"));
+    g_assert(!FoilAuth::isValidBase32("aebagbafa"));
+    g_assert(!FoilAuth::isValidBase32("aebagb= x"));
     g_assert(!FoilAuth::isValidBase32(QString()));
     g_assert(!FoilAuth::isValidBase32(" "));
     g_assert(!FoilAuth::isValidBase32("01234567"));
     g_assert(!FoilAuth::isValidBase32("88888888"));
     g_assert(!FoilAuth::isValidBase32("{}"));
     g_assert(!FoilAuth::isValidBase32("[]"));
+    g_assert(!FoilAuth::isValidBase32("="));
 }
 
 /*==========================================================================*
@@ -251,27 +276,27 @@ test_toUri(
         FoilAuthTypes::DEFAULT_TIMESHIFT,
         FoilAuth::DefaultAlgorithm).isEmpty());
     g_assert(FoilAuth::toUri(FoilAuth::TypeTOTP,
-        "aebagbafa", "Label", "Issuer", 5,
+        "aebagbaf", "Label", "Issuer", 5,
         FoilAuthTypes::DEFAULT_COUNTER,
         FoilAuthTypes::DEFAULT_TIMESHIFT,
         FoilAuth::DefaultAlgorithm) ==
         "otpauth://totp/Label?secret=aebagbaf&issuer=Issuer&digits=5");
     g_assert(FoilAuth::toUri(FoilAuth::TypeTOTP,
-        "aebagbafa", "Label", "Issuer",
+        "aebagbaf", "Label", "Issuer",
         FoilAuthTypes::DEFAULT_DIGITS,
         FoilAuthTypes::DEFAULT_COUNTER,
         FoilAuthTypes::DEFAULT_TIMESHIFT,
         FoilAuth::DefaultAlgorithm) ==
         "otpauth://totp/Label?secret=aebagbaf&issuer=Issuer&digits=6");
     g_assert(FoilAuth::toUri(FoilAuth::TypeTOTP,
-        "aebagbafa", "", "",
+        "aebagbaf", "", "",
         FoilAuthTypes::DEFAULT_DIGITS,
         FoilAuthTypes::DEFAULT_COUNTER,
         10,
         FoilAuth::DefaultAlgorithm) ==
         "otpauth://totp/?secret=aebagbaf&digits=6&timeshift=10");
     g_assert(FoilAuth::toUri(FoilAuth::TypeHOTP,
-        "aebagbafa", "Label", "",
+        "aebagbaf", "Label", "",
         FoilAuthTypes::DEFAULT_DIGITS, 42,
         FoilAuthTypes::DEFAULT_TIMESHIFT,
         FoilAuth::DefaultAlgorithm) ==
@@ -387,7 +412,7 @@ test_parseMigrationUri(
     secret = token.secretBase32().toUtf8();
     issuer = token.issuer().toUtf8();
     g_assert_cmpstr(label, == ,"TOTP test");
-    g_assert_cmpstr(secret, == ,"y3giofsrka4r4jzbssdw5pm22q======");
+    g_assert_cmpstr(secret, == ,"y3giofsrka4r4jzbssdw5pm22q");
     g_assert_cmpint(token.digits(), == ,FoilAuthTypes::DEFAULT_DIGITS);
     g_assert_cmpint(token.counter(), == ,FoilAuthTypes::DEFAULT_COUNTER);
     g_assert_cmpint(token.timeshift(), == ,FoilAuthTypes::DEFAULT_TIMESHIFT);
