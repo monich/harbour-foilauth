@@ -129,7 +129,9 @@ FOIL_UI_COMPONENTS = \
     $${FOIL_UI_QML}/FoilUiGenerateKeyPage.qml \
     $${FOIL_UI_QML}/FoilUiGenerateKeyView.qml \
     $${FOIL_UI_QML}/FoilUiGenerateKeyWarning.qml \
-    $${FOIL_UI_QML}/FoilUiGeneratingKeyView.qml
+    $${FOIL_UI_QML}/FoilUiGeneratingKeyView.qml \
+    $${FOIL_UI_QML}/FoilUiInfoLabel.qml
+
 
 FOIL_UI_IMAGES = $${FOIL_UI_QML}/images/*.svg
 
