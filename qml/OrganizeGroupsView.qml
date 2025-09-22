@@ -7,31 +7,25 @@ Item {
 
     property alias foilModel: groupModel.sourceModel
 
-    PageHeader {
-        id: header
-
-        //: Page header title
-        //% "Manage groups"
-        title: qsTrId("foilauth-organize-groups-title")
-        //: Page header descriptions
-        //% "Create, delete and rename groups"
-        description: qsTrId("foilauth-organize-groups-description")
-    }
-
     SilicaListView {
         id: list
 
         property var _editItem
 
         clip: true
-        width: parent.width
-        anchors {
-            top: header.bottom
-            bottom: parent.bottom
-        }
+        anchors.fill: parent
 
         model: FoilAuthGroupModel {
             id: groupModel
+        }
+
+        header: PageHeader {
+            //: Page header title
+            //% "Manage groups"
+            title: qsTrId("foilauth-organize-groups-title")
+            //: Page header descriptions
+            //% "Create, delete and rename groups"
+            description: qsTrId("foilauth-organize-groups-description")
         }
 
         delegate: ListItem {

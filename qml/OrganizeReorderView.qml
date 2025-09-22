@@ -8,17 +8,6 @@ Item {
     property var foilModel
     property bool isLandscape
 
-    PageHeader {
-        id: header
-
-        //: Page header title
-        //% "Organize tokens"
-        title: qsTrId("foilauth-organize-tokens-title")
-        //: Page header descriptions
-        //% "Press, hold and drag to reorder"
-        description: qsTrId("foilauth-organize-tokens-description")
-    }
-
     SilicaListView {
         id: list
 
@@ -27,11 +16,7 @@ Item {
         readonly property real _maxContentY: Math.max(originY + contentHeight - height, originY)
 
         clip: true
-        width: parent.width
-        anchors {
-            top: header.bottom
-            bottom: parent.bottom
-        }
+        anchors.fill: parent
 
         interactive: !Drag.active
         currentIndex: listModel.dragPos
@@ -47,6 +32,15 @@ Item {
                 duration: 50
                 easing.type: Easing.InOutQuad
             }
+        }
+
+        header: PageHeader {
+            //: Page header title
+            //% "Organize tokens"
+            title: qsTrId("foilauth-organize-tokens-title")
+            //: Page header descriptions
+            //% "Press, hold and drag to reorder"
+            description: qsTrId("foilauth-organize-tokens-description")
         }
 
         delegate: ListItem {
