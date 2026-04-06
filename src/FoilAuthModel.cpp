@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2019-2022 Jolla Ltd.
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -43,6 +43,7 @@
 
 #include "HarbourBase32.h"
 #include "HarbourDebug.h"
+#include "HarbourParentSignalQueueObject.h"
 #include "HarbourTask.h"
 
 #include "foil_output.h"
@@ -55,13 +56,12 @@
 #include "gutil_misc.h"
 #include "gutil_strv.h"
 
-#include <QDir>
-#include <QFile>
-#include <QTimer>
-#include <QFileInfo>
-#include <QDateTime>
-#include <QThreadPool>
-#include <QSharedPointer>
+#include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QTimer>
+#include <QtCore/QFileInfo>
+#include <QtCore/QDateTime>
+#include <QtCore/QThreadPool>
 
 #include <unistd.h>
 #include <string.h>
@@ -151,14 +151,18 @@ class FoilAuthModel::ModelData :
 {
 public:
     enum Role {
-#define FIRST(X,x) FirstRole = Qt::UserRole, X##Role = FirstRole,
-#define ROLE(X,x) X##Role,
-#define LAST(X,x) X##Role, LastRole = X##Role
+        #define FIRST(X,x) FirstRole = Qt::UserRole, X##Role = FirstRole,
+        #define ROLE(X,x) X##Role,
+        #define LAST(X,x) X##Role, LastRole = X##Role
         FOILAUTH_ROLES_(FIRST,ROLE,LAST)
-#undef FIRST
-#undef ROLE
-#undef LAST
+        #undef FIRST
+        #undef ROLE
+        #undef LAST
     };
+
+    // QtCreator syntax highlighter gets confused by the above macro magic.
+    // Somehow this stupid enum unconfuses it :/
+    enum { _ };
 
     typedef QList<ModelData*> List;
 
@@ -1174,22 +1178,25 @@ FoilAuthModel::DecryptAllTask::performTask()
     s(FoilState,foilState) \
     s(TimeLeft,timeLeft)
 
+enum FoilAuthModelSignal {
+    #define FOIL_SIGNAL_ENUM_(Name,name) Signal##Name##Changed,
+    FOIL_QUEUED_SIGNALS(FOIL_SIGNAL_ENUM_)
+    #undef FOIL_SIGNAL_ENUM_
+    FoilAuthModelSignalCount
+};
+
+typedef HarbourParentSignalQueueObject<FoilAuthModel,
+    FoilAuthModelSignal, FoilAuthModelSignalCount>
+    FoilAuthModelPrivateBase;
+
 class FoilAuthModel::Private :
-    public QObject
+    public FoilAuthModelPrivateBase
 {
     Q_OBJECT
 
+    static const SignalEmitter gSignalEmitters[];
+
 public:
-    typedef void (FoilAuthModel::*SignalEmitter)();
-    typedef uint SignalMask;
-
-    enum Signal {
-#define FOIL_SIGNAL_ENUM_(Name,name) Signal##Name##Changed,
-        FOIL_QUEUED_SIGNALS(FOIL_SIGNAL_ENUM_)
-#undef FOIL_SIGNAL_ENUM_
-        SignalCount
-    };
-
     Private(FoilAuthModel* aParent);
     ~Private();
 
@@ -1203,7 +1210,6 @@ public Q_SLOTS:
     void onTimer();
 
 public:
-    FoilAuthModel* parentModel();
     int rowCount() const;
     ModelData* dataAt(int aIndex) const;
     ModelData* findData(const QString aId) const;
@@ -1211,8 +1217,6 @@ public:
     int findDataPos(const QString aId) const;
     int findGroupPos(int) const;
     bool needTimer() const;
-    void queueSignal(Signal aSignal);
-    void emitQueuedSignals();
     void updateTimer();
     void checkTimer();
     bool checkPassword(const QString);
@@ -1243,8 +1247,6 @@ public:
     bool encrypt(const QString aBody, const QColor aColor, uint aPageNr, uint aReqId);
 
 public:
-    SignalMask iQueuedSignals;
-    Signal iFirstQueuedSignal;
     ModelData::List iData;
     QList<int> iGroupHeaderRows;
     FoilState iFoilState;
@@ -1264,10 +1266,16 @@ public:
     uint iTimeLeft;
 };
 
+/* static */
+const FoilAuthModel::Private::SignalEmitter
+FoilAuthModel::Private::gSignalEmitters [] = {
+    #define FOIL_SIGNAL_EMITTER_(Name,name) &FoilAuthModel::name##Changed,
+    FOIL_QUEUED_SIGNALS(FOIL_SIGNAL_EMITTER_)
+    #undef  SIGNAL_EMITTER_
+};
+
 FoilAuthModel::Private::Private(FoilAuthModel* aParent) :
-    QObject(aParent),
-    iQueuedSignals(0),
-    iFirstQueuedSignal(SignalCount),
+    FoilAuthModelPrivateBase(aParent, gSignalEmitters),
     iFoilState(FoilKeyMissing),
     iFoilDataDir(QDir::homePath() + "/" FOIL_AUTH_DIR),
     iFoilKeyDir(QDir::homePath() + "/" FOIL_KEY_DIR),
@@ -1327,9 +1335,7 @@ FoilAuthModel::Private::Private(FoilAuthModel* aParent) :
 
     iTimer->setSingleShot(true);
     connect(iTimer, SIGNAL(timeout()), SLOT(onTimer()));
-
-    // Clear queued signals
-    iFirstQueuedSignal = SignalCount;
+    clearQueuedSignals();
 }
 
 FoilAuthModel::Private::~Private()
@@ -1350,55 +1356,6 @@ FoilAuthModel::Private::~Private()
     iPasswordTasks.clear();
     iThreadPool->waitForDone();
     qDeleteAll(iData);
-}
-
-inline FoilAuthModel*
-FoilAuthModel::Private::parentModel()
-{
-    return qobject_cast<FoilAuthModel*>(parent());
-}
-
-void
-FoilAuthModel::Private::queueSignal(
-    Signal aSignal)
-{
-    if (aSignal >= 0 && aSignal < SignalCount) {
-        const SignalMask signalBit = (SignalMask(1) << aSignal);
-        if (iQueuedSignals) {
-            iQueuedSignals |= signalBit;
-            if (iFirstQueuedSignal > aSignal) {
-                iFirstQueuedSignal = aSignal;
-            }
-        } else {
-            iQueuedSignals = signalBit;
-            iFirstQueuedSignal = aSignal;
-        }
-    }
-}
-
-void
-FoilAuthModel::Private::emitQueuedSignals()
-{
-    static const SignalEmitter emitSignal [] = {
-#define FOIL_SIGNAL_EMITTER_(Name,name) &FoilAuthModel::name##Changed,
-        FOIL_QUEUED_SIGNALS(FOIL_SIGNAL_EMITTER_)
-#undef FOIL_SIGNAL_EMITTER_
-    };
-    Q_STATIC_ASSERT(G_N_ELEMENTS(emitSignal) == SignalCount);
-    if (iQueuedSignals) {
-        FoilAuthModel* model = parentModel();
-        // Reset first queued signal before emitting the signals.
-        // Signal handlers may emit new signals.
-        uint i = iFirstQueuedSignal;
-        iFirstQueuedSignal = SignalCount;
-        for (; i < SignalCount && iQueuedSignals; i++) {
-            const SignalMask signalBit = (SignalMask(1) << i);
-            if (iQueuedSignals & signalBit) {
-                iQueuedSignals &= ~signalBit;
-                Q_EMIT (model->*(emitSignal[i]))();
-            }
-        }
-    }
 }
 
 inline
@@ -1570,7 +1527,7 @@ FoilAuthModel::Private::changePassword(
                 QFile::rename(tmpKeyFile, iFoilKeyFile)) {
                 BaseTask::removeFile(saveKeyFile);
                 HDEBUG("Password changed");
-                Q_EMIT parentModel()->passwordChanged();
+                Q_EMIT parentObject()->passwordChanged();
                 return true;
             }
         } else {
@@ -1628,7 +1585,7 @@ FoilAuthModel::Private::dataChanged(
     if (aIndex >= 0 && aIndex < iData.count()) {
         QVector<int> roles;
         roles.append(aRole);
-        FoilAuthModel* model = parentModel();
+        FoilAuthModel* model = parentObject();
         QModelIndex modelIndex(model->index(aIndex));
         Q_EMIT model->dataChanged(modelIndex, modelIndex, roles);
     }
@@ -1643,7 +1600,7 @@ FoilAuthModel::Private::dataChanged(
     if (n > 0) {
         QVector<int> roles;
         roles.append(aRole);
-        FoilAuthModel* model = parentModel();
+        FoilAuthModel* model = parentObject();
         for (int i = 0; i < n; i++) {
             const int row = aRows.at(i);
             if (row >= 0 && row < iData.count()) {
@@ -1661,7 +1618,7 @@ FoilAuthModel::Private::insertModelData(
 {
     // Insert it into the model
     const int pos = aFront ? 0 : iData.count();
-    FoilAuthModel* model = parentModel();
+    FoilAuthModel* model = parentObject();
     model->beginInsertRows(QModelIndex(), pos, pos);
     if (aFront) {
         iData.prepend(aData);
@@ -1725,7 +1682,7 @@ FoilAuthModel::Private::addGroup(
     // Insert the new group to the end of the list
     ModelData* data = new ModelData(id, aTitle);
     const int pos = iData.count();
-    FoilAuthModel* model = parentModel();
+    FoilAuthModel* model = parentObject();
     model->beginInsertRows(QModelIndex(), pos, pos);
     iData.append(data);
     HDEBUG(data->iId << data->label());
@@ -1776,7 +1733,7 @@ FoilAuthModel::Private::addTokens(
         }
 
         if (!newData.isEmpty()) {
-            FoilAuthModel* model = parentModel();
+            FoilAuthModel* model = parentObject();
             const int pos = iData.count();
 
             model->beginInsertRows(QModelIndex(), pos, pos + newData.count() - 1);
@@ -1832,7 +1789,7 @@ FoilAuthModel::Private::onEncryptTaskDone()
                     data->iNextPassword = task->iNextPassword;
                     roles.append(ModelData::NextPasswordRole);
                 }
-                FoilAuthModel* model = parentModel();
+                FoilAuthModel* model = parentObject();
                 QModelIndex index(model->index(pos));
                 Q_EMIT model->dataChanged(index, index, roles);
                 saveInfo();
@@ -1886,7 +1843,7 @@ FoilAuthModel::Private::onPasswordTaskDone()
             }
             if (roles.size() > 0) {
                 HDEBUG("Updated" << qPrintable(data->label()));
-                FoilAuthModel* model = parentModel();
+                FoilAuthModel* model = parentObject();
                 QModelIndex modelIndex(model->index(pos));
                 Q_EMIT model->dataChanged(modelIndex, modelIndex, roles);
             }
@@ -1978,7 +1935,7 @@ FoilAuthModel::Private::onGenerateKeyTaskDone()
         // We know we were busy when we received this signal
         queueSignal(SignalBusyChanged);
     }
-    Q_EMIT parentModel()->keyGenerated();
+    Q_EMIT parentObject()->keyGenerated();
     emitQueuedSignals();
 }
 
@@ -1987,7 +1944,7 @@ FoilAuthModel::Private::destroyItemAt(
     int aIndex)
 {
     // The caller has checked the validity of the index
-    FoilAuthModel* model = parentModel();
+    FoilAuthModel* model = parentObject();
     HDEBUG(iData.at(aIndex)->label());
     model->beginRemoveRows(QModelIndex(), aIndex, aIndex);
     delete iData.takeAt(aIndex);
@@ -2049,7 +2006,7 @@ FoilAuthModel::Private::clearModel()
 {
     const int n = iData.count();
     if (n > 0) {
-        FoilAuthModel* model = parentModel();
+        FoilAuthModel* model = parentObject();
         model->beginRemoveRows(QModelIndex(), 0, n - 1);
         qDeleteAll(iData);
         iData.clear();
@@ -2064,7 +2021,7 @@ FoilAuthModel::Private::lock(
     bool aTimeout)
 {
     // Cancel whatever we are doing
-    FoilAuthModel* model = parentModel();
+    FoilAuthModel* model = parentObject();
     const bool wasBusy = busy();
     if (iSaveInfoTask) {
         iSaveInfoTask->release();
@@ -2201,7 +2158,7 @@ FoilAuthModel::Private::updateTimer()
                 updatePasswords(data);
             }
         }
-        Q_EMIT parentModel()->timerRestarted();
+        Q_EMIT parentObject()->timerRestarted();
     } else {
         const qint64 endOfThisPeriod = (thisPeriod + 1) * FoilAuth::PERIOD;
         iTimeLeft = (int)(endOfThisPeriod - secsSinceEpoch);
