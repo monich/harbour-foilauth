@@ -465,12 +465,12 @@
     <message id="jail-explanation">
         <source>This application is not designed to function in a sandbox. Try installing the latest version from &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; or &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, it may implement some sort of a workaround. No guarantee, though.</source>
         <extracomment>Label text explaining the sandbox situation</extracomment>
-        <translation>Denne applikasjonen er ikke laget for å fungere i en sandkasse. Prøv å installere den nyeste versjonen fra <b><a href='%1'>OpenRepos</a></b> eller <b><a href='%2'>GitHub</a></b>; den kan inneholde en form for omgåelse. Ingen garantier, dessverre.</translation>
+        <translation>Denne applikasjonen er ikke laget for å fungere i en sandkasse. Prøv å installere den nyeste versjonen fra &lt;b&gt;&lt;a href=&apos;%1&apos;&gt;OpenRepos&lt;/a&gt;&lt;/b&gt; eller &lt;b&gt;&lt;a href=&apos;%2&apos;&gt;GitHub&lt;/a&gt;&lt;/b&gt;, den kan inneholde en form for omgåelse. Ingen garantier, dessverre.</translation>
     </message>
     <message id="jail-terminal_hint">
         <source>If you have developer mode enabled, you may also try running &lt;b&gt;%1&lt;/b&gt; from the terminal. Sorry for the inconvenience!</source>
         <extracomment>Hint suggesting to run the app from the terminal</extracomment>
-        <translation>Hvis du har aktivert utviklermodus, kan du også prøve å kjøre <b>%1</b> fra terminalen. Beklager bryderiet!</translation>
+        <translation>Hvis du har aktivert utviklermodus, kan du også prøve å kjøre &lt;b&gt;%1&lt;/b&gt; fra terminalen. Beklager bryderiet!</translation>
     </message>
     <message id="foilauth-settings_page-header-version">
         <source>Version %1</source>
