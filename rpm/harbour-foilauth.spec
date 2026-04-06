@@ -1,6 +1,6 @@
 Name:           harbour-foilauth
 Summary:        Secure TOTP/HOTP authenticator
-Version:        1.1.12
+Version:        1.1.13
 Release:        1
 License:        BSD
 Group:          Applications/Internet
@@ -23,7 +23,6 @@ BuildRequires:  qt5-qttools-linguist
 
 %{!?qtc_qmake5:%define qtc_qmake5 %qmake5}
 %{!?qtc_make:%define qtc_make make}
-%{?qtc_builddir:%define _builddir %qtc_builddir}
 
 %description
 One-Time Password generator which keeps your secrets encrypted
@@ -60,7 +59,6 @@ Url:
 make %{?_smp_mflags} -C test test
 
 %install
-rm -rf %{buildroot}
 %qmake5_install
 
 desktop-file-install --delete-original \
