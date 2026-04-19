@@ -19,6 +19,21 @@ Item {
     // 400 ms is the pulley menu bounce-back duration
     Behavior on opacity { FadeAnimation { duration: 400 } }
 
+    Loader {
+        id: buzzLoader
+
+        active: false
+        source: Qt.resolvedUrl("Buzz.qml")
+    }
+
+    function _buzz() {
+        // Load buzzer on demand
+        buzzLoader.active = true
+        if (buzzLoader.item) {
+            buzzLoader.item.play()
+        }
+    }
+
     SilicaListView {
         id: tokenList
 
@@ -28,21 +43,6 @@ Item {
             id: listModel
 
             sourceModel: foilModel
-        }
-
-        Loader {
-            id: buzzLoader
-
-            active: false
-            source: Qt.resolvedUrl("Buzz.qml")
-        }
-
-        function buzz() {
-            // Load buzzer on demand
-            buzzLoader.active = true
-            if (buzzLoader.item) {
-                buzzLoader.item.play()
-            }
         }
 
         Notification {
@@ -373,12 +373,12 @@ Item {
                         onIncrementCounter: {
                             model.counter++
                             listItem.copyPassword()
-                            buzz()
+                            _buzz()
                         }
                         onDecrementCounter: {
                             model.counter--
                             listItem.copyPassword()
-                            buzz()
+                            _buzz()
                         }
 
                         Behavior on color { ColorAnimation { duration: 150 } }
