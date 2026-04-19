@@ -3,7 +3,6 @@ import Sailfish.Silica 1.0
 import org.nemomobile.notifications 1.0
 import harbour.foilauth 1.0
 
-import "foil-ui"
 import "harbour"
 
 Item {
@@ -357,6 +356,10 @@ Item {
                 height: listItem.contentHeight
                 sourceComponent: Component {
                     TokenListItem {
+                        id: tokenListItem
+
+                        property int copyCurrentPassword
+
                         description: model.label
                         prevPassword: model.prevPassword
                         currentPassword: model.currentPassword
@@ -371,14 +374,23 @@ Item {
 
                         onFavoriteToggled: model.favorite = !model.favorite
                         onIncrementCounter: {
+                            copyCurrentPassword++
                             model.counter++
-                            listItem.copyPassword()
                             _buzz()
                         }
                         onDecrementCounter: {
+                            copyCurrentPassword++
                             model.counter--
-                            listItem.copyPassword()
                             _buzz()
+                        }
+
+                        // currentPassword is updated asynchronously
+                        Connections {
+                            target: (tokenListItem.copyCurrentPassword > 0) ? tokenListItem : null
+                            onCurrentPasswordChanged: {
+                                listItem.copyPassword()
+                                tokenListItem.copyCurrentPassword--
+                            }
                         }
 
                         Behavior on color { ColorAnimation { duration: 150 } }
