@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2019-2022 Jolla Ltd.
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -71,7 +71,6 @@ class FoilAuthSettings :
     Q_PROPERTY(int autoLockTime READ autoLockTime WRITE setAutoLockTime NOTIFY autoLockTimeChanged)
     Q_PROPERTY(bool sailotpImportDone READ sailotpImportDone WRITE setSailotpImportDone NOTIFY sailotpImportDoneChanged)
     Q_PROPERTY(QStringList sailotpImportedTokens READ sailotpImportedTokens WRITE setSailotpImportedTokens NOTIFY sailotpImportedTokensChanged)
-    Q_DISABLE_COPY(FoilAuthSettings)
 
 public:
     explicit FoilAuthSettings(QObject* aParent = Q_NULLPTR);

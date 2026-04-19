@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2025 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2019-2022 Jolla Ltd.
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -52,8 +52,8 @@
 
 #include "gutil_misc.h"
 
-#include <QFile>
-#include <QFileSystemWatcher>
+#include <QtCore/QFile>
+#include <QtCore/QFileSystemWatcher>
 
 #define FOILAPPS_DIR    "/usr/bin"
 #define FOILPICS_PATH   FOILAPPS_DIR "/harbour-foilpics"
@@ -105,22 +105,27 @@ FoilAuth::Private::foilAuth() const
     return qobject_cast<FoilAuth*>(parent());
 }
 
+/* static */
 bool
 FoilAuth::Private::foilPicsInstalled()
 {
     const bool installed = QFile::exists(FOILPICS_PATH);
+
     HDEBUG("FoilPics is" << (installed ? "installed" : "not installed"));
     return installed;
 }
 
+/* static */
 bool
 FoilAuth::Private::foilNotesInstalled()
 {
     const bool installed = QFile::exists(FOILNOTES_PATH);
+
     HDEBUG("FoilNotes is" << (installed ? "installed" : "not installed"));
     return installed;
 }
 
+/* static */
 bool
 FoilAuth::Private::otherFoilAppsInstalled()
 {
@@ -131,6 +136,7 @@ void
 FoilAuth::Private::checkFoilAppsInstalled()
 {
     const bool haveOtherFoilApps = otherFoilAppsInstalled();
+
     if (iOtherFoilAppsInstalled != haveOtherFoilApps) {
         iOtherFoilAppsInstalled = haveOtherFoilApps;
         Q_EMIT foilAuth()->otherFoilAppsInstalledChanged();
@@ -141,11 +147,11 @@ FoilAuth::Private::checkFoilAppsInstalled()
 // FoilAuth
 // ==========================================================================
 
-FoilAuth::FoilAuth(QObject* aParent) :
+FoilAuth::FoilAuth(
+    QObject* aParent) :
     QObject(aParent),
     iPrivate(new Private(this))
-{
-}
+{}
 
 // Callback for qmlRegisterSingletonType<FoilAuth>
 QObject*
@@ -162,18 +168,22 @@ FoilAuth::otherFoilAppsInstalled() const
     return iPrivate->iOtherFoilAppsInstalled;
 }
 
+/* static */
 QSize
 FoilAuth::toSize(
     QVariant aVariant)
 {
     // e.g. "1920x1080"
     if (aVariant.isValid()) {
-        QStringList values(aVariant.toString().split('x'));
+        const QStringList values(aVariant.toString().split('x'));
+
         if (values.count() == 2) {
             bool ok = false;
-            int width = values.at(0).toInt(&ok);
+            const int width = values.at(0).toInt(&ok);
+
             if (ok && width > 0) {
-                int height = values.at(1).toInt(&ok);
+                const int height = values.at(1).toInt(&ok);
+
                 if (ok && height > 0) {
                     return QSize(width, height);
                 }
@@ -183,6 +193,7 @@ FoilAuth::toSize(
     return QSize();
 }
 
+/* static */
 bool
 FoilAuth::isValidBase32(
     const QString aBase32)
@@ -190,6 +201,7 @@ FoilAuth::isValidBase32(
     return HarbourBase32::isValidBase32(aBase32, false);
 }
 
+/* static */
 QString
 FoilAuth::toBase32(
     const QByteArray aBinary)
@@ -198,6 +210,7 @@ FoilAuth::toBase32(
         HarbourBase32::EncodeNoPadding);
 }
 
+/* static */
 QByteArray
 FoilAuth::fromBase32(
     const QString aBase32)
@@ -205,6 +218,7 @@ FoilAuth::fromBase32(
     return HarbourBase32::fromBase32(aBase32, false);
 }
 
+/* static */
 QByteArray
 FoilAuth::toByteArray(
     GBytes* aData)
@@ -219,17 +233,19 @@ FoilAuth::toByteArray(
     return QByteArray();
 }
 
-// QStringList is an array like object, but it is not an array in QML.
-// Couldn't figure out how to modify it from QML
+/* static */
 QStringList
 FoilAuth::stringListRemove(
     QStringList aList,
     const QString aString)
 {
+    // QStringList is an array like object, but it is not an array in QML.
+    // Couldn't figure out how to modify it from QML
     aList.removeOne(aString);
     return aList;
 }
 
+/* static */
 const char*
 FoilAuth::generateId(
     GString* aString)
@@ -241,6 +257,7 @@ FoilAuth::generateId(
     return aString->str;
 }
 
+/* static */
 FoilOutput*
 FoilAuth::createFoilFile(
     const QString aDestDir,
@@ -253,7 +270,9 @@ FoilAuth::createFoilFile(
     g_string_truncate(aOutPath, 0);
     g_string_append_len(aOutPath, dir.constData(), dir.size());
     g_string_append_c(aOutPath, '/');
+
     const gsize prefix_len = aOutPath->len;
+
     for (int i = 0; i < 100 && !out; i++) {
         g_string_truncate(aOutPath, prefix_len);
         out = foil_output_file_new_open(generateId(aOutPath));
@@ -262,6 +281,7 @@ FoilAuth::createFoilFile(
     return out;
 }
 
+/* static */
 QString
 FoilAuth::createEmptyFoilFile(
     const QString aDestDir)
@@ -278,6 +298,7 @@ FoilAuth::createEmptyFoilFile(
     return path;
 }
 
+/* static */
 uint
 FoilAuth::TOTP(
     const QByteArray aSecret,
@@ -288,6 +309,7 @@ FoilAuth::TOTP(
     return FoilAuth::hash(aSecret, aTime/PERIOD, aAlgorithm) % aMaxPass;
 }
 
+/* static */
 uint
 FoilAuth::HOTP(
     const QByteArray aSecret,
@@ -298,6 +320,7 @@ FoilAuth::HOTP(
     return FoilAuth::hash(aSecret, aCounter, aAlgorithm) % aMaxPass;
 }
 
+/* static */
 uint
 FoilAuth::hash(
     const QByteArray aSecret,
@@ -306,6 +329,7 @@ FoilAuth::hash(
 {
     const guint64 msg = htobe64(aValue);
     GType (*digest_type)(void) = foil_impl_digest_sha1_get_type;
+
     switch (aAlgorithm) {
     case DigestAlgorithmSHA1:
         digest_type = foil_impl_digest_sha1_get_type;
@@ -317,7 +341,9 @@ FoilAuth::hash(
         digest_type = foil_impl_digest_sha512_get_type;
         break;
     }
+
     FoilHmac* hmac = foil_hmac_new(digest_type(), aSecret.constData(), aSecret.size());
+
     foil_hmac_update(hmac, &msg, sizeof(msg));
 
     gsize hash_len;
@@ -330,6 +356,7 @@ FoilAuth::hash(
     return mini_hash;
 }
 
+/* static */
 QString
 FoilAuth::toUri(
     Type aType,
@@ -339,9 +366,11 @@ FoilAuth::toUri(
     Algorithm aAlgorithm)
 {
     const QByteArray secret(HarbourBase32::fromBase32(aSecretBase32));
+
     if (!secret.isEmpty()) {
         QString uri(FoilAuthToken((AuthType)aType, secret, aLabel, aIssuer, aDigits,
             aCounter, aTimeShift, (DigestAlgorithm) aAlgorithm).toUri());
+
         HDEBUG(aType << aSecretBase32 << aLabel << aIssuer << aDigits <<
             aCounter << aTimeShift << aAlgorithm << "=>" << uri);
         return uri;
@@ -349,6 +378,7 @@ FoilAuth::toUri(
     return QString();
 }
 
+/* static */
 FoilAuthToken
 FoilAuth::parseUri(
     const QString aUri)
@@ -356,6 +386,7 @@ FoilAuth::parseUri(
     return FoilAuthToken::fromUri(aUri);
 }
 
+/* static */
 QList<FoilAuthToken>
 FoilAuth::parseMigrationUri(
     const QString aUri)
@@ -368,6 +399,7 @@ FoilAuth::parseMigrationUri(
 
     QList<FoilAuthToken> result;
     FoilBytes prefixBytes;
+
     foil_bytes_from_string(&prefixBytes, FOILAUTH_MIGRATION_PREFIX);
     if (foil_parse_skip_bytes(&pos, &prefixBytes)) {
         // uri must be NULL-terminated
@@ -375,7 +407,9 @@ FoilAuth::parseMigrationUri(
         if (unescaped) {
             pos.ptr = (const guint8*) unescaped;
             pos.end = pos.ptr + strlen(unescaped);
+
             GBytes* bytes = foil_parse_base64(&pos, FOIL_INPUT_BASE64_VALIDATE);
+
             if (bytes) {
                 gsize size;
                 gconstpointer data = g_bytes_get_data(bytes, &size);
@@ -392,6 +426,7 @@ FoilAuth::parseMigrationUri(
 #endif // HARBOUR_DEBUG
 
                 const QByteArray buf(QByteArray::fromRawData((const char*)data, size));
+
                 result = FoilAuthToken::fromProtoBuf(buf);
                 HDEBUG(result.count() << "tokens" << result);
                 g_bytes_unref(bytes);
@@ -407,9 +442,11 @@ FoilAuth::migrationUri(
     const QByteArray aData)
 {
     QString uri;
+
     if (!aData.isEmpty()) {
         char* base64 = g_base64_encode((uchar*)aData.constData(), aData.size());
         char* escaped = g_uri_escape_string(base64, NULL, FALSE);
+
         uri = QString::fromLatin1(FOILAUTH_MIGRATION_PREFIX);
         uri.append(QLatin1String(escaped));
         g_free(escaped);

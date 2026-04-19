@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2025 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2019-2022 Jolla Ltd.
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -50,8 +50,8 @@
 
 #include <gutil_misc.h>
 
-#include <QAtomicInt>
-#include <QUrl>
+#include <QtCore/QAtomicInt>
+#include <QtCore/QUrl>
 
 #define FOILAUTH_KEY_TYPE "type"
 #define FOILAUTH_KEY_LABEL "label"
@@ -129,8 +129,8 @@ class FoilAuthToken::Private :
     public FoilAuthTypes
 {
 public:
-    Private(AuthType, QByteArray, QString, QString, QString, int, quint64, int, DigestAlgorithm);
-    ~Private();
+    Private(AuthType, const QByteArray&, const QString&, const QString&,
+        const QString&, int, quint64, int, DigestAlgorithm);
 
     enum Algorithm {
         ALGORITHM_UNSPECIFIED,
@@ -264,10 +264,10 @@ public:
 
 FoilAuthToken::Private::Private(
     AuthType aType,
-    QByteArray aSecret,
-    QString aSecretBase32,
-    QString aLabel,
-    QString aIssuer,
+    const QByteArray& aSecret,
+    const QString& aSecretBase32,
+    const QString& aLabel,
+    const QString& aIssuer,
     int aDigits,
     quint64 aCounter,
     int aTimeShift,
@@ -282,12 +282,7 @@ FoilAuthToken::Private::Private(
     iCounter(aCounter),
     iDigits(aDigits),
     iTimeshift(aTimeShift)
-{
-}
-
-FoilAuthToken::Private::~Private()
-{
-}
+{}
 
 QString
 FoilAuthToken::Private::password(
@@ -317,6 +312,7 @@ FoilAuthToken::Private::password(
     }
 }
 
+/* static */
 bool
 FoilAuthToken::Private::parseOtpParameters(
     GUtilRange* aPos,
@@ -406,6 +402,7 @@ FoilAuthToken::Private::parseOtpParameters(
     return false;
 }
 
+/* static */
 void
 FoilAuthToken::Private::encodeTrailer(
     QByteArray* aOutput,
@@ -425,8 +422,7 @@ FoilAuthToken::Private::encodeTrailer(
 
 FoilAuthToken::FoilAuthToken() :
     iPrivate(NULL)
-{
-}
+{}
 
 FoilAuthToken::FoilAuthToken(
     const FoilAuthToken& aToken) :
@@ -620,9 +616,12 @@ FoilAuthToken::fromUri(
     // Check scheme + type prefix
     GUtilData prefixBytes;
     FoilAuthTypes::AuthType type = FoilAuthTypes::AuthTypeTOTP;
+
     gutil_data_from_string(&prefixBytes, FOILAUTH_SCHEME "://"
         FOILAUTH_TYPE_TOTP "/");
+
     bool prefixOK = gutil_range_skip_prefix(&pos, &prefixBytes);
+
     if (!prefixOK) {
         type = FoilAuthTypes::AuthTypeHOTP;
         gutil_data_from_string(&prefixBytes, FOILAUTH_SCHEME "://"
@@ -720,6 +719,7 @@ FoilAuthToken::toUri() const
 {
     if (isValid()) {
         QString buf(FOILAUTH_SCHEME "://");
+
         // AuthTypeSteam is also TOTP
         buf.append(iPrivate->iType == FoilAuthTypes::AuthTypeHOTP ? TYPE_HOTP : TYPE_TOTP);
         buf.append(QChar('/'));
@@ -846,13 +846,14 @@ QByteArray
 FoilAuthToken::toProtoBuf(
     const QList<FoilAuthToken>& aTokens)
 {
+    quint64 batchId;
     QByteArray output;
     const int n = aTokens.count();
+
     for (int i = 0; i < n; i++) {
         output.append(aTokens.at(i).toProtoBuf());
     }
     // Trailer
-    quint64 batchId;
     foil_random(&batchId, sizeof(batchId));
     Private::encodeTrailer(&output, 0, 1, batchId);
     return output;
@@ -886,8 +887,8 @@ FoilAuthToken::toProtoBufs(
         QByteArray buf;
         Private::encodeTrailer(&buf, n - 1, n, batchId);
         const int maxTrailerSize = buf.size();
-
         int i;
+
         buf.resize(0);
         for (i = 0; i < n; i++) {
             const QByteArray tokenBuf(aTokens.at(i).toProtoBuf());
@@ -1042,6 +1043,7 @@ operator<<(
 {
     if (aToken.isValid()) {
         QDebugStateSaver saver(aDebug);
+
         aDebug.nospace() << "FoilAuthToken(" << aToken.label() <<
             ", " << aToken.issuer() << ", " <<aToken.type() <<
             ", " << aToken.algorithm() << ", " <<  aToken.secretBase32() <<

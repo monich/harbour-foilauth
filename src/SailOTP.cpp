@@ -1,6 +1,6 @@
 /*
- * Copyright (C) 2019-2023 Slava Monich <slava@monich.com>
- * Copyright (C) 2019-2022 Jolla Ltd.
+ * Copyright (C) 2019-2026 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2021 Jolla Ltd.
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -10,23 +10,27 @@
  *
  *  1. Redistributions of source code must retain the above copyright
  *     notice, this list of conditions and the following disclaimer.
+ *
  *  2. Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer
  *     in the documentation and/or other materials provided with the
  *     distribution.
+ *
  *  3. Neither the names of the copyright holders nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) ARISING
- * IN ANY WAY OUT OF THE USE OR INABILITY TO USE THIS SOFTWARE, EVEN
- * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * The views and conclusions contained in the software and documentation
  * are those of the authors and should not be interpreted as representing
@@ -41,23 +45,25 @@
 #include "HarbourBase32.h"
 #include "HarbourDebug.h"
 
-#include <QDir>
-#include <QFile>
-#include <QStandardPaths>
-#include <QCryptographicHash>
+#include <QtCore/QDir>
+#include <QtCore/QFile>
+#include <QtCore/QStandardPaths>
+#include <QtCore/QCryptographicHash>
 
-#include <QSqlDatabase>
-#include <QSqlQuery>
-#include <QSqlError>
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlError>
 
 // ==========================================================================
 // SailOTP::Private
 // ==========================================================================
 
 class SailOTP::Private :
-    public FoilAuthTypes {
+    public FoilAuthTypes
+{
 public:
-    class Token {
+    class Token
+    {
     public:
         Token() : iFavorite(false) {}
 
@@ -79,14 +85,14 @@ public:
     static const QString COL_LEN;
     static const QString COL_DIFF;
 
-    Private(QStringList, FoilAuthModel*);
+    Private(const QStringList&, FoilAuthModel*);
 
 private:
     static QString databasePath(QString);
 
     void fetchTokens(FoilAuthModel*);
-    void fetchTokens(FoilAuthModel*, QString);
-    void fetchTokens(FoilAuthModel*, QSqlDatabase);
+    void fetchTokens(FoilAuthModel*, const QString&);
+    void fetchTokens(FoilAuthModel*, const QSqlDatabase&);
 
 public:
     QList<Token> iTokens;
@@ -110,7 +116,7 @@ const QString SailOTP::Private::COL_LEN("len");         // INTEGER
 const QString SailOTP::Private::COL_DIFF("diff");       // INTEGER
 
 SailOTP::Private::Private(
-    QStringList aImportedTokens,
+    const QStringList& aImportedTokens,
     FoilAuthModel* aDestModel) :
     iImportedTokens(aImportedTokens)
 {
@@ -144,7 +150,7 @@ SailOTP::Private::fetchTokens(
 void
 SailOTP::Private::fetchTokens(
     FoilAuthModel* aDestModel,
-    QString aDbPath)
+    const QString& aDbPath)
 {
     if (QFile(aDbPath).exists()) {
         QSqlDatabase db(QSqlDatabase::database(DB_NAME));
@@ -164,9 +170,10 @@ SailOTP::Private::fetchTokens(
 void
 SailOTP::Private::fetchTokens(
     FoilAuthModel* aDestModel,
-    QSqlDatabase db)
+    const QSqlDatabase& aDatabase)
 {
-    QSqlQuery query(db);
+    QSqlQuery query(aDatabase);
+
     if (query.exec("SELECT * FROM " TABLE_NAME " ORDER BY " SORT_COL) ||
         query.exec("SELECT * FROM " TABLE_NAME)) {
         while (query.next()) {
@@ -174,13 +181,16 @@ SailOTP::Private::fetchTokens(
             const bool isTOTP = !type.compare(FoilAuthToken::TYPE_TOTP, Qt::CaseInsensitive);
             const bool isHOTP = !type.compare(FoilAuthToken::TYPE_HOTP, Qt::CaseInsensitive);
             const bool isSteam = !type.compare(QStringLiteral("TOTP_STEAM"), Qt::CaseInsensitive);
+
             if (isTOTP || isHOTP || isSteam) {
                 const QString base32(query.value(COL_SECRET).toString());
                 const QByteArray secret(HarbourBase32::fromBase32(base32));
+
                 if (!secret.isEmpty()) {
                     const QString title(query.value(COL_TITLE).toString());
                     const QString secretHash(QString(QCryptographicHash::hash(secret,
                         QCryptographicHash::Sha1).toHex()).toLower());
+
                     if (iImportedTokens.contains(secretHash) ||
                         (aDestModel && aDestModel->containsSecret(secret))) {
                         HDEBUG("SailOTP token" << title << "is already imported");
@@ -216,7 +226,8 @@ SailOTP::Private::fetchTokens(
 // SailOTP
 // ==========================================================================
 
-SailOTP::SailOTP(QObject* aParent) :
+SailOTP::SailOTP(
+    QObject* aParent) :
     QObject(aParent),
     iPrivate(Q_NULLPTR)
 {
@@ -260,6 +271,7 @@ SailOTP::fetchNewTokens(
     iPrivate = new Private(iImportedTokens, qobject_cast<FoilAuthModel*>(aDestModel));
     if (!iPrivate->iTokens.isEmpty()) {
         const int count = iPrivate->iTokens.count();
+
         HDEBUG("Fetched" << count << "new token(s)");
         setImportedTokens(iPrivate->iImportedTokens);
         return count;
@@ -275,10 +287,13 @@ SailOTP::importTokens(
 {
     if (iPrivate) {
         FoilAuthModel* model = qobject_cast<FoilAuthModel*>(aDestModel);
+
         if (model) {
             const int n = iPrivate->iTokens.count();
+
             for (int i = 0; i < n; i++) {
                 const Private::Token& token(iPrivate->iTokens.at(i));
+
                 if (model->contains(token.iToken)) {
                     HDEBUG(token.iToken.label() << "is already there");
                 } else {

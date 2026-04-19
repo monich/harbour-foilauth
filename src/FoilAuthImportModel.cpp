@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2022-2023 Slava Monich <slava@monich.com>
+ * Copyright (C) 2022-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2022 Jolla Ltd.
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -10,23 +10,27 @@
  *
  *  1. Redistributions of source code must retain the above copyright
  *     notice, this list of conditions and the following disclaimer.
+ *
  *  2. Redistributions in binary form must reproduce the above copyright
  *     notice, this list of conditions and the following disclaimer
  *     in the documentation and/or other materials provided with the
  *     distribution.
+ *
  *  3. Neither the names of the copyright holders nor the names of its
  *     contributors may be used to endorse or promote products derived
  *     from this software without specific prior written permission.
  *
- * THIS SOFTWARE IS PROVIDED ``AS IS'' AND ANY EXPRESSED OR IMPLIED
- * WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED WARRANTIES
- * OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE DISCLAIMED.
- * IN NO EVENT SHALL THE CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT,
- * INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING,
- * BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
- * LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) ARISING
- * IN ANY WAY OUT OF THE USE OR INABILITY TO USE THIS SOFTWARE, EVEN
- * IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+ * THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS
+ * "AS IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT
+ * LIMITED TO, THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR
+ * A PARTICULAR PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT
+ * HOLDERS OR CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL,
+ * SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT
+ * LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE,
+ * DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY
+ * THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+ * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE
+ * OF THIS SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  *
  * The views and conclusions contained in the software and documentation
  * are those of the authors and should not be interpreted as representing
@@ -43,8 +47,6 @@
 
 #include <foil_input.h>
 #include <foil_util.h>
-
-#include <QUrl>
 
 // Model roles
 #define MODEL_ROLES_(first,role,last) \
@@ -71,14 +73,18 @@ public:
     typedef QList<ModelData*> List;
 
     enum Role {
-#define FIRST(X,x) FirstRole = Qt::UserRole, X##Role = FirstRole,
-#define ROLE(X,x) X##Role,
-#define LAST(X,x) X##Role, LastRole = X##Role
+        #define FIRST(X,x) FirstRole = Qt::UserRole, X##Role = FirstRole,
+        #define ROLE(X,x) X##Role,
+        #define LAST(X,x) X##Role, LastRole = X##Role
         MODEL_ROLES_(FIRST,ROLE,LAST)
-#undef FIRST
-#undef ROLE
-#undef LAST
+        #undef FIRST
+        #undef ROLE
+        #undef LAST
     };
+
+    // QtCreator syntax highlighter gets confused by the above macro magic.
+    // Somehow this stupid enum unconfuses it :/
+    enum { _ };
 
     static ModelData* import(FoilAuthToken);
 
@@ -91,6 +97,7 @@ public:
     FoilAuthToken iToken;
 };
 
+/* static */
 FoilAuthImportModel::ModelData*
 FoilAuthImportModel::ModelData::import(
     FoilAuthToken aToken)
@@ -110,8 +117,7 @@ FoilAuthImportModel::ModelData::ModelData(
     FoilAuthToken aToken) :
     iSelected(true),
     iToken(aToken)
-{
-}
+{}
 
 QVariant
 FoilAuthImportModel::ModelData::get(
@@ -142,7 +148,7 @@ public:
     ~Private();
 
     ModelData* dataAt(int);
-    void setItems(const ModelData::List);
+    void setItems(const ModelData::List&);
     void updateSelectedTokens();
 
 public:
@@ -154,8 +160,7 @@ public:
 FoilAuthImportModel::Private::Private(
     FoilAuthImportModel* aModel) :
     iModel(aModel)
-{
-}
+{}
 
 FoilAuthImportModel::Private::~Private()
 {
@@ -173,7 +178,7 @@ FoilAuthImportModel::Private::dataAt(
 
 void
 FoilAuthImportModel::Private::setItems(
-    const ModelData::List aList)
+    const ModelData::List& aList)
 {
     const int prevCount = iList.count();
     const int newCount = aList.count();
@@ -348,9 +353,10 @@ QHash<int,QByteArray>
 FoilAuthImportModel::roleNames() const
 {
     QHash<int,QByteArray> roles;
-#define ROLE(X,x) roles.insert(ModelData::X##Role, #x);
-MODEL_ROLES(ROLE)
-#undef ROLE
+
+    #define ROLE(X,x) roles.insert(ModelData::X##Role, #x);
+    MODEL_ROLES(ROLE)
+    #undef ROLE
     return roles;
 }
 

@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2019-2022 Jolla Ltd.
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -86,7 +86,7 @@ public:
     Private(FoilAuthSettings*);
 
     static int validateQrCodeEcLevel(int);
-    static QSize toSize(const QVariant);
+    static QSize toSize(const QVariant&);
     static QSize size_4_3(int);
     static QSize size_16_9(int);
 
@@ -158,9 +158,10 @@ FoilAuthSettings::Private::validateQrCodeEcLevel(
             aValue : DEFAULT_QRCODE_ECLEVEL;
 }
 
+/* static */
 QSize
 FoilAuthSettings::Private::toSize(
-    const QVariant aVariant)
+    const QVariant& aVariant)
 {
     // e.g. "1920x1080"
     if (aVariant.isValid()) {
@@ -179,6 +180,7 @@ FoilAuthSettings::Private::toSize(
     return QSize(0, 0);
 }
 
+/* static */
 QSize
 FoilAuthSettings::Private::size_4_3(
     int aWidth)
@@ -186,6 +188,7 @@ FoilAuthSettings::Private::size_4_3(
     return QSize(aWidth, aWidth * 3 / 4);
 }
 
+/* static */
 QSize
 FoilAuthSettings::Private::size_16_9(
     int aWidth)
@@ -427,6 +430,7 @@ FoilAuthSettings::autoLockTime() const
     QVariant val(iPrivate->iAutoLockTime->value(DEFAULT_AUTO_LOCK_TIME));
     bool ok;
     const int ival(val.toInt(&ok));
+
     return (ok && ival >= 0) ? ival : DEFAULT_AUTO_LOCK_TIME;
 }
 

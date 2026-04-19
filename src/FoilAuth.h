@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2025 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2019-2022 Jolla Ltd.
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -44,11 +44,11 @@
 
 #include "foil_types.h"
 
-#include <QSize>
-#include <QObject>
-#include <QByteArray>
-#include <QVariantMap>
-#include <QVariantList>
+#include <QtCore/QByteArray>
+#include <QtCore/QObject>
+#include <QtCore/QSize>
+#include <QtCore/QVariantList>
+#include <QtCore/QVariantMap>
 
 class QQmlEngine;
 class QJSEngine;
@@ -60,7 +60,6 @@ class FoilAuth :
 {
     Q_OBJECT
     Q_PROPERTY(bool otherFoilAppsInstalled READ otherFoilAppsInstalled NOTIFY otherFoilAppsInstalledChanged)
-    Q_DISABLE_COPY(FoilAuth)
     Q_ENUMS(Algorithm)
     Q_ENUMS(Type)
 
@@ -106,9 +105,8 @@ public:
         DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM);
 
     // Invokable from QML
-    Q_INVOKABLE static QString toUri(Type aType, const QString aSecretBase32,
-        const QString aLabel, const QString aIssuer, int aDigits,
-        quint64 aCounter, int aTimeShift, Algorithm);
+    Q_INVOKABLE static QString toUri(Type, const QString, const QString,
+        const QString, int, quint64, int, Algorithm);
     Q_INVOKABLE static FoilAuthToken parseUri(const QString);
     Q_INVOKABLE static QList<FoilAuthToken> parseMigrationUri(const QString);
     Q_INVOKABLE static bool isValidBase32(const QString);
