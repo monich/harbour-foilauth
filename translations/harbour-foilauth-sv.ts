@@ -165,7 +165,7 @@
     <message id="foilauth-token-type-steam">
         <source>Steam</source>
         <extracomment>Menu item for time based token</extracomment>
-        <translation type="unfinished">Steam</translation>
+        <translation>Steam</translation>
     </message>
     <message id="foilauth-token-scan-button">
         <source>Scan QR code</source>
@@ -256,7 +256,7 @@
     <message id="foilauth-menu-lock">
         <source>Lock</source>
         <extracomment>Pulley menu item, locks the secrets</extracomment>
-        <translation type="unfinished">Låsa</translation>
+        <translation>Lås</translation>
     </message>
     <message id="foilauth-menu-organize">
         <source>Organize</source>
@@ -481,12 +481,12 @@
     <message id="foilauth-settings_page-front_camera-text">
         <source>Use the front camera</source>
         <extracomment>Text switch label</extracomment>
-        <translation type="unfinished">Använd den främre kameran</translation>
+        <translation>Använd den främre kameran</translation>
     </message>
     <message id="foilauth-settings_page-front_camera-description">
         <source>You can use the front camera for scanning QR codes in case if your back camera is scratched.</source>
         <extracomment>Text switch description</extracomment>
-        <translation type="unfinished">Du kan använda den främre kameran för att skanna QR-koder i händelse av att din bakre kamera blir repad.</translation>
+        <translation>Du kan använda den främre kameran för att skanna QR-koder i händelse av att din bakre kamera blir repad.</translation>
     </message>
     <message id="foilauth-settings_page-autolock-text">
         <source>Automatic locking</source>
@@ -501,27 +501,27 @@
     <message id="foilauth-settings_page-autolock_delay-label">
         <source>Locking delay</source>
         <extracomment>Slider label</extracomment>
-        <translation type="unfinished">Låsningsfördröjning</translation>
+        <translation>Låsningsfördröjning</translation>
     </message>
     <message id="foilauth-settings_page-autolock_delay-value-no_delay">
         <source>No delay</source>
         <extracomment>Slider value (no delay)</extracomment>
-        <translation type="unfinished">Ingen försening</translation>
+        <translation>Ingen fördröjning</translation>
     </message>
     <message id="foilauth-settings_page-autolock_delay-value-sec" numerus="yes">
         <source>%1 sec</source>
         <extracomment>Slider value</extracomment>
-        <translation type="unfinished">
-            <numerusform>%1 min</numerusform>
-            <numerusform>%1 min</numerusform>
+        <translation>
+            <numerusform>%1 sek</numerusform>
+            <numerusform>%1 sek</numerusform>
         </translation>
     </message>
     <message id="foilauth-settings_page-autolock_delay-value-min" numerus="yes">
         <source>%1 min</source>
         <extracomment>Slider value</extracomment>
-        <translation type="unfinished">
-            <numerusform>%1 sek</numerusform>
-            <numerusform>%1 sek</numerusform>
+        <translation>
+            <numerusform>%1 min</numerusform>
+            <numerusform>%1 min</numerusform>
         </translation>
     </message>
 </context>
