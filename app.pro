@@ -225,7 +225,7 @@ for(s, ICON_SIZES) {
     INSTALLS += $${icon_target}
 }
 
-# Settings
+# Settingsq
 
 app_settings {
     settings_json.files = settings/$${TARGET}.json
@@ -240,18 +240,17 @@ OTHER_FILES += \
 
 # Translations
 
-TRANSLATION_IDBASED=-idbased
 TRANSLATION_SOURCES = \
     $${_PRO_FILE_PWD_}/qml \
     $${_PRO_FILE_PWD_}/settings
 
 defineTest(addTrFile) {
-    rel = translations/$${1}
+    rel = translations/harbour-$${1}
     OTHER_FILES += $${rel}.ts
     export(OTHER_FILES)
 
     in = $${_PRO_FILE_PWD_}/$$rel
-    out = $${OUT_PWD}/$$rel
+    out = $${OUT_PWD}/translations/$${PREFIX}-$$1
 
     s = $$replace(1,-,_)
     lupdate_target = lupdate_$$s
@@ -263,7 +262,7 @@ defineTest(addTrFile) {
 
     $${qm_target}.path = $$TRANSLATIONS_PATH
     $${qm_target}.depends = $${lupdate_target}
-    $${qm_target}.commands = lrelease $$TRANSLATION_IDBASED \"$${out}.ts\" && \
+    $${qm_target}.commands = lrelease -idbased \"$${out}.ts\" && \
         $(INSTALL_FILE) \"$${out}.qm\" $(INSTALL_ROOT)$${TRANSLATIONS_PATH}/
 
     QMAKE_EXTRA_TARGETS += $${lupdate_target} $${qm_target}
@@ -277,11 +276,11 @@ defineTest(addTrFile) {
     export(INSTALLS)
 }
 
-LANGUAGES = de fr hu it nb_NO pl ru sv zh_CN
+LANGUAGES = de fr hu it nb pl ru sv zh_CN
 
-addTrFile($${TARGET})
+addTrFile($${NAME})
 for(l, LANGUAGES) {
-    addTrFile($${TARGET}-$$l)
+    addTrFile($${NAME}-$$l)
 }
 
 qm.path = $$TRANSLATIONS_PATH
