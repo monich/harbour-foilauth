@@ -253,7 +253,10 @@ Item {
 
                 x: header.extraContent.x
                 width: header.extraContent.width
-                anchors.verticalCenter: header.extraContent.verticalCenter
+                anchors {
+                    verticalCenter: header.extraContent.verticalCenter
+                    verticalCenterOffset: (!_isLandscape && 'topCutout' in Screen) ? (Screen.topCutout.height/2 - Theme.paddingSmall) : 0
+                }
                 leftMargin: Theme.horizontalPageMargin + Theme.paddingMedium
                 rightMargin: header.rightMargin
                 minimumValue: 1

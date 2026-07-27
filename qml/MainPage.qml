@@ -3,6 +3,7 @@ import Sailfish.Silica 1.0
 import harbour.foilauth 1.0
 import org.nemomobile.notifications 1.0
 
+import "Constants.js" as Constants
 import "foil-ui"
 import "harbour"
 
@@ -12,8 +13,11 @@ Page {
     readonly property var foilModel: FoilAuthModel
     property var foilUi
 
-    // Otherwise width may change with a delay, causing visible layout changes
-    onIsLandscapeChanged: width = isLandscape ? Screen.height : Screen.width
+    readonly property real _landscapeWidth: Screen.height - Constants.topNotchHeight
+
+    // Otherwise width is changing with a delay, causing visible layout changes
+    // when on-screen keyboard is active and taking part of the screen.
+    onIsLandscapeChanged: width = isLandscape ? _landscapeWidth : Screen.width
 
     function getFoilUi() {
         if (!foilUi) {

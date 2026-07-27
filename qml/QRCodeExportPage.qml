@@ -2,6 +2,8 @@ import QtQuick 2.0
 import Sailfish.Silica 1.0
 import harbour.foilauth 1.0
 
+import "Constants.js" as Constants
+
 Dialog {
     id: thisPage
 
@@ -32,6 +34,7 @@ Dialog {
         id: header
 
         x: Theme.horizontalPageMargin
+        y: thisPage.isLandscape ? 0 : Constants.topNotchHeight
         width: parent.width - 2 * x
         height: isLandscape ? Theme.itemSizeSmall : Theme.itemSizeLarge
         horizontalAlignment: Text.AlignHCenter
@@ -40,7 +43,6 @@ Dialog {
         font {
             pixelSize: Theme.fontSizeLarge
             family: Theme.fontFamilyHeading
-            bold: true
         }
         //: Page header
         //% "Code %1 of %2"

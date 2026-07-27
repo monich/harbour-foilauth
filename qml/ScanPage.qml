@@ -6,6 +6,7 @@ import org.nemomobile.policy 1.0
 import org.nemomobile.notifications 1.0
 import harbour.foilauth 1.0
 
+import "Constants.js" as Constants
 import "harbour"
 
 Page {
@@ -175,13 +176,20 @@ Page {
         }
     }
 
-    HarbourFitLabel {
+    Label {
         id: titleLabel
 
         x: Theme.horizontalPageMargin
+        y: thisPage.isLandscape ? 0 : Constants.topNotchHeight
         width: parent.width - 2 * x
         height: isPortrait ? Theme.itemSizeLarge : Theme.itemSizeSmall
-        maxFontSize: isPortrait ? Theme.fontSizeExtraLarge : Theme.fontSizeLarge
+        horizontalAlignment: Text.AlignHCenter
+        verticalAlignment: Text.AlignVCenter
+        color: Theme.highlightColor
+        font {
+            pixelSize: isPortrait ? Theme.fontSizeExtraLarge : Theme.fontSizeLarge
+            family: Theme.fontFamilyHeading
+        }
         //: Page title (suggestion to scan QR code)
         //% "Scan QR code"
         text: qsTrId("foilauth-scan-title")
