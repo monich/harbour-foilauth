@@ -27,7 +27,7 @@ CONFIG(debug, debug|release) {
 
 equals(QT_ARCH, arm64){
     message(Linking with OpenSSL)
-    PKGCONFIG += libcrypto
+    CONFIG += link_openssl
 }
 
 # Fix libfoil compilation warnings:
@@ -200,9 +200,10 @@ INSTALLS += qml_components
 
 # openssl
 
-!equals(QT_ARCH, arm64){
-SOURCES += \
-    $${HARBOUR_LIB_SRC}/libcrypto.c
+link_openssl {
+    PKGCONFIG += libcrypto
+} else {
+    SOURCES += $${HARBOUR_LIB_SRC}/libcrypto.c
 }
 
 # zbar
