@@ -8,53 +8,44 @@ CoverBackground {
     id: cover
 
     readonly property var foilModel: FoilAuthModel
-    readonly property int coverActionHeight: Theme.itemSizeSmall
-    readonly property bool darkOnLight: ('colorScheme' in Theme) && Theme.colorScheme === 1
-    readonly property string lockIconSource: Qt.resolvedUrl("images/" + (darkOnLight ? "cover-lock-dark.svg" :  "cover-lock.svg"))
-    readonly property string displayOn: HarbourSystemState.displayStatus !== HarbourSystemState.MCE_DISPLAY_OFF
+
+    readonly property bool _darkOnLight: ('colorScheme' in Theme) && Theme.colorScheme === 1
+    readonly property string _lockIconSource: Qt.resolvedUrl("images/" + (_darkOnLight ? "cover-lock-dark.svg" :  "cover-lock.svg"))
+    readonly property string _displayOn: !HarbourSystemState.displayOff
 
     Rectangle {
         width: parent.width
         height: appTitle.height
         anchors.top: parent.top
-        color: Theme.primaryColor
-        opacity: 0.1
-    }
+        color: Theme.rgba(Theme.primaryColor, 0.1)
 
-    Rectangle {
-        height: appTitle.height
-        width: Math.round(parent.width * (active ? value : 1))
-        color: Theme.primaryColor
-        opacity: 0.1
+        Label {
+            id: appTitle
 
-        readonly property bool active: foilModel.timerActive && displayOn
-        readonly property real value: (foilModel.timeLeft - 1)/(foilModel.period - 1)
-
-        Behavior on width {
-            enabled: displayOn
-            NumberAnimation { duration: 500 }
+            width: parent.width - 2 * Theme.paddingMedium
+            anchors.top: parent.top
+            height: implicitHeight + Theme.paddingLarge
+            horizontalAlignment: Text.AlignHCenter
+            verticalAlignment: Text.AlignVCenter
+            //: Application title
+            //% "Foil Auth"
+            text: qsTrId("foilauth-app_name")
+            opacity: (!list.count || list.currentIndex < 0 || !list.currentLabel || flipable.flipping) ? 1 : 0
+            visible: opacity > 0
+            Behavior on opacity { FadeAnimation { duration: 500 } }
         }
     }
 
-    Label {
-        id: appTitle
-
-        width: parent.width - 2 * Theme.paddingMedium
-        anchors.top: parent.top
-        height: implicitHeight + Theme.paddingLarge
-        horizontalAlignment: Text.AlignHCenter
-        verticalAlignment: Text.AlignVCenter
-        readonly property bool showAppTitle: !list.count || list.currentIndex < 0 || !list.currentLabel
-        //: Application title
-        //% "Foil Auth"
-        text: showAppTitle ? qsTrId("foilauth-app_name") : " "
+    Connections {
+        target: foilModel
+        onKeyAvailableChanged: flipable.flipped = foilModel.keyAvailable
     }
 
     Flipable {
         id: flipable
 
         readonly property real circleSize: Math.floor(parent.width * 0.8)
-        readonly property bool flipped: cover.foilModel.keyAvailable
+        property bool flipped
         property bool flipping
         property real targetAngle
 
@@ -87,13 +78,32 @@ CoverBackground {
                 opacity: 0.2
             }
 
-            HarbourFitLabel {
+            ProgressCircle {
+                opacity: (list.currentItem &&  list.currentItem.itemType !== FoilAuth.TypeHOTP) ? 1 : 0
+                anchors.fill: backgroundCircle
+                value: 1.0 - foilModel.timeLeft / FoilAuth.PERIOD
+                progressColor: Theme.rgba(Theme.highlightBackgroundColor, 0.2 /* opacityFaint */)
+                backgroundColor: Theme.rgba(Theme.highlightColor, 0.4 /* opacityLow */)
+
+                Behavior on opacity { FadeAnimation { } }
+                Behavior on value { NumberAnimation { duration: 500 } }
+            }
+
+            Label {
                 width: Math.round(backgroundCircle.width - 2 * parent.x)
                 height: width
-                anchors.centerIn: parent
-                maxFontSize: Theme.fontSizeHuge
+                color: Theme.highlightColor
+                anchors {
+                    margins: Theme.paddingMedium
+                    centerIn: parent
+                }
+                verticalAlignment: Text.AlignVCenter
+                horizontalAlignment: Text.AlignHCenter
+                fontSizeMode: Text.Fit
+                minimumPixelSize: Theme.fontSizeTiny
                 font {
                     family: Theme.fontFamilyHeading
+                    pixelSize: Theme.fontSizeHuge
                     bold: true
                 }
                 text: "\u2022\u2022\u2022\u2022\u2022\u2022"
@@ -103,33 +113,31 @@ CoverBackground {
             SlideshowView {
                 id: list
 
-                property string currentLabel
+                property string currentLabel: currentItem ? currentItem.itemLabel : ""
 
                 interactive: false
                 anchors.fill: parent
+                cacheItemCount: count
+                clip: true
+
                 model: FoilAuthFavoritesModel {
                     sourceModel: foilModel
                 }
+
                 delegate: Item {
                     id: passwordDelegate
+
                     width: parent.width
                     height: list.height
 
-                    readonly property string modelLabel: model.label
+                    readonly property int itemType: model.type
+                    readonly property string itemLabel: model.label
                     readonly property bool currentItem: passwordDelegate.PathView.isCurrentItem
-
-                    function updateCurrentLabel() {
-                        if (currentItem) {
-                            list.currentLabel = modelLabel
-                        }
-                    }
-
-                    Component.onCompleted: updateCurrentLabel()
-                    onCurrentItemChanged: updateCurrentLabel()
-                    onModelLabelChanged: updateCurrentLabel()
 
                     Label {
                         readonly property real maxWidth: parent.width - 2 * Theme.paddingMedium
+
+                        visible: !flipable.flipping
                         width: Math.min(paintedWidth, maxWidth)
                         anchors {
                             top: parent.top
@@ -139,23 +147,31 @@ CoverBackground {
                         horizontalAlignment: Text.AlignLeft
                         verticalAlignment: Text.AlignVCenter
                         truncationMode: TruncationMode.Fade
-                        text: modelLabel
+                        text: itemLabel
                     }
 
-                    HarbourFitLabel {
+                    Label {
                         id: passwordLabel
 
                         y: Math.round(backgroundCircle.y - list.y + (backgroundCircle.height - height)/2)
                         width: Math.round(backgroundCircle.width - 2 * backgroundCircle.x)
                         height: width
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        maxFontSize: Theme.fontSizeHuge
+                        anchors {
+                            margins: Theme.paddingMedium
+                            horizontalCenter: parent.horizontalCenter
+                        }
+                        verticalAlignment: Text.AlignVCenter
+                        horizontalAlignment: Text.AlignHCenter
+                        color: Theme.highlightColor
+                        fontSizeMode: Text.Fit
+                        minimumPixelSize: Theme.fontSizeTiny
                         font {
                             family: Theme.fontFamilyHeading
+                            pixelSize: Theme.fontSizeHuge
                             bold: true
                         }
                         transform: HarbourTextFlip {
-                            enabled: displayOn
+                            enabled: _displayOn
                             text: model.currentPassword
                             target: passwordLabel
                         }
@@ -219,6 +235,7 @@ CoverBackground {
             flipping = false
             if (!flipped) {
                 targetAngle = 0
+                foilModel.lock(false)
             }
         }
     }
@@ -226,7 +243,7 @@ CoverBackground {
     Timer {
         id: currentIndexTimer
 
-        running: list.count > 1 && displayOn
+        running: list.count > 1 && _displayOn
         interval: 5000
         repeat: true
         onTriggered: list.incrementCurrentIndex()
@@ -244,7 +261,8 @@ CoverBackground {
     }
 
     CoverActionList {
-        enabled: cover.foilModel.keyAvailable && list.count > 1
+        enabled: foilModel.keyAvailable && list.count > 1
+
         CoverAction {
             iconSource: "image://theme/icon-cover-previous"
             onTriggered: {
@@ -252,17 +270,19 @@ CoverBackground {
                 list.decrementCurrentIndex()
             }
         }
+
         CoverAction {
-            iconSource: cover.lockIconSource
-            onTriggered: cover.foilModel.lock(false)
+            iconSource: cover._lockIconSource
+            onTriggered: flipable.flipped = false
         }
     }
 
     CoverActionList {
-        enabled: cover.foilModel.keyAvailable && list.count < 2
+        enabled: foilModel.keyAvailable && list.count < 2
+
         CoverAction {
-            iconSource: cover.lockIconSource
-            onTriggered: cover.foilModel.lock(false)
+            iconSource: cover._lockIconSource
+            onTriggered: flipable.flipped = false
         }
     }
 }

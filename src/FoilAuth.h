@@ -61,11 +61,10 @@ class FoilAuth :
     Q_OBJECT
     Q_PROPERTY(bool otherFoilAppsInstalled READ otherFoilAppsInstalled NOTIFY otherFoilAppsInstalledChanged)
     Q_ENUMS(Algorithm)
+    Q_ENUMS(Constants)
     Q_ENUMS(Type)
 
 public:
-    static const int PERIOD = 30;
-
     // Export these to QML
     enum Algorithm {
         AlgorithmSHA1 = DigestAlgorithmSHA1,
@@ -79,6 +78,10 @@ public:
         TypeHOTP = AuthTypeHOTP,
         TypeSteam = AuthTypeSteam,
         DefaultType = DEFAULT_AUTH_TYPE
+    };
+
+    enum Constants {
+        PERIOD = 30 // seconds
     };
 
     explicit FoilAuth(QObject* aParent = Q_NULLPTR);
