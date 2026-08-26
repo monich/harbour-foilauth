@@ -45,8 +45,8 @@ CoverBackground {
         id: flipable
 
         readonly property real circleSize: Math.floor(parent.width * 0.8)
+        property alias flipping: flipTransition.running
         property bool flipped
-        property bool flipping
         property real targetAngle
 
         anchors.fill: parent
@@ -214,14 +214,12 @@ CoverBackground {
         ]
 
         transitions: Transition {
-            SequentialAnimation {
-                ScriptAction { script: flipable.flipping = true; }
-                NumberAnimation {
-                    target: rotation
-                    property: "angle"
-                    duration: 500
-                }
-                ScriptAction { script: flipable.completeFlip() }
+            id: flipTransition
+
+            NumberAnimation {
+                target: rotation
+                property: "angle"
+                duration: 500
             }
         }
 
@@ -231,9 +229,8 @@ CoverBackground {
             }
         }
 
-        function completeFlip() {
-            flipping = false
-            if (!flipped) {
+        onFlippingChanged: {
+            if (!flipping && !flipped) {
                 targetAngle = 0
                 foilModel.lock(false)
             }
@@ -261,7 +258,7 @@ CoverBackground {
     }
 
     CoverActionList {
-        enabled: foilModel.keyAvailable && list.count > 1
+        enabled: flipable.flipped && list.count > 1
 
         CoverAction {
             iconSource: "image://theme/icon-cover-previous"
@@ -278,7 +275,7 @@ CoverBackground {
     }
 
     CoverActionList {
-        enabled: foilModel.keyAvailable && list.count < 2
+        enabled: flipable.flipped && list.count <= 1
 
         CoverAction {
             iconSource: cover._lockIconSource
