@@ -117,7 +117,6 @@ CoverBackground {
 
                 interactive: false
                 anchors.fill: parent
-                cacheItemCount: count
                 clip: true
 
                 model: FoilAuthFavoritesModel {
@@ -133,6 +132,9 @@ CoverBackground {
                     readonly property int itemType: model.type
                     readonly property string itemLabel: model.label
                     readonly property bool currentItem: passwordDelegate.PathView.isCurrentItem
+                    property bool _completed
+
+                    Component.onCompleted: _completed = true
 
                     Label {
                         readonly property real maxWidth: parent.width - 2 * Theme.paddingMedium
@@ -171,7 +173,7 @@ CoverBackground {
                             bold: true
                         }
                         transform: HarbourTextFlip {
-                            enabled: _displayOn
+                            enabled: _completed && _displayOn
                             text: model.currentPassword
                             target: passwordLabel
                         }
