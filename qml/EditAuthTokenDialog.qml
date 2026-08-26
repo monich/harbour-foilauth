@@ -247,6 +247,42 @@ Dialog {
                     onCurrentIndexChanged: type = currentIndex
                 }
             }
+
+            SectionHeader {
+                //% "Add via URI"
+                text: qsTrId("foilauth-token-uri-header")
+                font.pixelSize: Theme.fontSizeLarge
+                horizontalAlignment: Qt.AlignLeft
+            }
+            TextField {
+                id: urlField
+                property var regExp: new RegExp(/^otpauth:\/\/.+\/.+\?.*secret=.+$/)
+                acceptableInput: regExp.test(text)
+                inputMethodHints: Qt.ImhUrlCharactersOnly | Qt.ImhNoPredictiveText | Qt.ImhNoAutoUppercase
+                placeholderText: "otpauth://<type>/<label>?secret=..."
+                //% "A OTP Auth URI"
+                label: qsTrId("foilauth-token-uri-field-label")
+                Component.onCompleted: {
+                    if (regExp.test(Clipboard.text)) {
+                        text = Clipboard.text
+                    }
+                }
+                onAcceptableInputChanged: {
+                    if (acceptableInput) {
+                        const tok = FoilAuth.parseUri(UriParameter)
+                        if (tok.valid) {
+                            thisDialog.type = tok.type
+                            thisDialog.label = tok.label
+                            thisDialog.issuer = tok.issuer
+                            thisDialog.secret = tok.secret
+                            thisDialog.digits = tok.digits
+                            thisDialog.counter = tok.counter
+                            thisDialog.timeshift = tok.timeshift
+                            thisDialog.algorithm = tok.algorithm
+                        }
+                    }
+                }
+            }
             VerticalPadding { }
 
             Button {
