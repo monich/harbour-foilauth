@@ -81,10 +81,15 @@ public:
     };
 
     enum Constants {
+        MinDigits = MIN_DIGITS,
+        MaxDigits = MAX_DIGITS,
+        DefaultDigits = DEFAULT_DIGITS,
+        DefaultCounter = DEFAULT_COUNTER,
+        DefaultTimeShift = DEFAULT_TIMESHIFT,
         PERIOD = 30 // seconds
     };
 
-    explicit FoilAuth(QObject* aParent = Q_NULLPTR);
+    explicit FoilAuth(QObject* parent = Q_NULLPTR);
 
     // Callback for qmlRegisterSingletonType<FoilAuth>
     static QObject* createSingleton(QQmlEngine*, QJSEngine*);
@@ -100,17 +105,17 @@ public:
     static FoilOutput* createFoilFile(const QString, GString*);
     static QString createEmptyFoilFile(const QString);
     static QString migrationUri(const QByteArray);
-    static uint TOTP(const QByteArray, quint64 aTime, uint aMaxPass,
-        DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM);
-    static uint HOTP(const QByteArray, quint64 aCounter, uint aMaxPass,
-        DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM);
-    static uint hash(const QByteArray, quint64 aValue,
-        DigestAlgorithm aAlgorithm = DEFAULT_ALGORITHM);
+    static uint TOTP(const QByteArray, quint64 time, uint maxPass,
+        DigestAlgorithm algorithm = DEFAULT_ALGORITHM);
+    static uint HOTP(const QByteArray, quint64 counter, uint maxPass,
+        DigestAlgorithm algorithm = DEFAULT_ALGORITHM);
+    static uint hash(const QByteArray, quint64 value,
+        DigestAlgorithm algorithm = DEFAULT_ALGORITHM);
 
     // Invokable from QML
     Q_INVOKABLE static QString toUri(Type, const QString, const QString,
         const QString, int, quint64, int, Algorithm);
-    Q_INVOKABLE static FoilAuthToken parseUri(const QString);
+    Q_INVOKABLE static QVariantMap parseUri(const QString);
     Q_INVOKABLE static QList<FoilAuthToken> parseMigrationUri(const QString);
     Q_INVOKABLE static bool isValidBase32(const QString);
     Q_INVOKABLE static QStringList stringListRemove(QStringList, const QString);

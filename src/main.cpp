@@ -1,5 +1,5 @@
 /*
- * Copyright (C) 2019-2024 Slava Monich <slava@monich.com>
+ * Copyright (C) 2019-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2019-2022 Jolla Ltd.
  *
  * You may use this file under the terms of the BSD license as follows:
@@ -169,16 +169,6 @@ int main(int argc, char *argv[])
     context->setContextProperty("QrCodeImageProvider", qrCodeImageProvider);
     context->setContextProperty("FoilAuthAppName", QString(FOILAUTH_APP_NAME));
     context->setContextProperty("TorchSupported", torchSupported);
-    context->setContextProperty("FoilAuthMinDigits",
-        QVariant::fromValue((int)FoilAuthTypes::MIN_DIGITS));
-    context->setContextProperty("FoilAuthMaxDigits",
-        QVariant::fromValue((int)FoilAuthTypes::MAX_DIGITS));
-    context->setContextProperty("FoilAuthDefaultDigits",
-        QVariant::fromValue((int)FoilAuthTypes::DEFAULT_DIGITS));
-    context->setContextProperty("FoilAuthDefaultCounter",
-        QVariant::fromValue((int)FoilAuthTypes::DEFAULT_COUNTER));
-    context->setContextProperty("FoilAuthDefaultTimeShift",
-        QVariant::fromValue((int)FoilAuthTypes::DEFAULT_TIMESHIFT));
 
     // Initialize the view and show it
     view->setTitle(qtTrId("foilauth-app_name"));

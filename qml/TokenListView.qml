@@ -63,9 +63,9 @@ Item {
             var n = SailOTP.fetchNewTokens(FoilAuthModel)
             if (n > 0) {
                 var dialog = pageStack.push(Qt.resolvedUrl("ImportTokensDialog.qml"), {
-                    allowedOrientations: mainPage.allowedOrientations,
-                    firstTime: !FoilAuthSettings.sailotpImportDone,
-                    count: n
+                    "allowedOrientations": mainPage.allowedOrientations,
+                    "firstTime": !FoilAuthSettings.sailotpImportDone,
+                    "count": n
                 })
                 if (dialog) {
                     dialog.accepted.connect(function() {
@@ -200,7 +200,7 @@ Item {
                 text: qsTrId("foilauth-menu-new_auth_token")
                 onClicked: {
                     var page = pageStack.push("ScanPage.qml", {
-                        "allowedOrientations": allowedOrientations
+                        "allowedOrientations": mainPage.allowedOrientations
                     })
 
                     page.skip.connect(function() {
@@ -232,7 +232,7 @@ Item {
                     })
                     page.tokensDetected.connect(function(model) {
                         pageStack.replace(Qt.resolvedUrl("SelectTokensPage.qml"), {
-                            "allowedOrientations": thisPage.allowedOrientations,
+                            "allowedOrientations": mainPage.allowedOrientations,
                             "tokens": model.getTokens()
                         }).tokensAccepted.connect(FoilAuthModel.addTokens)
                     })
@@ -319,15 +319,16 @@ Item {
                             pageStack.push(editAuthTokenDialogComponent, {
                                 //: Dialog title
                                 //% "Edit token"
-                                dialogTitle: qsTrId("foilauth-edit_token-title"),
-                                type: model.type,
-                                label: model.label,
-                                secret: model.secret,
-                                issuer: model.issuer,
-                                algorithm: model.algorithm,
-                                digits: model.digits,
-                                counter: model.counter,
-                                timeshift: model.timeshift
+                                "dialogTitle": qsTrId("foilauth-edit_token-title"),
+                                "showQrCode": true,
+                                "type": model.type,
+                                "label": model.label,
+                                "secret": model.secret,
+                                "issuer": model.issuer,
+                                "algorithm": model.algorithm,
+                                "digits": model.digits,
+                                "counter": model.counter,
+                                "timeshift": model.timeshift
                             }).tokenAccepted.connect(function(dialog) {
                                 item.updateToken(dialog)
                             })
