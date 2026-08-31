@@ -110,7 +110,9 @@ Dialog {
                         onClicked: {
                             var token = list.model.getToken(delegate.itemIndex)
                             pageStack.push(Qt.resolvedUrl("EditAuthTokenDialog.qml"), {
-                                "allowedOrientations": allowedOrientations,
+                                "allowedOrientations": thisDialog.allowedOrientations,
+                                "canImportFromClipboard": false,
+                                "showQrCode": false,
                                 "type": token.type,
                                 "label": token.label,
                                 "issuer": token.issuer,

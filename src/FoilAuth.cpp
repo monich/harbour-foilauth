@@ -379,11 +379,12 @@ FoilAuth::toUri(
 }
 
 /* static */
-FoilAuthToken
+QVariantMap
 FoilAuth::parseUri(
     const QString aUri)
 {
-    return FoilAuthToken::fromUri(aUri);
+    HDEBUG(aUri);
+    return FoilAuthToken::fromUri(aUri).toVariantMap();
 }
 
 /* static */

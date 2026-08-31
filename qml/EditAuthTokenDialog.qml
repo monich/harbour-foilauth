@@ -7,22 +7,25 @@ import "harbour"
 Dialog {
     id: thisDialog
 
-    forwardNavigation: !qrCodeOnly
-    backNavigation: !qrCodeOnly
-    canAccept: generator.text !== ""
+    forwardNavigation: !_qrCodeFullScreen
+    backNavigation: !_qrCodeFullScreen
+    canAccept: _uri !== ""
 
-    property bool qrCodeOnly
-    property bool canScan
+    property bool canImportFromClipboard: true
+    property bool showQrCode: !canImportFromClipboard
     property alias acceptText: header.acceptText
     property alias dialogTitle: header.title
     property string issuer
-    property int type: FoilAuth.DefaultType
-    property int algorithm: FoilAuth.DefaultAlgorithm
+    property alias type: typeComboBox.currentIndex
+    property alias algorithm: algorithmComboBox.currentIndex
     property alias label: labelField.text
     property alias secret: secretField.text
     property alias digits: digitsField.text
     property alias counter: counterField.text
     property alias timeshift: timeshiftField.text
+
+    property bool _qrCodeFullScreen
+    property string _uri: FoilAuth.toUri(type, secret, label, issuer, digits, counter, timeshift, algorithm)
 
     signal tokenAccepted(var dialog)
 
@@ -31,8 +34,8 @@ Dialog {
     HarbourQrCodeGenerator {
         id: generator
 
+        text: showQrCode ? _uri : ""
         ecLevel: FoilAuthSettings.qrCodeEcLevel
-        text: FoilAuth.toUri(type, secret, label, issuer, digits, counter, timeshift, algorithm)
     }
 
     Item {
@@ -42,8 +45,8 @@ Dialog {
         width: qrcodeImage.width
         height: qrcodeImage.height
         anchors.horizontalCenter: thisDialog.horizontalCenter
-        z: qrCodeOnly ? 1000 /* just above the dialog header overlay */ : 0
-        opacity: qrCodeOnly ? 1 : 0
+        z: _qrCodeFullScreen ? 1000 /* just above the dialog header overlay */ : 0
+        opacity: _qrCodeFullScreen ? 1 : 0
         visible: opacity > 0
         Behavior on opacity { FadeAnimation { } }
     }
@@ -55,6 +58,33 @@ Dialog {
         contentHeight: column.height
         interactive: opacity > 0
         Behavior on opacity { FadeAnimation { } }
+
+
+        PullDownMenu {
+            id: pullDownMenu
+
+            visible: canImportFromClipboard
+
+            MenuItem {
+                readonly property var clipboardToken: canImportFromClipboard ?
+                    FoilAuth.parseUri(Clipboard.text) : { "valid": false }
+
+                enabled: !!clipboardToken.valid
+                text: "Import from clipboard"
+                onClicked: {
+                    var token = clipboardToken
+                    Clipboard.text = ""
+                    typeComboBox.currentIndex = token.type
+                    algorithmComboBox.currentIndex = token.algorithm
+                    thisDialog.label = token.label
+                    thisDialog.issuer = token.issuer
+                    thisDialog.secret = token.secret
+                    thisDialog.digits = token.digits
+                    thisDialog.counter = token.counter
+                    thisDialog.timeshift = token.timeshift
+                }
+            }
+        }
 
         Column {
             id: column
@@ -78,7 +108,7 @@ Dialog {
                 //: Text field placeholder (OTP label)
                 //% "OTP label"
                 placeholderText: qsTrId("foilauth-token-label-placeholder")
-                enabled: !qrCodeOnly
+                enabled: !_qrCodeFullScreen
 
                 EnterKey.enabled: text.length > 0
                 EnterKey.iconSource: "image://theme/icon-m-enter-next"
@@ -96,11 +126,19 @@ Dialog {
               //% "Secret OTP key"
               placeholderText: qsTrId("foilauth-token-secret-placeholder")
               errorHighlight: !FoilAuth.isValidBase32(text)
-              enabled: !qrCodeOnly
+              inputMethodHints: Qt.ImhNoPredictiveText | Qt.ImhSensitiveData
+              enabled: !_qrCodeFullScreen
 
               EnterKey.enabled: text.length > 10
               EnterKey.iconSource: "image://theme/icon-m-enter-next"
               EnterKey.onClicked: digitsField.focus = true
+
+              // Don't select the secret
+              onSelectedTextChanged: {
+                  if (selectedText !== "") {
+                      deselect()
+                  }
+              }
             }
 
             Grid {
@@ -119,13 +157,13 @@ Dialog {
                     //: Text field placeholder (number of password digits)
                     //% "Number of password digits"
                     placeholderText: qsTrId("foilauth-token-digits-placeholder")
-                    text: FoilAuthDefaultDigits
+                    text: FoilAuth.DefaultDigits
                     validator: IntValidator {
-                        bottom: FoilAuthMinDigits
-                        top: FoilAuthMaxDigits
+                        bottom: FoilAuth.MinDigits
+                        top: FoilAuth.MaxDigits
                     }
                     inputMethodHints: Qt.ImhDigitsOnly
-                    enabled: !qrCodeOnly
+                    enabled: !_qrCodeFullScreen
 
                     EnterKey.iconSource: "image://theme/icon-m-enter-next"
                     EnterKey.onClicked: timeshiftField.focus = true
@@ -139,10 +177,10 @@ Dialog {
                     //% "Counter value"
                     label: qsTrId("foilauth-token-counter-text")
                     placeholderText: label
-                    text: FoilAuthDefaultCounter
+                    text: FoilAuth.DefaultCounter
                     validator: IntValidator {}
                     inputMethodHints: Qt.ImhDigitsOnly
-                    enabled: !qrCodeOnly
+                    enabled: !_qrCodeFullScreen
                     visible: type === FoilAuth.TypeHOTP
 
                     EnterKey.iconSource: "image://theme/icon-m-enter-accept"
@@ -160,10 +198,10 @@ Dialog {
                     //: Text field placeholder (number of password digits)
                     //% "OTP time shift, in seconds"
                     placeholderText: qsTrId("foilauth-token-timeshift-placeholder")
-                    text: FoilAuthDefaultTimeShift
+                    text: FoilAuth.DefaultTimeShift
                     validator: IntValidator {}
                     inputMethodHints: Qt.ImhDigitsOnly
-                    enabled: !qrCodeOnly
+                    enabled: !_qrCodeFullScreen
                     visible: type === FoilAuth.TypeTOTP || type === FoilAuth.TypeSteam
 
                     EnterKey.iconSource: "image://theme/icon-m-enter-accept"
@@ -210,6 +248,7 @@ Dialog {
                     //: Combo box label
                     //% "Digest algorithm"
                     label: qsTrId("foilauth-token-digest_algorithm-label")
+                    currentIndex: FoilAuth.DefaultAlgorithm
                     menu: ContextMenu {
                         x: 0
                         width: algorithmComboBox.width
@@ -218,9 +257,8 @@ Dialog {
                         MenuItem { text: qsTrId("foilauth-token-digest_algorithm-default").arg("SHA1") }
                         MenuItem { text: "SHA256" }
                         MenuItem { text: "SHA512" }
+                        onActivated: thisDialog.algorithm = index
                     }
-                    Component.onCompleted: currentIndex = algorithm
-                    onCurrentIndexChanged: algorithm = currentIndex
                 }
 
                 ComboBox {
@@ -230,6 +268,7 @@ Dialog {
                     //: Combo box label
                     //% "Type"
                     label: qsTrId("foilauth-token-type-label")
+                    currentIndex: FoilAuth.DefaultType
                     menu: ContextMenu {
                         x: 0
                         width: typeComboBox.width
@@ -242,33 +281,19 @@ Dialog {
                         //: Menu item for time based token
                         //% "Steam"
                         MenuItem { text: qsTrId("foilauth-token-type-steam") }
+                        onActivated: thisDialog.type = index
                     }
-                    Component.onCompleted: currentIndex = type
-                    onCurrentIndexChanged: type = currentIndex
                 }
             }
+
             VerticalPadding { }
-
-            Button {
-                id: scanButton
-
-                anchors.horizontalCenter: parent.horizontalCenter
-                //: Button label, opens QR code scan window
-                //% "Scan QR code"
-                text: qsTrId("foilauth-token-scan-button")
-                visible: canScan && !secretField.text.length
-                onClicked: pageStack.push(Qt.resolvedUrl("ScanPage.qml"), {
-                    allowedOrientations: thisDialog.allowedOrientations
-                })
-            }
-
-            VerticalPadding { visible: scanButton.visible }
 
             Item {
                 id: flickableQrcodeContainer
 
                 width: qrcodeImage.width
                 height: qrcodeImage.height
+                visible: generator.qrcode !== ""
                 anchors.horizontalCenter: parent.horizontalCenter
 
                 QRCodeImage {
@@ -280,11 +305,11 @@ Dialog {
                     MouseArea {
                         id: qrcodeMouseArea
 
-                        enabled: !qrCodeOnly
+                        enabled: !_qrCodeFullScreen
                         anchors.fill: parent
                         onPressAndHold: ;
                         onClicked: {
-                            qrCodeOnly = true
+                            _qrCodeFullScreen = true
                             flickable.focus = true
                         }
                     }
@@ -295,7 +320,7 @@ Dialog {
                 }
             }
 
-            VerticalPadding { }
+            VerticalPadding { visible: flickableQrcodeContainer.visible }
         }
 
         VerticalScrollDecorator { }
@@ -304,16 +329,16 @@ Dialog {
     MouseArea {
         id: fullScreenQrcodeMouseArea
 
-        enabled: qrCodeOnly
+        enabled: _qrCodeFullScreen
         anchors.fill: parent
         onPressAndHold: ;
-        onClicked: qrCodeOnly = false
+        onClicked: _qrCodeFullScreen = false
     }
 
     states: [
         State {
             name: "qrcode"
-            when: qrCodeOnly
+            when: _qrCodeFullScreen
 
             ParentChange {
                 target: qrcodeImage
@@ -326,7 +351,7 @@ Dialog {
         },
         State {
             name: "normal"
-            when: !qrCodeOnly
+            when: !_qrCodeFullScreen
 
             PropertyChanges {
                 target: flickable
