@@ -166,11 +166,6 @@
         <extracomment>Menu item for time based token</extracomment>
         <translation>Steam (OTP)</translation>
     </message>
-    <message id="foilauth-token-scan-button">
-        <source>Scan QR code</source>
-        <extracomment>Button label, opens QR code scan window</extracomment>
-        <translation>Skann QR-kode</translation>
-    </message>
     <message id="foilauth-notification-unsupported_qrcode">
         <source>Invalid or unsupported QR code</source>
         <extracomment>Warning notification</extracomment>

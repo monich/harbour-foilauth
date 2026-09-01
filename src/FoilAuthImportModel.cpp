@@ -253,12 +253,12 @@ void
 FoilAuthImportModel::setUri(
     const QString aUri)
 {
-    const QByteArray uri(aUri.trimmed().toUtf8());
+    const QString uri(aUri.trimmed());
 
-    HDEBUG(uri.constData());
+    HDEBUG(qPrintable(uri));
 
     ModelData::List items;
-    FoilAuthToken singleToken(FoilAuth::parseUri(uri));
+    FoilAuthToken singleToken(FoilAuthToken::fromUri(uri));
 
     if (singleToken.isValid()) {
         items.append(ModelData::import(singleToken));
