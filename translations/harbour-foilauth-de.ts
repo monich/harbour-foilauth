@@ -387,6 +387,11 @@
         <extracomment>Dialog button</extracomment>
         <translation>Speichern</translation>
     </message>
+    <message id="foilauth-edit_token-menu-import">
+        <source>Import from clipboard</source>
+        <extracomment>Menu item</extracomment>
+        <translation type="unfinished">Aus der Zwischenablage importieren</translation>
+    </message>
     <message id="foilauth-select_page-header">
         <source>Select tokens</source>
         <extracomment>Page title</extracomment>

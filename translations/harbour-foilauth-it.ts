@@ -377,6 +377,11 @@
         <extracomment>Dialog button</extracomment>
         <translation>Salva</translation>
     </message>
+    <message id="foilauth-edit_token-menu-import">
+        <source>Import from clipboard</source>
+        <extracomment>Menu item</extracomment>
+        <translation type="unfinished">Importa dagli appunti</translation>
+    </message>
     <message id="foilauth-remorse-deleting_selected_token">
         <source>Deleting selected token</source>
         <extracomment>Remorse popup text (single token selected)</extracomment>

@@ -70,7 +70,9 @@ Dialog {
                     FoilAuth.parseUri(Clipboard.text) : { "valid": false }
 
                 enabled: !!clipboardToken.valid
-                text: "Import from clipboard"
+                //: Menu item
+                //% "Import from clipboard"
+                text: qsTrId("foilauth-edit_token-menu-import")
                 onClicked: {
                     var token = clipboardToken
                     Clipboard.text = ""

@@ -380,6 +380,11 @@
         <extracomment>Dialog button</extracomment>
         <translation>Сохранить</translation>
     </message>
+    <message id="foilauth-edit_token-menu-import">
+        <source>Import from clipboard</source>
+        <extracomment>Menu item</extracomment>
+        <translation>Импорт из буфера обмена</translation>
+    </message>
     <message id="foilauth-remorse-deleting_selected_token">
         <source>Deleting selected token</source>
         <extracomment>Remorse popup text (single token selected)</extracomment>

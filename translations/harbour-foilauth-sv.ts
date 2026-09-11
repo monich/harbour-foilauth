@@ -358,6 +358,11 @@
         <extracomment>Dialog title</extracomment>
         <translation>Redigera token</translation>
     </message>
+    <message id="foilauth-edit_token-menu-import">
+        <source>Import from clipboard</source>
+        <extracomment>Menu item</extracomment>
+        <translation type="unfinished">Importera från urklipp</translation>
+    </message>
     <message id="foilauth-edit_token-save">
         <source>Save</source>
         <extracomment>Dialog button</extracomment>
