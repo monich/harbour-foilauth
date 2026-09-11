@@ -380,6 +380,11 @@
         <extracomment>Dialog button</extracomment>
         <translation>Zapisz</translation>
     </message>
+    <message id="foilauth-edit_token-menu-import">
+        <source>Import from clipboard</source>
+        <extracomment>Menu item</extracomment>
+        <translation type="unfinished">Importuj ze schowka</translation>
+    </message>
     <message id="foilauth-remorse-deleting_selected_tokens">
         <source>Deleting selected tokens</source>
         <extracomment>Remorse popup text (multiple tokens selected)</extracomment>

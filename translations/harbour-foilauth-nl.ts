@@ -363,6 +363,11 @@
         <extracomment>Dialog button</extracomment>
         <translation>Opslaan</translation>
     </message>
+    <message id="foilauth-edit_token-menu-import">
+        <source>Import from clipboard</source>
+        <extracomment>Menu item</extracomment>
+        <translation type="unfinished">Importeren van klembord</translation>
+    </message>
     <message id="foilauth-menu-select_tokens">
         <source>Select</source>
         <extracomment>Pulley menu item, opens selection page</extracomment>
