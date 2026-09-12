@@ -73,9 +73,8 @@ CoverBackground {
                 width: flipable.circleSize
                 height: flipable.circleSize
                 anchors.centerIn: parent
-                color: "white"
+                color: Theme.rgba(Theme.highlightDimmerColor, 0.4 /* opacityLow */)
                 radius: flipable.circleSize/2
-                opacity: 0.2
             }
 
             ProgressCircle {
@@ -164,7 +163,6 @@ CoverBackground {
                         }
                         verticalAlignment: Text.AlignVCenter
                         horizontalAlignment: Text.AlignHCenter
-                        color: Theme.highlightColor
                         fontSizeMode: Text.Fit
                         minimumPixelSize: Theme.fontSizeTiny
                         font {
