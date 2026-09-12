@@ -1,6 +1,6 @@
 /*
+ * Copyright (C) 2019-2026 Slava Monich <slava@monich.com>
  * Copyright (C) 2019-2022 Jolla Ltd.
- * Copyright (C) 2019-2025 Slava Monich <slava@monich.com>
  *
  * You may use this file under the terms of the BSD license as follows:
  *
@@ -339,19 +339,25 @@ test_parseUri(
     void)
 {
     // Invalid token
-    g_assert(!FoilAuth::parseUri(QString()).isValid());
+    g_assert(!FoilAuth::parseUri(QString()).value(FoilAuthToken::KEY_VALID).toBool());
 
     // Valid token
-    FoilAuthToken token = FoilAuth::parseUri("otpauth://totp/Test?secret=vhiiktvjc6meoftj&issuer=Issuer&digits=5");
-    g_assert(token.isValid());
-    g_assert_cmpint(token.type(), == ,FoilAuthTypes::AuthTypeTOTP);
-    g_assert(token.secretBase32() == QString("vhiiktvjc6meoftj"));
-    g_assert(token.label() == QString("Test"));
-    g_assert(token.issuer() == QString("Issuer"));
-    g_assert_cmpint(token.digits(), == ,5);
-    g_assert_cmpint(token.counter(), == ,FoilAuthTypes::DEFAULT_COUNTER);
-    g_assert_cmpint(token.timeshift(), == ,FoilAuthTypes::DEFAULT_TIMESHIFT);
-    g_assert_cmpint(token.algorithm(), == ,FoilAuthTypes::DEFAULT_ALGORITHM);
+    bool ok = false;
+    QVariantMap token(FoilAuth::parseUri("otpauth://totp/Test?secret=vhiiktvjc6meoftj&issuer=Issuer&digits=5"));
+    g_assert(token.value(FoilAuthToken::KEY_VALID).toBool());
+    g_assert_cmpint(token.value(FoilAuthToken::KEY_TYPE).toInt(&ok), == ,FoilAuthTypes::AuthTypeTOTP);
+    g_assert_true(ok);
+    g_assert(token.value(FoilAuthToken::KEY_SECRET).toString() == QString("vhiiktvjc6meoftj"));
+    g_assert(token.value(FoilAuthToken::KEY_LABEL).toString() == QString("Test"));
+    g_assert(token.value(FoilAuthToken::KEY_ISSUER).toString() == QString("Issuer"));
+    g_assert_cmpint(token.value(FoilAuthToken::KEY_DIGITS).toInt(&ok), == ,5);
+    g_assert_true(ok);
+    g_assert_cmpint(token.value(FoilAuthToken::KEY_COUNTER).toInt(&ok), == ,FoilAuthTypes::DEFAULT_COUNTER);
+    g_assert_true(ok);
+    g_assert_cmpint(token.value(FoilAuthToken::KEY_TIMESHIFT).toInt(&ok), == ,FoilAuthTypes::DEFAULT_TIMESHIFT);
+    g_assert_true(ok);
+    g_assert_cmpint(token.value(FoilAuthToken::KEY_ALGORITHM).toInt(&ok), == ,FoilAuthTypes::DEFAULT_ALGORITHM);
+    g_assert_true(ok);
 }
 
 /*==========================================================================*
