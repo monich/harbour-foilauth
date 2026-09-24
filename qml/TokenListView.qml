@@ -248,17 +248,14 @@ Item {
             title: qsTrId("foilauth-app_name")
             leftMargin: 0
 
-            ProgressBar {
-                id: countdown
-
-                x: header.extraContent.x
-                width: header.extraContent.width
+            CountdownBar {
+                x: header.extraContent.x + Theme.horizontalPageMargin
+                width: header.extraContent.width - Theme.horizontalPageMargin - header.rightMargin
                 anchors.verticalCenter: '_titleItem' in header ? header._titleItem.verticalCenter : header.extraContent.verticalCenter
-                leftMargin: Theme.horizontalPageMargin + Theme.paddingMedium
-                rightMargin: header.rightMargin
-                minimumValue: 1
+                minimumValue: 0
                 maximumValue: foilModel.period
                 value: foilModel.timeLeft
+                text: formatTimeLeft(foilModel.timeLeft)
                 visible: opacity > 0
                 opacity: foilModel.timerActive ? 1 : 0
 
@@ -266,6 +263,12 @@ Item {
                 Behavior on value {
                     enabled: foilModel.timerActive && Qt.application.active
                     NumberAnimation { duration: 500 }
+                }
+
+                function formatTimeLeft(t) {
+                    var min = Math.floor(t / 60)
+                    var sec = t % 60
+                    return (sec < 10 ? "%1:0%2" : "%1:%2").arg(min).arg(sec)
                 }
             }
         }
