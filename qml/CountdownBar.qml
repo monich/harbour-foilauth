@@ -14,13 +14,19 @@ Item {
 
     implicitHeight: Theme.fontSizeMedium
 
-    Rectangle {
+    Item {
         x: _borderWidth
         y: _borderWidth
-        radius: _radius
         width: (parent.width - 2 * _borderWidth) * Math.max(0, Math.min(1, (value - minimumValue)/maximumValue))
         height: parent.height - 2 * _borderWidth
-        color: Theme.rgba(Theme.highlightBackgroundColor, 0.4 /* opacityLow */)
+        clip: true
+
+        Rectangle {
+            radius: _radius
+            width: thisItem.width - 2 * _borderWidth
+            height: parent.height
+            color: Theme.rgba(Theme.highlightBackgroundColor, 0.4 /* opacityLow */)
+        }
     }
 
     Rectangle {
