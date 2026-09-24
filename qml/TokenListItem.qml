@@ -60,7 +60,7 @@ Rectangle {
             rightMargin: Theme.paddingLarge
             baseline: currentPasswordLabel.baseline
         }
-        font.pixelSize: Theme.fontSizeTiny
+        font.pixelSize: Theme.fontSizeExtraSmall
         color: Theme.highlightColor
         visible: landscape && !hotp
         transform: HarbourTextFlip {
@@ -99,7 +99,7 @@ Rectangle {
             rightMargin: Theme.horizontalPageMargin
             baseline: currentPasswordLabel.baseline
         }
-        font.pixelSize: Theme.fontSizeTiny
+        font.pixelSize: Theme.fontSizeExtraSmall
         color: Theme.highlightColor
         visible: landscape && !hotp
         transform: HarbourTextFlip {
