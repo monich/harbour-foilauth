@@ -1,6 +1,6 @@
 Name:           harbour-foilauth
 Summary:        Secure TOTP/HOTP authenticator
-Version:        1.1.19
+Version:        1.1.20
 Release:        1
 License:        BSD
 Group:          Applications/Internet
